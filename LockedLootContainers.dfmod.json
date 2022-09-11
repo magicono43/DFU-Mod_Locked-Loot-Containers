@@ -1,0 +1,14 @@
+{
+    "ModTitle": "LockedLootContainers",
+    "ModVersion": "1.00",
+    "ModAuthor": "Kirk.O",
+    "ContactInfo": "kirkoliveri@gmail.com",
+    "DFUnity_Version": "0.14.4",
+    "ModDescription": "Replaces Some Generated Loot Containers With Locked And Sometimes Even Trapped Chests.",
+    "GUID": "13001a8b-9126-4835-8423-33e0c022787f",
+    "Files": [
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/LockedLootContainersMain.cs",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/modsettings.json"
+    ],
+    "Dependencies": []
+}

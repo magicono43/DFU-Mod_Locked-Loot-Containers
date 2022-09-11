@@ -1,0 +1,22 @@
+{
+    "Version": "1.0",
+    "Sections": [
+        {
+            "Name": "Options",
+            "Description": "Options And Preferences For This Mod.",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Min": 1,
+                    "Max": 100,
+                    "Value": 12,
+                    "Name": "TimeScale",
+                    "Description": "Default = 12 || 1 = Each Minute Equals 1 Real-life Minute || 60 = Each Minute Equals 1 Real-life Second",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                }
+            ],
+            "$version": "v1"
+        }
+    ]
+}
