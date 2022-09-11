@@ -38,9 +38,14 @@ namespace LockedLootContainers
         {
             Debug.Log("Begin mod init: Locked Loot Containers");
 
-            // Do stuff
+            PlayerEnterExit.OnTransitionDungeonInterior += AddLootChests_OnTransitionDungeonInterior;
 
             Debug.Log("Finished mod init: Locked Loot Containers");
+        }
+
+        public void AddLootChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
+        {
+
         }
     }
 }
