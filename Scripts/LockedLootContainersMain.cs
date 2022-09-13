@@ -12,6 +12,7 @@ using UnityEngine;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallConnect;
+using DaggerfallWorkshop;
 
 namespace LockedLootContainers
 {
@@ -47,12 +48,23 @@ namespace LockedLootContainers
         public void AddLootChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
         {
             DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
+            DaggerfallLoot[] lootPiles;
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
             {
                 if (locationData.MapTableData.DungeonType == DFRegion.DungeonTypes.Cemetery)
                 {
                     // Make list of loot-piles currently in the dungeon "scene."
+                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
+
+                    for (int i = 0; i < lootPiles.Length; i++)
+                    {
+                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
+                        {
+                            Transform lootPileTransform = lootPiles[i].transform;
+                            // Possibly create custom gameobject locked chest component thing to attach here and do main functions with, next time.
+                        }
+                    }
                 }
             }
         }
