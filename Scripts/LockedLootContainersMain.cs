@@ -31,7 +31,10 @@ namespace LockedLootContainers
         public static void Init(InitParams initParams)
         {
             mod = initParams.Mod;
-            instance = new GameObject("LockedLootContainers").AddComponent<LockedLootContainersMain>(); // Add script to the scene.
+            var go = new GameObject(mod.Title);
+            instance = go.AddComponent<LockedLootContainersMain>(); // Add script to the scene.
+
+            go.AddComponent<LLCObject>();
 
             mod.IsReady = true;
         }
@@ -40,9 +43,16 @@ namespace LockedLootContainers
         {
             Debug.Log("Begin mod init: Locked Loot Containers");
 
+            PlayerActivate.RegisterCustomActivation(mod, 500, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
+
             PlayerEnterExit.OnTransitionDungeonInterior += AddLootChests_OnTransitionDungeonInterior;
 
             Debug.Log("Finished mod init: Locked Loot Containers");
+        }
+
+        private static void ChestActivation(RaycastHit hit)
+        {
+            // Where most of heavy lifting will happen, once locked chest object has been clicked. Will check for being locked, trapped, already unlocked, what to do when and such.
         }
 
         public void AddLootChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
