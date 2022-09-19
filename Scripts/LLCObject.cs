@@ -1,5 +1,6 @@
 using UnityEngine;
 using DaggerfallConnect.Arena2;
+using DaggerfallWorkshop.Game.Items;
 
 namespace LockedLootContainers
 {
@@ -7,38 +8,91 @@ namespace LockedLootContainers
     {
         #region Fields
 
-        TextFile.Token[] greetingText;
+        TextFile.Token[] onClickText;
 
-        bool hasGreeting = false;
-        ulong linkedAlliesID = 0;
-        bool inventoryPopulated = false;
+        ulong chestID = 0;
+
+        bool isLocked = false;
+        bool isTrapped = false;
+        bool isEmpty = false;
+        bool hasBeenBashed = false;
+
+        int lockDifficulty = 0;
+        int chestMaterial = 0; // Likely won't be an int, will probably be some custom material type I make that will be filled in later on.
+
+        int trapAmount = 0;
+        int trapType = 0; // May eventually if possibly to have more than 1 trap on a chest, that this would be better as an array/list of the effects attached kind of like spell-bundle arrays.
+
+        ItemCollection attachedLoot;
 
         #endregion
 
         #region Properties
 
-        public TextFile.Token[] GreetingText
+        public TextFile.Token[] OnClickText
         {
-            get { return greetingText; }
-            set { greetingText = value; }
+            get { return onClickText; }
+            set { onClickText = value; }
         }
 
-        public bool HasGreeting
+        public ulong ChestID
         {
-            get { return hasGreeting; }
-            set { hasGreeting = value; }
+            get { return chestID; }
+            set { chestID = value; }
         }
 
-        public ulong LinkedAlliesID
+        public bool IsLocked
         {
-            get { return linkedAlliesID; }
-            set { linkedAlliesID = value; }
+            get { return isLocked; }
+            set { isLocked = value; }
         }
 
-        public bool InventoryPopulated
+        public bool IsTrapped
         {
-            get { return inventoryPopulated; }
-            set { inventoryPopulated = value; }
+            get { return isTrapped; }
+            set { isTrapped = value; }
+        }
+
+        public bool IsEmpty
+        {
+            get { return isEmpty; }
+            set { isEmpty = value; }
+        }
+
+        public bool HasBeenBashed
+        {
+            get { return hasBeenBashed; }
+            set { hasBeenBashed = value; }
+        }
+
+        public int LockDifficulty
+        {
+            get { return lockDifficulty; }
+            set { lockDifficulty = value; }
+        }
+
+        public int ChestMaterial
+        {
+            get { return chestMaterial; }
+            set { chestMaterial = value; }
+        }
+
+        public int TrapAmount
+        {
+            get { return trapAmount; }
+            set { trapAmount = value; }
+        }
+
+        public int TrapType
+        {
+            get { return trapType; }
+            set { trapType = value; }
+        }
+
+        public ItemCollection AttachedLoot
+        {
+            get { return attachedLoot; }
+            set { attachedLoot = value; }
         }
 
         #endregion
