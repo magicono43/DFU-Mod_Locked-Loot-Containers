@@ -43,7 +43,7 @@ namespace LockedLootContainers
         {
             Debug.Log("Begin mod init: Locked Loot Containers");
 
-            PlayerActivate.RegisterCustomActivation(mod, 500, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
+            PlayerActivate.RegisterCustomActivation(mod, 810, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
 
             PlayerEnterExit.OnTransitionDungeonInterior += AddLootChests_OnTransitionDungeonInterior;
 
@@ -71,6 +71,12 @@ namespace LockedLootContainers
                     {
                         if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
                         {
+                            DaggerfallBillboard lootPileBillboard = lootPiles[i].gameObject.GetComponent<DaggerfallBillboard>();
+                            if (lootPileBillboard != null)
+                            {
+                                lootPileBillboard.SetMaterial(810, 0); // Hopefully should replace loot pile billboard with my custom one provided.
+                            }
+
                             Transform lootPileTransform = lootPiles[i].transform;
                             // Possibly create custom gameobject locked chest component thing to attach here and do main functions with, next time.
                         }
