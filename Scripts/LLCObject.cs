@@ -23,6 +23,7 @@ namespace LockedLootContainers
         int trapAmount = 0;
         int trapType = 0; // May eventually if possibly to have more than 1 trap on a chest, that this would be better as an array/list of the effects attached kind of like spell-bundle arrays.
 
+        ItemCollection oldLoot;
         ItemCollection attachedLoot;
 
         #endregion
@@ -87,6 +88,12 @@ namespace LockedLootContainers
         {
             get { return trapType; }
             set { trapType = value; }
+        }
+
+        public ItemCollection Oldloot
+        {
+            get { return oldLoot; }
+            set { oldLoot = value; }
         }
 
         public ItemCollection AttachedLoot

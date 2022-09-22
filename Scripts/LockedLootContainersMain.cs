@@ -13,6 +13,8 @@ using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallConnect;
 using DaggerfallWorkshop;
+using DaggerfallWorkshop.Game.Items;
+using DaggerfallWorkshop.Utility;
 
 namespace LockedLootContainers
 {
@@ -52,6 +54,7 @@ namespace LockedLootContainers
 
         private static void ChestActivation(RaycastHit hit)
         {
+            DaggerfallUI.MessageBox("Good job, Asshole. You clicked the chest.");
             // Where most of heavy lifting will happen, once locked chest object has been clicked. Will check for being locked, trapped, already unlocked, what to do when and such.
         }
 
@@ -71,13 +74,23 @@ namespace LockedLootContainers
                     {
                         if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
                         {
-                            DaggerfallBillboard lootPileBillboard = lootPiles[i].gameObject.GetComponent<DaggerfallBillboard>();
-                            if (lootPileBillboard != null)
-                            {
-                                lootPileBillboard.SetMaterial(810, 0); // Hopefully should replace loot pile billboard with my custom one provided.
-                            }
+                            ItemCollection oldPileLoot = lootPiles[i].Items;
+                            Transform oldLootPileTransform = lootPiles[i].transform;
+                            Vector3 pos = lootPiles[i].transform.position;
 
-                            Transform lootPileTransform = lootPiles[i].transform;
+                            GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(810, 0, oldLootPileTransform.parent.parent);
+
+                            LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
+                            llcObj.Oldloot = oldPileLoot;
+
+                            // Set position
+                            Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
+                            chestParentObj.transform.position = pos;
+                            chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
+                            GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
+
+                            Destroy(lootPiles[i].gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
+
                             // Possibly create custom gameobject locked chest component thing to attach here and do main functions with, next time.
                         }
                     }
