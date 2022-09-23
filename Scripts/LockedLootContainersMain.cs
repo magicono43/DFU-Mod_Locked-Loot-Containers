@@ -15,6 +15,8 @@ using DaggerfallConnect;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Utility;
+using DaggerfallWorkshop.Game.UserInterfaceWindows;
+using DaggerfallWorkshop.Game.UserInterface;
 
 namespace LockedLootContainers
 {
@@ -54,8 +56,63 @@ namespace LockedLootContainers
 
         private static void ChestActivation(RaycastHit hit)
         {
-            DaggerfallUI.MessageBox("Good job, Asshole. You clicked the chest.");
+            DaggerfallMessageBox chestChoicePopUp = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+            string[] message = { "Good job, Asshole. You clicked the chest." };
+
+            chestChoicePopUp.SetText(message);
+            chestChoicePopUp.OnButtonClick += chestChoicePopUp_OnButtonClick;
+            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Copy); // Inspect
+            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Accept); // Pick-lock
+            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Reject); // Bash
+            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Anchor); // Open Spell
+            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Cancel); // Cancel
+            chestChoicePopUp.Show();
+
             // Where most of heavy lifting will happen, once locked chest object has been clicked. Will check for being locked, trapped, already unlocked, what to do when and such.
+        }
+
+        private static void chestChoicePopUp_OnButtonClick(DaggerfallMessageBox sender, DaggerfallMessageBox.MessageBoxButtons messageBoxButton)
+        {
+            if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Copy) // Inspect
+            {
+                sender.CloseWindow();
+                DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                string[] message = { "Good job, you inspected the chest!" };
+                inspectChestPopup.SetText(message);
+                inspectChestPopup.Show();
+                inspectChestPopup.ClickAnywhereToClose = true;
+            }
+            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Accept) // Pick-lock
+            {
+                sender.CloseWindow();
+                DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                string[] message = { "You attempted picking the lock!" };
+                inspectChestPopup.SetText(message);
+                inspectChestPopup.Show();
+                inspectChestPopup.ClickAnywhereToClose = true;
+            }
+            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Reject) // Bash
+            {
+                sender.CloseWindow();
+                DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                string[] message = { "You attempted bashing the lock, dummy!" };
+                inspectChestPopup.SetText(message);
+                inspectChestPopup.Show();
+                inspectChestPopup.ClickAnywhereToClose = true;
+            }
+            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Anchor) // Open Spell
+            {
+                sender.CloseWindow();
+                DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                string[] message = { "You attempted to magically open the lock!" };
+                inspectChestPopup.SetText(message);
+                inspectChestPopup.Show();
+                inspectChestPopup.ClickAnywhereToClose = true;
+            }
+            else // Cancel
+            {
+                sender.CloseWindow();
+            }
         }
 
         public void AddLootChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
