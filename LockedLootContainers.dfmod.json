@@ -10,7 +10,8 @@
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/LLCObject.cs",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/LockedLootContainersMain.cs",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/810_0-0.PNG",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/modsettings.json"
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/modsettings.json",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/811_0-0.PNG"
     ],
     "Dependencies": []
 }

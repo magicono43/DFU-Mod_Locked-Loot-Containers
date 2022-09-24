@@ -31,6 +31,9 @@ namespace LockedLootContainers
 
         static Mod mod;
 
+        // Global Variables
+        public static GameObject ChestObjRef { get; set; }
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
@@ -56,6 +59,8 @@ namespace LockedLootContainers
 
         private static void ChestActivation(RaycastHit hit)
         {
+            ChestObjRef = hit.collider.gameObject; // Sets clicked chest as global variable reference for later user in other methods.
+
             DaggerfallMessageBox chestChoicePopUp = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             string[] message = { "Good job, Asshole. You clicked the chest." };
 
@@ -85,11 +90,37 @@ namespace LockedLootContainers
             else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Accept) // Pick-lock
             {
                 sender.CloseWindow();
-                DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+
+                if (ChestObjRef != null)
+                {
+                    LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
+                    ItemCollection closedChestLoot = closedChestData.AttachedLoot;
+                    Transform closedChestTransform = ChestObjRef.transform;
+                    Vector3 pos = ChestObjRef.transform.position;
+
+                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
+                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                    ChestObjRef = null;
+
+                    // Show success and play unlock sound
+                    DaggerfallUI.AddHUDText(TextManager.Instance.GetLocalizedText("lockpickingSuccess"), 4f);
+                    DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                    if (dfAudioSource != null)
+                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+                }
+                else
+                {
+                    DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                }
+
+                /*DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
                 string[] message = { "You attempted picking the lock!" };
                 inspectChestPopup.SetText(message);
                 inspectChestPopup.Show();
-                inspectChestPopup.ClickAnywhereToClose = true;
+                inspectChestPopup.ClickAnywhereToClose = true;*/
             }
             else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Reject) // Bash
             {
@@ -134,11 +165,14 @@ namespace LockedLootContainers
                             ItemCollection oldPileLoot = lootPiles[i].Items;
                             Transform oldLootPileTransform = lootPiles[i].transform;
                             Vector3 pos = lootPiles[i].transform.position;
+                            ulong oldLoadID = lootPiles[i].LoadID;
 
                             GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(810, 0, oldLootPileTransform.parent.parent);
 
                             LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
                             llcObj.Oldloot = oldPileLoot;
+                            llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
+                            llcObj.LoadID = oldLoadID;
 
                             // Set position
                             Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();

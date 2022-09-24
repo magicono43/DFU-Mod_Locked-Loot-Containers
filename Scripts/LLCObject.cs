@@ -26,6 +26,8 @@ namespace LockedLootContainers
         ItemCollection oldLoot;
         ItemCollection attachedLoot;
 
+        ulong loadID;
+
         #endregion
 
         #region Properties
@@ -100,6 +102,12 @@ namespace LockedLootContainers
         {
             get { return attachedLoot; }
             set { attachedLoot = value; }
+        }
+
+        public ulong LoadID
+        {
+            get { return loadID; }
+            set { loadID = value; }
         }
 
         #endregion
