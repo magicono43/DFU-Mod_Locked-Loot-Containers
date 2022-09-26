@@ -33,6 +33,8 @@ namespace LockedLootContainers
 
         // Global Variables
         public static GameObject ChestObjRef { get; set; }
+        public static PlayerActivateModes currentMode { get { return GameManager.Instance.PlayerActivate.CurrentMode; } }
+        public static WeaponManager wepManager { get { return GameManager.Instance.WeaponManager; } }
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -57,21 +59,81 @@ namespace LockedLootContainers
             Debug.Log("Finished mod init: Locked Loot Containers");
         }
 
+        private void Update() // Will obviously have to refine this alot, but for now it's going to probably be the best solution for certain issues going forward for triggering and detection, etc.
+        {
+            if (GameManager.IsGamePaused)
+                return;
+
+            if (!wepManager.ScreenWeapon.IsAttacking())
+                return;
+
+            if (wepManager.ScreenWeapon.GetCurrentFrame() == wepManager.ScreenWeapon.GetHitFrame())
+            {
+                if (wepManager.ScreenWeapon.WeaponType == WeaponTypes.Bow) // Don't consider bashing for the bow, atleast not this part, do the actual projectile later for that.
+                    return;
+
+                // Do stuff here for checking for raycast hiting our custom chest object and such, check "WeaponManager.cs" for the "WeaponEnvDamage" method for examples, continue tomorrow.
+            }
+        }
+
         private static void ChestActivation(RaycastHit hit)
         {
             ChestObjRef = hit.collider.gameObject; // Sets clicked chest as global variable reference for later user in other methods.
 
-            DaggerfallMessageBox chestChoicePopUp = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-            string[] message = { "Good job, Asshole. You clicked the chest." };
+            string[] message = null;
 
-            chestChoicePopUp.SetText(message);
-            chestChoicePopUp.OnButtonClick += chestChoicePopUp_OnButtonClick;
-            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Copy); // Inspect
-            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Accept); // Pick-lock
-            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Reject); // Bash
-            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Anchor); // Open Spell
-            chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Cancel); // Cancel
-            chestChoicePopUp.Show();
+            if (hit.distance > PlayerActivate.DefaultActivationDistance)
+                DaggerfallUI.SetMidScreenText(TextManager.Instance.GetLocalizedText("youAreTooFarAway"));
+
+            switch (currentMode)
+            {
+                case PlayerActivateModes.Info: // Attempt To Inspect Chest
+                case PlayerActivateModes.Talk:
+                    DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                    message[0] = "Good job, you inspected the chest!";
+                    inspectChestPopup.SetText(message);
+                    inspectChestPopup.Show();
+                    inspectChestPopup.ClickAnywhereToClose = true;
+                    break;
+                case PlayerActivateModes.Steal: // Attempt To Lock-pick Chest
+                    if (ChestObjRef != null)
+                    {
+                        LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
+                        ItemCollection closedChestLoot = closedChestData.AttachedLoot;
+                        Transform closedChestTransform = ChestObjRef.transform;
+                        Vector3 pos = ChestObjRef.transform.position;
+
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                        Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                        ChestObjRef = null;
+
+                        // Show success and play unlock sound
+                        DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
+                        DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                        if (dfAudioSource != null)
+                            dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+                    }
+                    else
+                    {
+                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                    }
+                    break;
+                case PlayerActivateModes.Grab: // Bring Up Pop-up Message With Buttons To Choose What To Do, Also Might Be How You Can Attempt Disarming Traps Maybe?
+                    DaggerfallMessageBox chestChoicePopUp = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                    message[0] = "What do you want to do with this chest?";
+                    chestChoicePopUp.SetText(message);
+                    chestChoicePopUp.OnButtonClick += chestChoicePopUp_OnButtonClick;
+                    chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Copy); // Inspect
+                    chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Accept); // Pick-lock
+                    chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Cancel); // Cancel
+                    chestChoicePopUp.Show(); // Will possibly have another button show if the chest has been inspected and confirmed to have traps that can be disarmed.
+                    break;
+                default:
+                    break;
+            }
 
             // Where most of heavy lifting will happen, once locked chest object has been clicked. Will check for being locked, trapped, already unlocked, what to do when and such.
         }
