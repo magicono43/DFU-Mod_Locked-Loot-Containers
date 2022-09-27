@@ -17,6 +17,7 @@ using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.UserInterface;
+using DaggerfallWorkshop.Game.Entity;
 
 namespace LockedLootContainers
 {
@@ -33,8 +34,11 @@ namespace LockedLootContainers
 
         // Global Variables
         public static GameObject ChestObjRef { get; set; }
-        public static PlayerActivateModes currentMode { get { return GameManager.Instance.PlayerActivate.CurrentMode; } }
-        public static WeaponManager wepManager { get { return GameManager.Instance.WeaponManager; } }
+        public static GameObject MainCamera { get; set; }
+        public static int PlayerLayerMask { get; set; }
+        public static PlayerEntity Player { get { return GameManager.Instance.PlayerEntity; } }
+        public static PlayerActivateModes CurrentMode { get { return GameManager.Instance.PlayerActivate.CurrentMode; } }
+        public static WeaponManager WepManager { get { return GameManager.Instance.WeaponManager; } }
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -52,6 +56,9 @@ namespace LockedLootContainers
         {
             Debug.Log("Begin mod init: Locked Loot Containers");
 
+            MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
+
             PlayerActivate.RegisterCustomActivation(mod, 810, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
 
             PlayerEnterExit.OnTransitionDungeonInterior += AddLootChests_OnTransitionDungeonInterior;
@@ -64,16 +71,68 @@ namespace LockedLootContainers
             if (GameManager.IsGamePaused)
                 return;
 
-            if (!wepManager.ScreenWeapon.IsAttacking())
+            if (!WepManager.ScreenWeapon)
                 return;
 
-            if (wepManager.ScreenWeapon.GetCurrentFrame() == wepManager.ScreenWeapon.GetHitFrame())
+            if (!WepManager.ScreenWeapon.IsAttacking())
+                return;
+
+            if (WepManager.ScreenWeapon.GetCurrentFrame() == WepManager.ScreenWeapon.GetHitFrame())
             {
-                if (wepManager.ScreenWeapon.WeaponType == WeaponTypes.Bow) // Don't consider bashing for the bow, atleast not this part, do the actual projectile later for that.
+                if (WepManager.ScreenWeapon.WeaponType == WeaponTypes.Bow) // Don't consider bashing for the bow, atleast not this part, do the actual projectile later for that.
                     return;
 
-                // Do stuff here for checking for raycast hiting our custom chest object and such, check "WeaponManager.cs" for the "WeaponEnvDamage" method for examples, continue tomorrow.
+                if (!MainCamera)
+                    return;
+
+                // Fire ray along player facing using weapon range
+                RaycastHit hit;
+                Ray ray = new Ray(MainCamera.transform.position, MainCamera.transform.forward);
+                if (Physics.Raycast(ray, out hit, WepManager.ScreenWeapon.Reach, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
+                {
+                    DaggerfallUnityItem currentRightHandWeapon = Player.ItemEquipTable.GetItem(EquipSlots.RightHand); // Will have to see if these work for the player or not, might just be enemies?
+                    DaggerfallUnityItem currentLeftHandWeapon = Player.ItemEquipTable.GetItem(EquipSlots.LeftHand);
+                    DaggerfallUnityItem strikingWeapon = WepManager.UsingRightHand ? currentRightHandWeapon : currentLeftHandWeapon;
+
+                    // Check if hit has a LLCObject component
+                    LLCObject hitChest = hit.transform.gameObject.GetComponent<LLCObject>();
+                    if (hitChest)
+                        AttemptMeleeChestBash(hitChest, strikingWeapon);
+                }
             }
+
+            // Now that I have some basics for bashing out of the way (still needs testing). Tomorrow I should look into how I might do this for spell detection and projectile detection, etc.
+            // For the "open" spell effect atleast, check under PlayerActivate.cs in the "HandleOpenEffect" method about details involving that part atleast seems simple enough.
+            // But still need to do the whole projectile thing, which hopefully will be easier than it seems in my head.
+        }
+
+        private static void AttemptMeleeChestBash(LLCObject chest, DaggerfallUnityItem weapon) // May eventually put this in LLCObject itself, but for now just keep it here with everything else.
+        {
+            if (chest != null)
+            {
+                ItemCollection closedChestLoot = chest.AttachedLoot;
+                Transform closedChestTransform = chest.gameObject.transform; // Not sure if the explicit "gameObject" reference is necessary, will test eventually and determine if so or not.
+                Vector3 pos = chest.gameObject.transform.position;
+
+                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
+                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+
+                // Show success and play unlock sound
+                DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f);
+                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                if (dfAudioSource != null)
+                    dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+            }
+            else
+            {
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+            }
+
+            // Will do rest of bashing logic later when all of this part atleast is confirmed to work and such.
+            // Oh yeah, make sure to check ActionDoor.cs under "AttemptBash" for making sounds of bashing and such when hitting the chest, don't want to forget about that detail.
         }
 
         private static void ChestActivation(RaycastHit hit)
@@ -85,7 +144,7 @@ namespace LockedLootContainers
             if (hit.distance > PlayerActivate.DefaultActivationDistance)
                 DaggerfallUI.SetMidScreenText(TextManager.Instance.GetLocalizedText("youAreTooFarAway"));
 
-            switch (currentMode)
+            switch (CurrentMode)
             {
                 case PlayerActivateModes.Info: // Attempt To Inspect Chest
                 case PlayerActivateModes.Talk:
@@ -180,41 +239,6 @@ namespace LockedLootContainers
 
                 /*DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
                 string[] message = { "You attempted picking the lock!" };
-                inspectChestPopup.SetText(message);
-                inspectChestPopup.Show();
-                inspectChestPopup.ClickAnywhereToClose = true;*/
-            }
-            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Reject) // Bash
-            {
-                sender.CloseWindow();
-
-                if (ChestObjRef != null)
-                {
-                    LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
-                    ItemCollection closedChestLoot = closedChestData.AttachedLoot;
-                    Transform closedChestTransform = ChestObjRef.transform;
-                    Vector3 pos = ChestObjRef.transform.position;
-
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, closedChestData.LoadID, null, false);
-                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
-                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                    ChestObjRef = null;
-
-                    // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f);
-                    DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
-                    if (dfAudioSource != null)
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
-                }
-                else
-                {
-                    DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
-                }
-
-                /*DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                string[] message = { "You attempted bashing the lock, dummy!" };
                 inspectChestPopup.SetText(message);
                 inspectChestPopup.Show();
                 inspectChestPopup.ClickAnywhereToClose = true;*/
