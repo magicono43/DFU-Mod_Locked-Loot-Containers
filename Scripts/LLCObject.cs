@@ -1,6 +1,7 @@
 using UnityEngine;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Items;
+using DaggerfallWorkshop.Game;
 
 namespace LockedLootContainers
 {
@@ -157,6 +158,51 @@ namespace LockedLootContainers
         {
             get { return attachedLoot; }
             set { attachedLoot = value; }
+        }
+
+        #endregion
+
+        #region Collision Handling
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            DoCollision(collision, null);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            DoCollision(null, other);
+        }
+
+        void DoCollision(Collision collision, Collider other)
+        {
+            // Get missile based on collision type
+            DaggerfallMissile missile = null; // No clue if this part is necessary in this case, will just have to do testing, it's a bit confusing in this regard.
+            if (collision != null && other == null)
+                missile = collision.gameObject.transform.GetComponent<DaggerfallMissile>();
+            else if (collision == null && other != null)
+                missile = other.gameObject.transform.GetComponent<DaggerfallMissile>();
+            else
+                return;
+
+            if (missile == null)
+                return;
+
+            if (missile.Caster != GameManager.Instance.PlayerEntityBehaviour) // Only want these to count for the player's projectiles, but not idea how this might work if enemies are blocked by chests.
+                return;
+
+            if (missile.IsArrow) // If the impact even happens, I'm assuming the arrow won't destroy itself in this case without the chest having a rigidbody as well maybe? Not sure, needs testing.
+            {
+                // Do stuff chest should do after being hit by an arrow?
+            }
+
+            if (missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.SingleTargetAtRange || missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.AreaAtRange)
+            {
+                // Do stuff chest should do after being hit by a spell projectile (and maybe spell aoe as well somehow?)
+            }
+
+            // No idea how I might do the AoE detection right now, but hopefully I'll figure out something eventually.
+            // Also need to fill this entire "DoCollision" method with behaviors I want the chest to do, right now it's just empty placeholder non-actions, but will also have to see if it works at all.
         }
 
         #endregion

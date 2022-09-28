@@ -18,6 +18,7 @@ using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
+using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 
 namespace LockedLootContainers
 {
@@ -144,6 +145,10 @@ namespace LockedLootContainers
             if (hit.distance > PlayerActivate.DefaultActivationDistance)
                 DaggerfallUI.SetMidScreenText(TextManager.Instance.GetLocalizedText("youAreTooFarAway"));
 
+            // Handle Open spell effects (if active)
+            if (HandleOpenEffect())
+                return;
+
             switch (CurrentMode)
             {
                 case PlayerActivateModes.Info: // Attempt To Inspect Chest
@@ -197,6 +202,42 @@ namespace LockedLootContainers
             // Where most of heavy lifting will happen, once locked chest object has been clicked. Will check for being locked, trapped, already unlocked, what to do when and such.
         }
 
+        public static bool HandleOpenEffect() // Bare basic behavior for the open effect, just for testing for now obviously.
+        {
+            // Check if player has Open effect running
+            Open openEffect = (Open)GameManager.Instance.PlayerEffectManager.FindIncumbentEffect<Open>();
+            if (openEffect == null)
+                return false;
+
+            if (ChestObjRef != null)
+            {
+                LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
+                ItemCollection closedChestLoot = closedChestData.AttachedLoot;
+                Transform closedChestTransform = ChestObjRef.transform;
+                Vector3 pos = ChestObjRef.transform.position;
+
+                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
+                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                ChestObjRef = null;
+
+                // Show success and play unlock sound
+                DaggerfallUI.AddHUDText("The lock effortlessly unlatches through use of magic...", 4f);
+                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                if (dfAudioSource != null)
+                    dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+            }
+            else
+            {
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+            }
+
+            openEffect.CancelEffect();
+            return true;
+        }
+
         private static void chestChoicePopUp_OnButtonClick(DaggerfallMessageBox sender, DaggerfallMessageBox.MessageBoxButtons messageBoxButton)
         {
             if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Copy) // Inspect
@@ -239,41 +280,6 @@ namespace LockedLootContainers
 
                 /*DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
                 string[] message = { "You attempted picking the lock!" };
-                inspectChestPopup.SetText(message);
-                inspectChestPopup.Show();
-                inspectChestPopup.ClickAnywhereToClose = true;*/
-            }
-            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Anchor) // Open Spell
-            {
-                sender.CloseWindow();
-
-                if (ChestObjRef != null)
-                {
-                    LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
-                    ItemCollection closedChestLoot = closedChestData.AttachedLoot;
-                    Transform closedChestTransform = ChestObjRef.transform;
-                    Vector3 pos = ChestObjRef.transform.position;
-
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
-                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
-                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                    ChestObjRef = null;
-
-                    // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText("The lock effortlessly unlatches through use of magic...", 4f);
-                    DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
-                    if (dfAudioSource != null)
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
-                }
-                else
-                {
-                    DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
-                }
-
-                /*DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                string[] message = { "You attempted to magically open the lock!" };
                 inspectChestPopup.SetText(message);
                 inspectChestPopup.Show();
                 inspectChestPopup.ClickAnywhereToClose = true;*/
