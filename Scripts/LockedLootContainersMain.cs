@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		9/8/2022, 11:00 PM
+// Last Edit:		9/28/2022, 10:00 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -102,9 +102,9 @@ namespace LockedLootContainers
                 }
             }
 
-            // Now that I have some basics for bashing out of the way (still needs testing). Tomorrow I should look into how I might do this for spell detection and projectile detection, etc.
-            // For the "open" spell effect atleast, check under PlayerActivate.cs in the "HandleOpenEffect" method about details involving that part atleast seems simple enough.
-            // But still need to do the whole projectile thing, which hopefully will be easier than it seems in my head.
+            // So the fact I got basically everything to work so far with the projectile/collision detection stuff is pretty crazy to me.
+            // However, looking at the DaggerfallMissile.cs code under the "DoAreaOfEffect" method, I have a feeling without a PR, I won't be able to do a clean/easy
+            // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal all other successes considered.
         }
 
         private static void AttemptMeleeChestBash(LLCObject chest, DaggerfallUnityItem weapon) // May eventually put this in LLCObject itself, but for now just keep it here with everything else.
@@ -125,22 +125,17 @@ namespace LockedLootContainers
                 DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f);
                 DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
                 if (dfAudioSource != null)
-                    dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+                    dfAudioSource.PlayOneShot(SoundClips.PlayerDoorBash); // Might change this later to emit sound from chest audiosource itself instead of player's?
             }
             else
             {
                 DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
             }
-
-            // Will do rest of bashing logic later when all of this part atleast is confirmed to work and such.
-            // Oh yeah, make sure to check ActionDoor.cs under "AttemptBash" for making sounds of bashing and such when hitting the chest, don't want to forget about that detail.
         }
 
         private static void ChestActivation(RaycastHit hit)
         {
             ChestObjRef = hit.collider.gameObject; // Sets clicked chest as global variable reference for later user in other methods.
-
-            string[] message = null;
 
             if (hit.distance > PlayerActivate.DefaultActivationDistance)
                 DaggerfallUI.SetMidScreenText(TextManager.Instance.GetLocalizedText("youAreTooFarAway"));
@@ -154,8 +149,7 @@ namespace LockedLootContainers
                 case PlayerActivateModes.Info: // Attempt To Inspect Chest
                 case PlayerActivateModes.Talk:
                     DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    message[0] = "Good job, you inspected the chest!";
-                    inspectChestPopup.SetText(message);
+                    inspectChestPopup.SetText("Good job, you inspected the chest!");
                     inspectChestPopup.Show();
                     inspectChestPopup.ClickAnywhereToClose = true;
                     break;
@@ -187,8 +181,7 @@ namespace LockedLootContainers
                     break;
                 case PlayerActivateModes.Grab: // Bring Up Pop-up Message With Buttons To Choose What To Do, Also Might Be How You Can Attempt Disarming Traps Maybe?
                     DaggerfallMessageBox chestChoicePopUp = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    message[0] = "What do you want to do with this chest?";
-                    chestChoicePopUp.SetText(message);
+                    chestChoicePopUp.SetText("What do you want to do with this chest?");
                     chestChoicePopUp.OnButtonClick += chestChoicePopUp_OnButtonClick;
                     chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Copy); // Inspect
                     chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Accept); // Pick-lock
@@ -325,8 +318,6 @@ namespace LockedLootContainers
                             GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
 
                             Destroy(lootPiles[i].gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
-
-                            // Possibly create custom gameobject locked chest component thing to attach here and do main functions with, next time.
                         }
                     }
                 }

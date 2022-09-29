@@ -1,10 +1,13 @@
 using UnityEngine;
+using DaggerfallWorkshop;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Utility;
 
 namespace LockedLootContainers
 {
+    [RequireComponent(typeof(DaggerfallAudioSource))] // Appears to automatically assign an audiosource to this class gameobject when it is created? Atleast that is what I think it's meant to do?
     public class LLCObject : MonoBehaviour
     {
         #region Fields
@@ -35,6 +38,8 @@ namespace LockedLootContainers
 
         ItemCollection oldLoot;
         ItemCollection attachedLoot;
+
+        DaggerfallAudioSource dfAudioSource;
 
         #endregion
 
@@ -162,6 +167,11 @@ namespace LockedLootContainers
 
         #endregion
 
+        void Awake()
+        {
+            dfAudioSource = GetComponent<DaggerfallAudioSource>();
+        }
+
         #region Collision Handling
 
         private void OnCollisionEnter(Collision collision)
@@ -177,11 +187,11 @@ namespace LockedLootContainers
         void DoCollision(Collision collision, Collider other)
         {
             // Get missile based on collision type
-            DaggerfallMissile missile = null; // No clue if this part is necessary in this case, will just have to do testing, it's a bit confusing in this regard.
+            DaggerfallMissile missile = null;
             if (collision != null && other == null)
                 missile = collision.gameObject.transform.GetComponent<DaggerfallMissile>();
             else if (collision == null && other != null)
-                missile = other.gameObject.transform.GetComponent<DaggerfallMissile>();
+                missile = other.GetComponentInParent<DaggerfallMissile>();
             else
                 return;
 
@@ -191,18 +201,36 @@ namespace LockedLootContainers
             if (missile.Caster != GameManager.Instance.PlayerEntityBehaviour) // Only want these to count for the player's projectiles, but not idea how this might work if enemies are blocked by chests.
                 return;
 
-            if (missile.IsArrow) // If the impact even happens, I'm assuming the arrow won't destroy itself in this case without the chest having a rigidbody as well maybe? Not sure, needs testing.
+            if (missile.IsArrow)
             {
-                // Do stuff chest should do after being hit by an arrow?
+                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, gameObject.transform.position, gameObject.transform.parent, 812, 0, LoadID, null, false);
+                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                openChestLoot.Items.TransferAll(AttachedLoot); // Transfers items from this closed chest's items to the new open chest's item collection.
+
+                // Show success and play unlock sound
+                DaggerfallUI.AddHUDText("The arrow smashes a large hole in the flimsy chest, granting access to its contents...", 4f);
+                if (dfAudioSource)
+                {
+                    if (dfAudioSource != null)
+                        dfAudioSource.PlayClipAtPoint(SoundClips.PlayerDoorBash, gameObject.transform.position);
+                }
+            }
+            else if (missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.SingleTargetAtRange || missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.AreaAtRange)
+            {
+                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, gameObject.transform.position, gameObject.transform.parent, 812, 0, LoadID, null, false);
+                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                openChestLoot.Items.TransferAll(AttachedLoot); // Transfers items from this closed chest's items to the new open chest's item collection.
+
+                // Show success and play unlock sound
+                DaggerfallUI.AddHUDText("The spell causes the flimsy chest to erupt into a splintery mess, granting access to its contents...", 4f);
+                if (dfAudioSource)
+                {
+                    if (dfAudioSource != null)
+                        dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, gameObject.transform.position);
+                }
             }
 
-            if (missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.SingleTargetAtRange || missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.AreaAtRange)
-            {
-                // Do stuff chest should do after being hit by a spell projectile (and maybe spell aoe as well somehow?)
-            }
-
-            // No idea how I might do the AoE detection right now, but hopefully I'll figure out something eventually.
-            // Also need to fill this entire "DoCollision" method with behaviors I want the chest to do, right now it's just empty placeholder non-actions, but will also have to see if it works at all.
+            Destroy(gameObject);
         }
 
         #endregion
