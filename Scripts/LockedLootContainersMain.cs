@@ -22,7 +22,7 @@ using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 
 namespace LockedLootContainers
 {
-    public class LockedLootContainersMain : MonoBehaviour
+    public partial class LockedLootContainersMain : MonoBehaviour
     {
         static LockedLootContainersMain instance;
 
@@ -280,47 +280,6 @@ namespace LockedLootContainers
             else // Cancel
             {
                 sender.CloseWindow();
-            }
-        }
-
-        public void AddLootChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
-        {
-            DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
-            DaggerfallLoot[] lootPiles;
-
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
-            {
-                if (locationData.MapTableData.DungeonType == DFRegion.DungeonTypes.Cemetery)
-                {
-                    // Make list of loot-piles currently in the dungeon "scene."
-                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
-
-                    for (int i = 0; i < lootPiles.Length; i++)
-                    {
-                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
-                        {
-                            ItemCollection oldPileLoot = lootPiles[i].Items;
-                            Transform oldLootPileTransform = lootPiles[i].transform;
-                            Vector3 pos = lootPiles[i].transform.position;
-                            ulong oldLoadID = lootPiles[i].LoadID;
-
-                            GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(810, 0, oldLootPileTransform.parent.parent);
-
-                            LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
-                            llcObj.Oldloot = oldPileLoot;
-                            llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
-                            llcObj.LoadID = oldLoadID;
-
-                            // Set position
-                            Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
-                            chestParentObj.transform.position = pos;
-                            chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
-                            GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
-
-                            Destroy(lootPiles[i].gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
-                        }
-                    }
-                }
             }
         }
     }

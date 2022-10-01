@@ -18,17 +18,23 @@ namespace LockedLootContainers
         TextFile.Token[] regionManufacturedText;
         TextFile.Token[] companyManufacturedText;
 
-        bool isLocked = false;
+        bool isLocked = false; // Value is kind of pointless right now, since as soon as the chest unlocks it changes into a loot-pile and does not persist in an "unlocked" state or whatever.
         bool isTrapped = false;
-        bool isEmpty = false;
-        bool isLockJammed = false;
+        bool isEmpty = false; // Looks like someone was here already, and they decided to relatch the lock after they emptied the chest...
+        bool isLockJammed = false; // Presumably will be unable to unlock after it has been jammed, including open spell magic, and will need force at this point, atleast probably.
+        bool hasHiddenCompartment = false; // If this chest generated with an extra hidden compartment that can only be detected if perceptive, skilled, and lucky enough, etc.
         bool hasBeenBashed = false;
         bool hasBeenInspected = false;
 
-        int chestMaterial = 0; // Likely won't be an int, will probably be some custom material type I make that will be filled in later on.
-        int lockMaterial = 0;
-        int lockComplexity = 0;
-        int magicResistance = 0;
+        ChestMaterials chestMaterial = ChestMaterials.None;
+        int chestSturdiness = 1;
+        int chestMagicResist = 1;
+
+        LockMaterials lockMaterial = LockMaterials.None;
+        int lockSturdiness = 1;
+        int lockMagicResist = 1;
+        int lockComplexity = 1;
+        int jamResist = 1;
 
         int picksAttempted = 0;
         int bashesAttempted = 0;
@@ -87,6 +93,18 @@ namespace LockedLootContainers
             set { isEmpty = value; }
         }
 
+        public bool IsLockJammed
+        {
+            get { return isLockJammed; }
+            set { isLockJammed = value; }
+        }
+
+        public bool HasHiddenCompartment
+        {
+            get { return hasHiddenCompartment; }
+            set { hasHiddenCompartment = value; }
+        }
+
         public bool HasBeenBashed
         {
             get { return hasBeenBashed; }
@@ -99,22 +117,40 @@ namespace LockedLootContainers
             set { hasBeenInspected = value; }
         }
 
-        public bool IsLockJammed
-        {
-            get { return isLockJammed; }
-            set { isLockJammed = value; }
-        }
-
-        public int ChestMaterial
+        public ChestMaterials ChestMaterial
         {
             get { return chestMaterial; }
             set { chestMaterial = value; }
         }
 
-        public int LockMaterial
+        public int ChestSturdiness
+        {
+            get { return chestSturdiness; }
+            set { chestSturdiness = value; }
+        }
+
+        public int ChestMagicResist
+        {
+            get { return chestMagicResist; }
+            set { chestMagicResist = value; }
+        }
+
+        public LockMaterials LockMaterial
         {
             get { return lockMaterial; }
             set { lockMaterial = value; }
+        }
+
+        public int LockSturdiness
+        {
+            get { return lockSturdiness; }
+            set { lockSturdiness = value; }
+        }
+
+        public int LockMagicResist
+        {
+            get { return lockMagicResist; }
+            set { lockMagicResist = value; }
         }
 
         public int LockComplexity
@@ -123,10 +159,10 @@ namespace LockedLootContainers
             set { lockComplexity = value; }
         }
 
-        public int MagicResistance
+        public int JamResist
         {
-            get { return magicResistance; }
-            set { magicResistance = value; }
+            get { return jamResist; }
+            set { jamResist = value; }
         }
 
         public int PicksAttempted
