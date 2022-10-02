@@ -40,7 +40,7 @@ namespace LockedLootContainers
     [Flags]
     public enum PermittedMaterials
     {
-        Nothing = 0,
+        None = 0,
         Wood = 1,
         Iron = 2,
         Steel = 4,

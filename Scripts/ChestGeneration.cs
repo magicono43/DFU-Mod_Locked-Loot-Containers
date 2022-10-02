@@ -14,36 +14,65 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        public void AddLootChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
+        #region Fields
+
+        public const PermittedMaterials PermittedMaterials_None = PermittedMaterials.None;
+        public const PermittedMaterials PermittedMaterials_FireProof = (PermittedMaterials)0b_1111_1100;
+        public const PermittedMaterials PermittedMaterials_All = (PermittedMaterials)0b_1111_1111;
+
+        #endregion
+
+        public void AddChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
         {
             DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
             DaggerfallLoot[] lootPiles;
+
+            PermittedMaterials allowedMats = PermittedMaterials_All; // Default will be allow all materials for chests and locks to generate, unless specified otherwise later in process.
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
             {
                 switch (locationData.MapTableData.DungeonType) // These will give various modifier values which will then be used afterward to do the actual "work" part in the generation process.
                 {
-                    default:
-                    case DFRegion.DungeonTypes.Crypt: // Guess first thing to do is define the new enum flag attributes for these "PermittedMaterials" somehow.
+                    case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
+                        allowedMats = PermittedMaterials_All; break;
                     case DFRegion.DungeonTypes.OrcStronghold:
+                        allowedMats = (PermittedMaterials)0b_0001_1110; break;
                     case DFRegion.DungeonTypes.HumanStronghold:
+                        allowedMats = PermittedMaterials_All; break;
                     case DFRegion.DungeonTypes.Prison:
+                        allowedMats = (PermittedMaterials)0b_0000_0011; break;
                     case DFRegion.DungeonTypes.DesecratedTemple:
+                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
                     case DFRegion.DungeonTypes.Mine:
+                        allowedMats = (PermittedMaterials)0b_0011_0111; break;
                     case DFRegion.DungeonTypes.NaturalCave:
+                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
                     case DFRegion.DungeonTypes.Coven:
+                        allowedMats = (PermittedMaterials)0b_1111_0001; break;
                     case DFRegion.DungeonTypes.VampireHaunt:
+                        allowedMats = PermittedMaterials_All; break;
                     case DFRegion.DungeonTypes.Laboratory:
+                        allowedMats = (PermittedMaterials)0b_1111_0110; break;
                     case DFRegion.DungeonTypes.HarpyNest:
+                        allowedMats = (PermittedMaterials)0b_1111_0111; break;
                     case DFRegion.DungeonTypes.RuinedCastle:
+                        allowedMats = PermittedMaterials_All; break;
                     case DFRegion.DungeonTypes.SpiderNest:
+                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
                     case DFRegion.DungeonTypes.GiantStronghold:
+                        allowedMats = (PermittedMaterials)0b_0000_0111; break;
                     case DFRegion.DungeonTypes.DragonsDen:
+                        allowedMats = PermittedMaterials_FireProof; break;
                     case DFRegion.DungeonTypes.BarbarianStronghold:
+                        allowedMats = (PermittedMaterials)0b_0001_1111; break;
                     case DFRegion.DungeonTypes.VolcanicCaves:
+                        allowedMats = PermittedMaterials_FireProof; break;
                     case DFRegion.DungeonTypes.ScorpionNest:
+                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
                     case DFRegion.DungeonTypes.Cemetery:
-                        break;
+                        allowedMats = (PermittedMaterials)0b_0000_0011; break;
+                    default:
+                        allowedMats = PermittedMaterials_All; break;
                 }
 
                 if (locationData.MapTableData.DungeonType == DFRegion.DungeonTypes.Cemetery)

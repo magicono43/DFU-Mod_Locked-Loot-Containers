@@ -62,7 +62,7 @@ namespace LockedLootContainers
 
             PlayerActivate.RegisterCustomActivation(mod, 810, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
 
-            PlayerEnterExit.OnTransitionDungeonInterior += AddLootChests_OnTransitionDungeonInterior;
+            PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
 
             Debug.Log("Finished mod init: Locked Loot Containers");
         }
