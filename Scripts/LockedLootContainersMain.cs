@@ -60,6 +60,7 @@ namespace LockedLootContainers
             MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
 
+            // Definitely consider making a custom activation for those silly 3D chest models that are in-game but never used for anything and add replace those with my custom chest objects, etc.
             PlayerActivate.RegisterCustomActivation(mod, 810, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
 
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;

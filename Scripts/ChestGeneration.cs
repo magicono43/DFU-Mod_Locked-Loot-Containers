@@ -76,65 +76,70 @@ namespace LockedLootContainers
                         allowedMats = PermittedMaterials_All; break;
                 }
 
-                if (locationData.MapTableData.DungeonType == DFRegion.DungeonTypes.Cemetery)
+                // Make list of loot-piles currently in the dungeon "scene."
+                lootPiles = FindObjectsOfType<DaggerfallLoot>();
+
+                for (int i = 0; i < lootPiles.Length; i++)
                 {
-                    // Make list of loot-piles currently in the dungeon "scene."
-                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
-
-                    for (int i = 0; i < lootPiles.Length; i++)
+                    if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
                     {
-                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
+                        Transform oldLootPileTransform = lootPiles[i].transform;
+                        Vector3 pos = lootPiles[i].transform.position;
+
+                        Ray[] rays = { new Ray(pos, oldLootPileTransform.up), new Ray(pos, -oldLootPileTransform.up),
+                        new Ray(pos, oldLootPileTransform.right), new Ray(pos, -oldLootPileTransform.right),
+                        new Ray(pos, oldLootPileTransform.forward), new Ray(pos, -oldLootPileTransform.forward)}; // up, down, right, left, front, back.
+
+                        float[] rayDistances = { 0, 0, 0, 0, 0, 0 }; // Distances that up, down, right, left, front, and back rays traveled before hitting a collider.
+                        float[] boxDimensions = { 0.2f, 0.2f, 0.2f }; // Default dimensions of the overlap box.
+
+                        RaycastHit hit;
+                        for (int h = 0; h < rays.Length; h++)
                         {
-                            Transform oldLootPileTransform = lootPiles[i].transform;
-                            Vector3 pos = lootPiles[i].transform.position;
-
-                            Ray[] rays = { new Ray(pos, oldLootPileTransform.up), new Ray(pos, -oldLootPileTransform.up),
-                            new Ray(pos, oldLootPileTransform.right), new Ray(pos, -oldLootPileTransform.right),
-                            new Ray(pos, oldLootPileTransform.forward), new Ray(pos, -oldLootPileTransform.forward)}; // up, down, right, left, front, back.
-
-                            float[] rayDistances = { 0, 0, 0, 0, 0, 0 }; // Distances that up, down, right, left, front, and back rays traveled before hitting a collider.
-                            float[] boxDimensions = { 0.2f, 0.2f, 0.2f }; // Default dimensions of the overlap box.
-
-                            RaycastHit hit;
-                            for (int h = 0; h < rays.Length; h++)
+                            if (Physics.Raycast(rays[h], out hit, 30f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
                             {
-                                if (Physics.Raycast(rays[h], out hit, 50f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
-                                {
-                                    rayDistances[h] = hit.distance;
-                                }
-                                else
-                                {
-                                    rayDistances[h] = 50f;
-                                }
+                                rayDistances[h] = hit.distance;
+                            }
+                            else
+                            {
+                                rayDistances[h] = 30f;
+                            }
+                        }
+
+                        boxDimensions[0] = (rayDistances[0] + rayDistances[1]); // y-axis? up and down
+                        boxDimensions[1] = (rayDistances[2] + rayDistances[3]); // x-axis? right and left
+                        boxDimensions[2] = (rayDistances[4] + rayDistances[5]); // z-axis? front and back
+                        Vector3 boxDimVector = new Vector3(boxDimensions[1], boxDimensions[0], boxDimensions[2]) * 2f;
+
+                        // Testing Box Sizes Here
+                        /*GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        cube.transform.position = pos;
+                        cube.transform.rotation = lootPiles[i].transform.rotation;
+                        cube.transform.localScale = boxDimVector;*/
+
+                        // Collect GameObjects that overlap the box and ignore duplicates, use these later to estimate a "room value" that a chest is being generated in.
+                        // Test this part more properly tomorrow, now after knowing some of the limitations now due to the "combined models" thing with dungeons and such.
+                        // Primarily be checking for flats/billboards, other loot-piles, enemies, area of overlap box, action objects, and especially doors.
+                        List<GameObject> roomObjects = new List<GameObject>();
+                        Collider[] overlaps = Physics.OverlapBox(pos, boxDimVector, lootPiles[i].transform.rotation, PlayerLayerMask);
+                        for (int r = 0; r < overlaps.Length; r++)
+                        {
+                            GameObject go = overlaps[r].gameObject;
+
+                            if (go && go == lootPiles[i].gameObject) // Ignore the gameObject (lootpile) this box is originating from.
+                                continue;
+
+                            if (go && !roomObjects.Contains(go))
+                            {
+                                roomObjects.Add(go);
+                                //Debug.LogFormat("Box overlapped GameObject, {0}", go.name);
                             }
 
-                            boxDimensions[0] = (rayDistances[0] + rayDistances[1]) / 2; // y-axis? up and down
-                            boxDimensions[1] = (rayDistances[2] + rayDistances[3]) / 2; // x-axis? right and left
-                            boxDimensions[2] = (rayDistances[4] + rayDistances[5]) / 2; // z-axis? front and back
-                            Vector3 boxDimVector = new Vector3(boxDimensions[1], boxDimensions[0], boxDimensions[2]);
+                            // Continue work from here tomorrow. Try and do filtering out of non-important room objects for our "room value" context related stuff,
+                            // which will then be used to somehow modify/determine the odds of certain chest types and rarities being generated in certain locations.
+                            // If I need examples for this look at "DaggerfallMissile.cs" under the "DoAreaOfEffect" method for something fairly similar.
 
-                            // Collect GameObjects that overlap the box and ignore duplicates, use these later to estimate a "room value" that a chest is being generated in.
-                            List<GameObject> roomObjects = new List<GameObject>();
-                            Collider[] overlaps = Physics.OverlapBox(pos, boxDimVector, lootPiles[i].transform.rotation, PlayerLayerMask);
-                            for (int r = 0; r < overlaps.Length; r++)
-                            {
-                                GameObject go = overlaps[r].gameObject;
-
-                                if (go && go == lootPiles[i].gameObject) // Ignore the gameObject (lootpile) this box is originating from.
-                                    continue;
-
-                                if (go && !roomObjects.Contains(go))
-                                {
-                                    roomObjects.Add(go);
-                                    //Debug.LogFormat("Box overlapped GameObject, {0}", go.name);
-                                }
-
-                                // Continue work from here tomorrow. Try and do filtering out of non-important room objects for our "room value" context related stuff,
-                                // which will then be used to somehow modify/determine the odds of certain chest types and rarities being generated in certain locations.
-                                // If I need examples for this look at "DaggerfallMissile.cs" under the "DoAreaOfEffect" method for something fairly similar.
-
-                                DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
-                            }
+                            DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
                         }
                     }
                 }
