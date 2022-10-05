@@ -129,6 +129,9 @@ namespace LockedLootContainers
                             if (go && go == lootPiles[i].gameObject) // Ignore the gameObject (lootpile) this box is originating from.
                                 continue;
 
+                            if (go && go.name == "CombinedModels") // Ignore the entire combinedmodels gameobject
+                                continue;
+
                             if (go && !roomObjects.Contains(go))
                             {
                                 roomObjects.Add(go);
@@ -138,9 +141,24 @@ namespace LockedLootContainers
                             // Continue work from here tomorrow. Try and do filtering out of non-important room objects for our "room value" context related stuff,
                             // which will then be used to somehow modify/determine the odds of certain chest types and rarities being generated in certain locations.
                             // If I need examples for this look at "DaggerfallMissile.cs" under the "DoAreaOfEffect" method for something fairly similar.
+                            // Turns out, depending on the size of certain overlap boxes, you can sort of get some idea of what the object is currently in, like inside a coffin and such.
+                            // Later on consider adding toggle setting for this whole "room context" thing here, for possibly faster loading times or something without it potentially.
 
                             DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
                         }
+
+                        // This section below is once again primarily for testing atm.
+                        Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
+                        Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
+                        for (int g = 0; g < roomObjects.Count; g++)
+                        {
+                            if (roomObjects[g])
+                            {
+                                Debug.LogFormat("Overlap found on gameobject: {0}     By loot-pile with Load ID: {1}", roomObjects[g].name, lootPiles[i].LoadID);
+                            }
+                        }
+                        Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
+                        Debug.LogFormat("-------------------------------------- {0}-", i);
                     }
                 }
 
