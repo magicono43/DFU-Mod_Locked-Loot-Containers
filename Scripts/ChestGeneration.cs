@@ -10,6 +10,7 @@ using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Collections.Generic;
+using System;
 
 namespace LockedLootContainers
 {
@@ -147,8 +148,45 @@ namespace LockedLootContainers
                             DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
                         }
 
+                        // Was actually some useful stuff here, that being finding and isolating the identifying values for models, so I can more easily filter later based on their ID as an int value.
                         // This section below is once again primarily for testing atm.
                         Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
+                        Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
+                        for (int g = 0; g < roomObjects.Count; g++)
+                        {
+                            if (roomObjects[g])
+                            {
+                                MeshFilter meshFilter = roomObjects[g].GetComponent<MeshFilter>();
+                                if (meshFilter)
+                                {
+                                    int modelID = -1;
+                                    bool validID = false;
+                                    string meshName = meshFilter.mesh.name;
+
+                                    if (meshName.Length > 0)
+                                    {
+                                        string properName = meshName.Substring(0, meshName.Length - 9);
+                                        validID = int.TryParse(properName, out modelID);
+                                    }
+
+                                    if (validID)
+                                    {
+                                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
+                                        Debug.LogFormat("Here is the modelID # plus 20: {0}", modelID + 20);
+                                        Debug.LogFormat("What happens here I wonder?: {0}", meshName + 20);
+                                    }
+                                    else
+                                    {
+                                        Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
+                                    }
+                                }
+                            }
+                        }
+                        Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
+                        Debug.LogFormat("-------------------------------------- {0}-", i);
+
+                        // This section below is once again primarily for testing atm.
+                        /*Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
                         Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
                         for (int g = 0; g < roomObjects.Count; g++)
                         {
@@ -158,7 +196,7 @@ namespace LockedLootContainers
                             }
                         }
                         Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
-                        Debug.LogFormat("-------------------------------------- {0}-", i);
+                        Debug.LogFormat("-------------------------------------- {0}-", i);*/
                     }
                 }
 
