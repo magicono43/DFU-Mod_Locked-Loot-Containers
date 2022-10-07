@@ -148,9 +148,59 @@ namespace LockedLootContainers
                             DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
                         }
 
-                        // Was actually some useful stuff here, that being finding and isolating the identifying values for models, so I can more easily filter later based on their ID as an int value.
-                        // This section below is once again primarily for testing atm.
+                        // This section below is once again primarily for testing atm. This is for enemy entities atm.
                         Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
+                        Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
+                        for (int g = 0; g < roomObjects.Count; g++)
+                        {
+                            if (roomObjects[g])
+                            {
+                                DaggerfallEnemy daggerfallEnemy = roomObjects[g].GetComponent<DaggerfallEnemy>();
+                                if (daggerfallEnemy)
+                                {
+                                    MobileEnemy enemy = daggerfallEnemy.MobileUnit.Summary.Enemy;
+                                    int mobileID = enemy.ID;
+                                    MobileAffinity affinity = enemy.Affinity;
+                                    MobileTeams team = enemy.Team;
+
+                                    if (team != MobileTeams.PlayerAlly && team != MobileTeams.CityWatch) // Ignore mobile entities that are currently on the player's team or are city guards.
+                                    {
+                                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
+                                    }
+                                }
+                            }
+                        }
+                        Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
+                        Debug.LogFormat("-------------------------------------- {0}-", i);
+
+                        // This section below is once again primarily for testing atm. This is for flat billboard objects atm.
+                        Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
+                        Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
+                        for (int g = 0; g < roomObjects.Count; g++)
+                        {
+                            if (roomObjects[g])
+                            {
+                                DaggerfallBillboard billBoard = roomObjects[g].GetComponent<DaggerfallBillboard>(); // Will have to test and eventually account for mods like "Handpainted Models" etc.
+                                if (billBoard)
+                                {
+                                    BillboardSummary summary = billBoard.Summary;
+                                    FlatTypes flatType = summary.FlatType;
+                                    int archive = summary.Archive;
+                                    int record = summary.Record;
+
+                                    if (flatType != FlatTypes.Editor && flatType != FlatTypes.Nature) // Ignore editor flats and nature flats, I assume nature is just the trees and plants in exteriors?
+                                    {
+                                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
+                                    }
+                                }
+                            }
+                        }
+                        Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
+                        Debug.LogFormat("-------------------------------------- {0}-", i);
+
+                        // Was actually some useful stuff here, that being finding and isolating the identifying values for models, so I can more easily filter later based on their ID as an int value.
+                        // This section below is once again primarily for testing atm. This is for 3D model objects atm.
+                        /*Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
                         Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
                         for (int g = 0; g < roomObjects.Count; g++)
                         {
@@ -183,7 +233,7 @@ namespace LockedLootContainers
                             }
                         }
                         Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
-                        Debug.LogFormat("-------------------------------------- {0}-", i);
+                        Debug.LogFormat("-------------------------------------- {0}-", i);*/
 
                         // This section below is once again primarily for testing atm.
                         /*Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
