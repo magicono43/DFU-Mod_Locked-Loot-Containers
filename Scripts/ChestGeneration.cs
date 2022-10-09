@@ -155,20 +155,27 @@ namespace LockedLootContainers
                         {
                             if (roomObjects[g])
                             {
-                                DaggerfallEnemy daggerfallEnemy = roomObjects[g].GetComponent<DaggerfallEnemy>();
+                                DaggerfallEntityBehaviour entityBehaviour = roomObjects[g].GetComponent<DaggerfallEntityBehaviour>();
                                 DaggerfallBillboard billBoard = roomObjects[g].GetComponent<DaggerfallBillboard>(); // Will have to test and eventually account for mods like "Handpainted Models" etc.
                                 MeshFilter meshFilter = roomObjects[g].GetComponent<MeshFilter>();
 
-                                if (daggerfallEnemy)
+                                if (entityBehaviour)
                                 {
-                                    MobileEnemy enemy = daggerfallEnemy.MobileUnit.Summary.Enemy;
-                                    int mobileID = enemy.ID;
-                                    MobileAffinity affinity = enemy.Affinity;
-                                    MobileTeams team = enemy.Team;
-
-                                    if (team != MobileTeams.PlayerAlly && team != MobileTeams.CityWatch) // Ignore mobile entities that are currently on the player's team or are city guards.
+                                    EnemyEntity enemyEntity = entityBehaviour.Entity as EnemyEntity;
+                                    if (enemyEntity != null)
                                     {
-                                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
+                                        MobileEnemy enemy = enemyEntity.MobileEnemy;
+                                        int mobileID = enemy.ID;
+                                        MobileAffinity affinity = enemy.Affinity;
+                                        MobileTeams team = enemy.Team;
+
+                                        if (team != MobileTeams.PlayerAlly && team != MobileTeams.CityWatch) // Ignore mobile entities that are currently on the player's team or are city guards.
+                                        {
+                                            // Useful Stuff Here (complete for now)
+                                            EnemyRoomValueMods(enemyEntity);
+
+                                            Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
+                                        }
                                     }
                                 }
                                 else if (billBoard)
@@ -180,6 +187,9 @@ namespace LockedLootContainers
 
                                     if (flatType != FlatTypes.Editor && flatType != FlatTypes.Nature) // Ignore editor flats and nature flats, I assume nature is just the trees and plants in exteriors?
                                     {
+                                        // Useful Stuff Here (will try working on this part tomorrow, going to be alot of billboards to consider probably, archive and theme will likely be how I do this.)
+                                        BillboardRoomValueMods();
+
                                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
                                     }
                                 }
@@ -198,6 +208,9 @@ namespace LockedLootContainers
 
                                     if (validID)
                                     {
+                                        // Useful Stuff Here (Will do this after billboards, but this will possibly be alot smaller just due to less models outside doors likely being unmerged.)
+                                        ModelRoomValueMods();
+
                                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
                                     }
                                     else
@@ -248,6 +261,102 @@ namespace LockedLootContainers
                     }
                 }
             }
+        }
+
+        public static int EnemyRoomValueMods(EnemyEntity enemyEntity) // Will want to take into account modded enemies and such later on when getting to the polishing parts.
+        {
+            if (enemyEntity.EntityType == EntityTypes.EnemyClass) // Thief-like classes remove room value, non-thief add room value. Logic being one is protecting something, other is trying to take, etc.
+            {
+                switch (enemyEntity.CareerIndex)
+                {
+                    case (int)ClassCareers.Battlemage:
+                    case (int)ClassCareers.Monk:
+                    case (int)ClassCareers.Archer:
+                    case (int)ClassCareers.Warrior:
+                    case (int)ClassCareers.Knight:
+                        return 4;
+                    case (int)ClassCareers.Mage:
+                    case (int)ClassCareers.Spellsword:
+                    case (int)ClassCareers.Sorcerer:
+                    case (int)ClassCareers.Healer:
+                    case (int)ClassCareers.Ranger:
+                        return 2;
+                    case (int)ClassCareers.Rogue:
+                    case (int)ClassCareers.Acrobat:
+                    case (int)ClassCareers.Assassin:
+                    case (int)ClassCareers.Barbarian:
+                        return -2;
+                    case (int)ClassCareers.Nightblade:
+                    case (int)ClassCareers.Bard:
+                    case (int)ClassCareers.Burglar:
+                    case (int)ClassCareers.Thief:
+                        return -4;
+                    default:
+                        return 0;
+                }
+            }
+            else
+            {
+                switch (enemyEntity.CareerIndex) // Assumed context that room/area would be in that would warrant based on monsters/beasts near it, some remove, many add to value based on this.
+                {
+                    case (int)MonsterCareers.Rat:
+                        return -5;
+                    case (int)MonsterCareers.GiantBat:
+                    case (int)MonsterCareers.Spider:
+                    case (int)MonsterCareers.Slaughterfish:
+                    case (int)MonsterCareers.Giant:
+                    case (int)MonsterCareers.GiantScorpion:
+                        return -3;
+                    case (int)MonsterCareers.GrizzlyBear:
+                    case (int)MonsterCareers.SabertoothTiger:
+                    case (int)MonsterCareers.Harpy:
+                    case (int)MonsterCareers.Dreugh:
+                        return -2;
+                    case (int)MonsterCareers.Imp:
+                    case (int)MonsterCareers.OrcSergeant:
+                    case (int)MonsterCareers.Ghost:
+                    case (int)MonsterCareers.Dragonling:
+                        return 1;
+                    case (int)MonsterCareers.SkeletalWarrior:
+                    case (int)MonsterCareers.OrcShaman:
+                    case (int)MonsterCareers.Wraith:
+                    case (int)MonsterCareers.Daedroth:
+                    case (int)MonsterCareers.Vampire:
+                    case (int)MonsterCareers.FireAtronach:
+                    case (int)MonsterCareers.FleshAtronach:
+                    case (int)MonsterCareers.IceAtronach:
+                        return 2;
+                    case (int)MonsterCareers.Mummy:
+                    case (int)MonsterCareers.Gargoyle:
+                    case (int)MonsterCareers.FrostDaedra:
+                    case (int)MonsterCareers.FireDaedra:
+                    case (int)MonsterCareers.IronAtronach:
+                    case (int)MonsterCareers.Lamia:
+                        return 3;
+                    case (int)MonsterCareers.OrcWarlord:
+                    case (int)MonsterCareers.DaedraSeducer:
+                    case (int)MonsterCareers.VampireAncient:
+                    case (int)MonsterCareers.DaedraLord:
+                    case (int)MonsterCareers.Lich:
+                    case (int)MonsterCareers.AncientLich:
+                    case (int)MonsterCareers.Dragonling_Alternate:
+                        return 4;
+                    default:
+                        return 0;
+                }
+            }
+        }
+
+        public static int BillboardRoomValueMods()
+        {
+
+            return 0;
+        }
+
+        public static int ModelRoomValueMods()
+        {
+
+            return 0;
         }
 
         public static string BuildName()
