@@ -188,7 +188,7 @@ namespace LockedLootContainers
                                     if (flatType != FlatTypes.Editor && flatType != FlatTypes.Nature) // Ignore editor flats and nature flats, I assume nature is just the trees and plants in exteriors?
                                     {
                                         // Useful Stuff Here (will try working on this part tomorrow, going to be alot of billboards to consider probably, archive and theme will likely be how I do this.)
-                                        BillboardRoomValueMods();
+                                        BillboardRoomValueMods(flatType, archive, record);
 
                                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
                                     }
@@ -347,10 +347,35 @@ namespace LockedLootContainers
             }
         }
 
-        public static int BillboardRoomValueMods()
+        public static int BillboardRoomValueMods(FlatTypes type, int archive, int record)
         {
-
-            return 0;
+            switch (archive)
+            {
+                case 97: // Divine Statues
+                case 98: // Monster Statues
+                case 202: // Demonic Statues
+                    return 5;
+                case 208: // Lab Equipment
+                case 216: // Treasure
+                    return 3;
+                case 205: // Containers
+                case 207: // Equipment
+                case 209: // Library Stuff
+                    return 2;
+                case 200: // Misc Furniture
+                case 204: // Various Clothing
+                case 210: // Lights
+                case 218: // Pots and Pans
+                    return 1;
+                case 214: // Work Tools
+                    return -1;
+                case 201: // Animals
+                    return -2;
+                case 206: // Death
+                    return -3;
+                default:
+                    return 0;
+            }
         }
 
         public static int ModelRoomValueMods()
