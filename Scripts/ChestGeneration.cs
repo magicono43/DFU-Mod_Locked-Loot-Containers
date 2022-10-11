@@ -84,6 +84,8 @@ namespace LockedLootContainers
                 {
                     if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
                     {
+                        int totalRoomValueMod = 0;
+
                         Transform oldLootPileTransform = lootPiles[i].transform;
                         Vector3 pos = lootPiles[i].transform.position;
 
@@ -171,8 +173,7 @@ namespace LockedLootContainers
 
                                         if (team != MobileTeams.PlayerAlly && team != MobileTeams.CityWatch) // Ignore mobile entities that are currently on the player's team or are city guards.
                                         {
-                                            // Useful Stuff Here (complete for now)
-                                            EnemyRoomValueMods(enemyEntity);
+                                            totalRoomValueMod += EnemyRoomValueMods(enemyEntity);
 
                                             Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
                                         }
@@ -187,15 +188,13 @@ namespace LockedLootContainers
 
                                     if (flatType != FlatTypes.Editor && flatType != FlatTypes.Nature) // Ignore editor flats and nature flats, I assume nature is just the trees and plants in exteriors?
                                     {
-                                        // Useful Stuff Here (will try working on this part tomorrow, going to be alot of billboards to consider probably, archive and theme will likely be how I do this.)
-                                        BillboardRoomValueMods(flatType, archive, record);
+                                        totalRoomValueMod += BillboardRoomValueMods(flatType, archive, record);
 
                                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
                                     }
                                 }
                                 else if (meshFilter)
                                 {
-                                    // Was actually some useful stuff here, that being finding and isolating the identifying values for models, so I can more easily filter later based on their ID as an int value.
                                     int modelID = -1;
                                     bool validID = false;
                                     string meshName = meshFilter.mesh.name;
@@ -208,8 +207,7 @@ namespace LockedLootContainers
 
                                     if (validID)
                                     {
-                                        // Useful Stuff Here (Will do this after billboards, but this will possibly be alot smaller just due to less models outside doors likely being unmerged.)
-                                        ModelRoomValueMods();
+                                        totalRoomValueMod += ModelRoomValueMods(modelID);
 
                                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
                                     }
@@ -226,6 +224,10 @@ namespace LockedLootContainers
                         }
                         Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
                         Debug.LogFormat("-------------------------------------- {0}-", i);
+
+                        // After this point, somehow use the int value "totalRoomValueMod" to assist in the formula for determining if this loot-pile will be replaced with a chest,
+                        // as well as what rarity and overall value that chest will have. Will likely actually start doing some rng rolls here and stuff, but will have to
+                        // consider more on the specifics tomorrow, or whenever I get back to it. 10/10/2022, 8:40 PM.
                     }
                 }
 
@@ -378,8 +380,18 @@ namespace LockedLootContainers
             }
         }
 
-        public static int ModelRoomValueMods()
+        public static int ModelRoomValueMods(int modelID) // Will have to check and take into consideration mods like Hand-painted models and see what that might do to these in that circumstance.
         {
+            if ((modelID >= 55000 && modelID <= 55005) || (modelID >= 55013 && modelID <= 55015)) // Presumably Non-secret doors
+                return 4;
+            if ((modelID >= 55006 && modelID <= 55012) || (modelID >= 55017 && modelID <= 55033)) // Presumably Secret doors
+                return 12;
+            if (modelID >= 41000 && modelID <= 41002) // Bed models
+                return 6;
+            if (modelID >= 41815 && modelID <= 41834) // Crate models
+                return 2;
+            if (modelID >= 41811 && modelID <= 41813) // Chest models
+                return 14;
 
             return 0;
         }
