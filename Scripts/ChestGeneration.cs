@@ -11,6 +11,7 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Collections.Generic;
 using System;
+using DaggerfallWorkshop.Game.Utility;
 
 namespace LockedLootContainers
 {
@@ -30,51 +31,52 @@ namespace LockedLootContainers
             DaggerfallLoot[] lootPiles;
 
             PermittedMaterials allowedMats = PermittedMaterials_All; // Default will be allow all materials for chests and locks to generate, unless specified otherwise later in process.
+            int baseChestOdds = 20; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
             {
                 switch (locationData.MapTableData.DungeonType) // These will give various modifier values which will then be used afterward to do the actual "work" part in the generation process.
                 {
                     case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
-                        allowedMats = PermittedMaterials_All; break;
+                        allowedMats = PermittedMaterials_All; baseChestOdds = 35; break;
                     case DFRegion.DungeonTypes.OrcStronghold:
-                        allowedMats = (PermittedMaterials)0b_0001_1110; break;
+                        allowedMats = (PermittedMaterials)0b_0001_1110; baseChestOdds = 35; break;
                     case DFRegion.DungeonTypes.HumanStronghold:
-                        allowedMats = PermittedMaterials_All; break;
+                        allowedMats = PermittedMaterials_All; baseChestOdds = 40; break;
                     case DFRegion.DungeonTypes.Prison:
-                        allowedMats = (PermittedMaterials)0b_0000_0011; break;
+                        allowedMats = (PermittedMaterials)0b_0000_0011; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.DesecratedTemple:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
+                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 35; break;
                     case DFRegion.DungeonTypes.Mine:
-                        allowedMats = (PermittedMaterials)0b_0011_0111; break;
+                        allowedMats = (PermittedMaterials)0b_0011_0111; baseChestOdds = 25; break;
                     case DFRegion.DungeonTypes.NaturalCave:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
+                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.Coven:
-                        allowedMats = (PermittedMaterials)0b_1111_0001; break;
+                        allowedMats = (PermittedMaterials)0b_1111_0001; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.VampireHaunt:
-                        allowedMats = PermittedMaterials_All; break;
+                        allowedMats = PermittedMaterials_All; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.Laboratory:
-                        allowedMats = (PermittedMaterials)0b_1111_0110; break;
+                        allowedMats = (PermittedMaterials)0b_1111_0110; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.HarpyNest:
-                        allowedMats = (PermittedMaterials)0b_1111_0111; break;
+                        allowedMats = (PermittedMaterials)0b_1111_0111; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.RuinedCastle:
-                        allowedMats = PermittedMaterials_All; break;
+                        allowedMats = PermittedMaterials_All; baseChestOdds = 50; break;
                     case DFRegion.DungeonTypes.SpiderNest:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
+                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.GiantStronghold:
-                        allowedMats = (PermittedMaterials)0b_0000_0111; break;
+                        allowedMats = (PermittedMaterials)0b_0000_0111; baseChestOdds = 25; break;
                     case DFRegion.DungeonTypes.DragonsDen:
-                        allowedMats = PermittedMaterials_FireProof; break;
+                        allowedMats = PermittedMaterials_FireProof; baseChestOdds = 55; break;
                     case DFRegion.DungeonTypes.BarbarianStronghold:
-                        allowedMats = (PermittedMaterials)0b_0001_1111; break;
+                        allowedMats = (PermittedMaterials)0b_0001_1111; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.VolcanicCaves:
-                        allowedMats = PermittedMaterials_FireProof; break;
+                        allowedMats = PermittedMaterials_FireProof; baseChestOdds = 25; break;
                     case DFRegion.DungeonTypes.ScorpionNest:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; break;
+                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.Cemetery:
-                        allowedMats = (PermittedMaterials)0b_0000_0011; break;
+                        allowedMats = (PermittedMaterials)0b_0000_0011; baseChestOdds = 30; break;
                     default:
-                        allowedMats = PermittedMaterials_All; break;
+                        allowedMats = PermittedMaterials_All; baseChestOdds = 20; break;
                 }
 
                 // Make list of loot-piles currently in the dungeon "scene."
@@ -141,8 +143,6 @@ namespace LockedLootContainers
                                 //Debug.LogFormat("Box overlapped GameObject, {0}", go.name);
                             }
 
-                            // Continue work from here tomorrow. Try and do filtering out of non-important room objects for our "room value" context related stuff,
-                            // which will then be used to somehow modify/determine the odds of certain chest types and rarities being generated in certain locations.
                             // If I need examples for this look at "DaggerfallMissile.cs" under the "DoAreaOfEffect" method for something fairly similar.
                             // Turns out, depending on the size of certain overlap boxes, you can sort of get some idea of what the object is currently in, like inside a coffin and such.
                             // Later on consider adding toggle setting for this whole "room context" thing here, for possibly faster loading times or something without it potentially.
@@ -225,43 +225,58 @@ namespace LockedLootContainers
                         Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
                         Debug.LogFormat("-------------------------------------- {0}-", i);
 
-                        // After this point, somehow use the int value "totalRoomValueMod" to assist in the formula for determining if this loot-pile will be replaced with a chest,
-                        // as well as what rarity and overall value that chest will have. Will likely actually start doing some rng rolls here and stuff, but will have to
-                        // consider more on the specifics tomorrow, or whenever I get back to it. 10/10/2022, 8:40 PM.
+                        RollIfChestShouldBeCreated(lootPiles[i], allowedMats, baseChestOdds, totalRoomValueMod);
                     }
                 }
+            }
+        }
 
-                if (locationData.MapTableData.DungeonType == DFRegion.DungeonTypes.Cemetery)
+        // This is really rough, mainly just for testing, because having some trouble thinking of a good formula for it all atm.
+        // Definitely going to have to tweak and probably reconsider how the room context stuff modifies the chest odds, might be too drastic in some contexts and dungeon types, will have to see.
+        public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, PermittedMaterials allowedMats, int baseChestOdds, int totalRoomValueMod)
+        {
+            int chestOdds = baseChestOdds + totalRoomValueMod;
+
+            if (chestOdds <= 0)
+                return;
+
+            if (Dice100.SuccessRoll(chestOdds)) // If roll is successful, start process of replacing loot-pile with chest object as well as what properties the chest should have.
+            {
+                ItemCollection oldPileLoot = lootPile.Items;
+                Transform oldLootPileTransform = lootPile.transform;
+                Vector3 pos = lootPile.transform.position;
+                ulong oldLoadID = lootPile.LoadID;
+
+                GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(810, 0, oldLootPileTransform.parent.parent);
+
+                LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
+                llcObj.Oldloot = oldPileLoot;
+                llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
+                llcObj.LoadID = oldLoadID;
+
+                // Adding new properties to chest based on rolls for chest materials, rarity, possibly traps later, etc.
+                if (allowedMats.HasFlag(PermittedMaterials.Dwarven)) // This means nothing atm, just there so I remember the "HasFlag" syntax.
                 {
-                    // Make list of loot-piles currently in the dungeon "scene."
-                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
-
-                    for (int i = 0; i < lootPiles.Length; i++)
-                    {
-                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure)
-                        {
-                            ItemCollection oldPileLoot = lootPiles[i].Items;
-                            Transform oldLootPileTransform = lootPiles[i].transform;
-                            Vector3 pos = lootPiles[i].transform.position;
-                            ulong oldLoadID = lootPiles[i].LoadID;
-
-                            GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(810, 0, oldLootPileTransform.parent.parent);
-
-                            LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
-                            llcObj.Oldloot = oldPileLoot;
-                            llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
-                            llcObj.LoadID = oldLoadID;
-
-                            // Set position
-                            Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
-                            chestParentObj.transform.position = pos;
-                            chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
-                            GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
-
-                            Destroy(lootPiles[i].gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
-                        }
-                    }
+                    /*
+                    So I'm thinking tomorrow I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
+                    This will work kind of similar to my random generation stuff in stuff like "Jewelry Additions", but possibly better, but also maybe more complex?
+                    But the tickets will have a value given to them based on what values from the possible chest and lock materials are permitted in this case. Somehow the rarity
+                    of the material in question will determine what proportion of tickets from the limited pool that material is given. Maybe have the flags checked from least rare to most rare,
+                    and give the least rare some large amount of tickets from the max at the start, then slowly go through the rest of the permitted ones from what amount of tickets are remaining
+                    and give them tickets based on what are left each time another is given more or something. Somehow also try to incorperate the "totalRoomValueMod" to either increase the
+                    amount of tickets rarer materials get, if it's positive above some value, or more to less rare materials if it's below some value or something. Don't know how I'll do this
+                    all exactly, but atleast I have some idea how I might try it. Worst case I could try something similar to how vanilla DFU determines the plate armors in FormulaHelper.cs?
+                    Don't know, will have to see tomorrow how it pans out, but might be a bit confusing at first, maybe make the tickets from the pool like 300, 500, or 1000 or something, will see.
+                    */
                 }
+
+                // Set position
+                Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
+                chestParentObj.transform.position = pos;
+                chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
+                GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
+
+                Destroy(lootPile.gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
             }
         }
 
