@@ -240,6 +240,9 @@ namespace LockedLootContainers
             if (chestOdds <= 0)
                 return;
 
+            if (allowedMats.HasFlag(PermittedMaterials.None)) // If no materials are allowed, return and don't generate chest.
+                return;
+
             if (Dice100.SuccessRoll(chestOdds)) // If roll is successful, start process of replacing loot-pile with chest object as well as what properties the chest should have.
             {
                 ItemCollection oldPileLoot = lootPile.Items;
@@ -255,20 +258,19 @@ namespace LockedLootContainers
                 llcObj.LoadID = oldLoadID;
 
                 // Adding new properties to chest based on rolls for chest materials, rarity, possibly traps later, etc.
-                if (allowedMats.HasFlag(PermittedMaterials.Dwarven)) // This means nothing atm, just there so I remember the "HasFlag" syntax.
-                {
-                    /*
-                    So I'm thinking tomorrow I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
-                    This will work kind of similar to my random generation stuff in stuff like "Jewelry Additions", but possibly better, but also maybe more complex?
-                    But the tickets will have a value given to them based on what values from the possible chest and lock materials are permitted in this case. Somehow the rarity
-                    of the material in question will determine what proportion of tickets from the limited pool that material is given. Maybe have the flags checked from least rare to most rare,
-                    and give the least rare some large amount of tickets from the max at the start, then slowly go through the rest of the permitted ones from what amount of tickets are remaining
-                    and give them tickets based on what are left each time another is given more or something. Somehow also try to incorperate the "totalRoomValueMod" to either increase the
-                    amount of tickets rarer materials get, if it's positive above some value, or more to less rare materials if it's below some value or something. Don't know how I'll do this
-                    all exactly, but atleast I have some idea how I might try it. Worst case I could try something similar to how vanilla DFU determines the plate armors in FormulaHelper.cs?
-                    Don't know, will have to see tomorrow how it pans out, but might be a bit confusing at first, maybe make the tickets from the pool like 300, 500, or 1000 or something, will see.
-                    */
-                }
+                llcObj.ChestMaterial = RollChestMaterial(allowedMats, totalRoomValueMod); // Alright for now just do something simple without a limited ticket sort of system, will try that more later on.
+                llcObj.LockMaterial = RollLockMaterial(allowedMats, totalRoomValueMod);
+                /*
+                So I'm thinking tomorrow I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
+                This will work kind of similar to my random generation stuff in stuff like "Jewelry Additions", but possibly better, but also maybe more complex?
+                But the tickets will have a value given to them based on what values from the possible chest and lock materials are permitted in this case. Somehow the rarity
+                of the material in question will determine what proportion of tickets from the limited pool that material is given. Maybe have the flags checked from least rare to most rare,
+                and give the least rare some large amount of tickets from the max at the start, then slowly go through the rest of the permitted ones from what amount of tickets are remaining
+                and give them tickets based on what are left each time another is given more or something. Somehow also try to incorperate the "totalRoomValueMod" to either increase the
+                amount of tickets rarer materials get, if it's positive above some value, or more to less rare materials if it's below some value or something. Don't know how I'll do this
+                all exactly, but atleast I have some idea how I might try it. Worst case I could try something similar to how vanilla DFU determines the plate armors in FormulaHelper.cs?
+                Don't know, will have to see tomorrow how it pans out, but might be a bit confusing at first, maybe make the tickets from the pool like 300, 500, or 1000 or something, will see.
+                */
 
                 // Set position
                 Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
@@ -278,6 +280,20 @@ namespace LockedLootContainers
 
                 Destroy(lootPile.gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
             }
+        }
+
+        public static ChestMaterials RollChestMaterial(PermittedMaterials allowedMats, int roomValueMod)
+        {
+
+
+            return ChestMaterials.Wood;
+        }
+
+        public static LockMaterials RollLockMaterial(PermittedMaterials allowedMats, int roomValueMod)
+        {
+
+
+            return LockMaterials.Wood;
         }
 
         public static int EnemyRoomValueMods(EnemyEntity enemyEntity) // Will want to take into account modded enemies and such later on when getting to the polishing parts.
