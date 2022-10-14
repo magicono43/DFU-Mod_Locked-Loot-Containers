@@ -19,9 +19,9 @@ namespace LockedLootContainers
     {
         #region Fields
 
-        public const PermittedMaterials PermittedMaterials_None = PermittedMaterials.None;
-        public const PermittedMaterials PermittedMaterials_FireProof = (PermittedMaterials)0b_1111_1100;
-        public const PermittedMaterials PermittedMaterials_All = (PermittedMaterials)0b_1111_1111;
+        public bool[] PermittedMaterials_None = new bool[] { false, false, false, false, false, false, false, false };
+        public bool[] PermittedMaterials_FireProof = new bool[] { false, false, true, true, true, true, true, true };
+        public bool[] PermittedMaterials_All = new bool[] { true, true, true, true, true, true, true, true };
 
         #endregion
 
@@ -30,7 +30,7 @@ namespace LockedLootContainers
             DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
             DaggerfallLoot[] lootPiles;
 
-            PermittedMaterials allowedMats = PermittedMaterials_All; // Default will be allow all materials for chests and locks to generate, unless specified otherwise later in process.
+            bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             int baseChestOdds = 20; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
@@ -40,41 +40,41 @@ namespace LockedLootContainers
                     case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
                         allowedMats = PermittedMaterials_All; baseChestOdds = 35; break;
                     case DFRegion.DungeonTypes.OrcStronghold:
-                        allowedMats = (PermittedMaterials)0b_0001_1110; baseChestOdds = 35; break;
+                        allowedMats = new bool[] { false, true, true, true, true, false, false, false }; baseChestOdds = 35; break;
                     case DFRegion.DungeonTypes.HumanStronghold:
                         allowedMats = PermittedMaterials_All; baseChestOdds = 40; break;
                     case DFRegion.DungeonTypes.Prison:
-                        allowedMats = (PermittedMaterials)0b_0000_0011; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, false, false, false, false, false, false }; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.DesecratedTemple:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 35; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 35; break;
                     case DFRegion.DungeonTypes.Mine:
-                        allowedMats = (PermittedMaterials)0b_0011_0111; baseChestOdds = 25; break;
+                        allowedMats = new bool[] { true, true, true, false, true, true, false, false }; baseChestOdds = 25; break;
                     case DFRegion.DungeonTypes.NaturalCave:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.Coven:
-                        allowedMats = (PermittedMaterials)0b_1111_0001; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { true, false, false, false, true, true, true, true }; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.VampireHaunt:
                         allowedMats = PermittedMaterials_All; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.Laboratory:
-                        allowedMats = (PermittedMaterials)0b_1111_0110; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { false, true, true, false, true, true, true, true }; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.HarpyNest:
-                        allowedMats = (PermittedMaterials)0b_1111_0111; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, false, true, true, true, true }; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.RuinedCastle:
                         allowedMats = PermittedMaterials_All; baseChestOdds = 50; break;
                     case DFRegion.DungeonTypes.SpiderNest:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.GiantStronghold:
-                        allowedMats = (PermittedMaterials)0b_0000_0111; baseChestOdds = 25; break;
+                        allowedMats = new bool[] { true, true, true, false, false, false, false, false }; baseChestOdds = 25; break;
                     case DFRegion.DungeonTypes.DragonsDen:
                         allowedMats = PermittedMaterials_FireProof; baseChestOdds = 55; break;
                     case DFRegion.DungeonTypes.BarbarianStronghold:
-                        allowedMats = (PermittedMaterials)0b_0001_1111; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { true, true, true, true, true, false, false, false }; baseChestOdds = 30; break;
                     case DFRegion.DungeonTypes.VolcanicCaves:
                         allowedMats = PermittedMaterials_FireProof; baseChestOdds = 25; break;
                     case DFRegion.DungeonTypes.ScorpionNest:
-                        allowedMats = (PermittedMaterials)0b_0111_1111; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 20; break;
                     case DFRegion.DungeonTypes.Cemetery:
-                        allowedMats = (PermittedMaterials)0b_0000_0011; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { true, true, false, false, false, false, false, false }; baseChestOdds = 30; break;
                     default:
                         allowedMats = PermittedMaterials_All; baseChestOdds = 20; break;
                 }
@@ -233,14 +233,21 @@ namespace LockedLootContainers
 
         // This is really rough, mainly just for testing, because having some trouble thinking of a good formula for it all atm.
         // Definitely going to have to tweak and probably reconsider how the room context stuff modifies the chest odds, might be too drastic in some contexts and dungeon types, will have to see.
-        public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, PermittedMaterials allowedMats, int baseChestOdds, int totalRoomValueMod)
+        public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod)
         {
             int chestOdds = baseChestOdds + totalRoomValueMod;
+            int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
 
             if (chestOdds <= 0)
                 return;
 
-            if (allowedMats.HasFlag(PermittedMaterials.None)) // If no materials are allowed, return and don't generate chest.
+            for (int i = 0; i < allowedMats.Length; i++)
+            {
+                if (allowedMats[i] == true)
+                    permitMatsCount++;
+            }
+
+            if (permitMatsCount <= 0)
                 return;
 
             if (Dice100.SuccessRoll(chestOdds)) // If roll is successful, start process of replacing loot-pile with chest object as well as what properties the chest should have.
@@ -258,10 +265,10 @@ namespace LockedLootContainers
                 llcObj.LoadID = oldLoadID;
 
                 // Adding new properties to chest based on rolls for chest materials, rarity, possibly traps later, etc.
-                llcObj.ChestMaterial = RollChestMaterial(allowedMats, totalRoomValueMod); // Alright for now just do something simple without a limited ticket sort of system, will try that more later on.
-                llcObj.LockMaterial = RollLockMaterial(allowedMats, totalRoomValueMod);
+                llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod); // Alright for now just do something simple without a limited ticket sort of system, will try that more later on.
+                llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
                 /*
-                So I'm thinking tomorrow I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
+                So I'm thinking I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
                 This will work kind of similar to my random generation stuff in stuff like "Jewelry Additions", but possibly better, but also maybe more complex?
                 But the tickets will have a value given to them based on what values from the possible chest and lock materials are permitted in this case. Somehow the rarity
                 of the material in question will determine what proportion of tickets from the limited pool that material is given. Maybe have the flags checked from least rare to most rare,
@@ -271,6 +278,10 @@ namespace LockedLootContainers
                 all exactly, but atleast I have some idea how I might try it. Worst case I could try something similar to how vanilla DFU determines the plate armors in FormulaHelper.cs?
                 Don't know, will have to see tomorrow how it pans out, but might be a bit confusing at first, maybe make the tickets from the pool like 300, 500, or 1000 or something, will see.
                 */
+
+                // Now that I have the chest and lock materials determined at a very basic and ready for testing state. Possibly the next aspect to try and determine after that might be the other
+                // various more specific attributes such as the general toughness, magic resistance, lock complexity, etc, all of that stuff. Now that I can use the materials to help modify these
+                // values, I think that's a good starting point for getting those resolved in a similar way, more random rolls basically with some ranges determined by roomValueMod and such. Tomorrow.
 
                 // Set position
                 Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
@@ -282,18 +293,115 @@ namespace LockedLootContainers
             }
         }
 
-        public static ChestMaterials RollChestMaterial(PermittedMaterials allowedMats, int roomValueMod)
+        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
         {
+            int[] itemRolls = new int[] { };
+            List<int> itemRollsList = new List<int>();
 
+            for (int i = 0; i < allowedMats.Length; i++)
+            {
+                int arrayStart = itemRollsList.Count;
+                int fillElements = 0;
+                switch (i)
+                {
+                    case (int)PermittedMaterials.Wood:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(95 - (roomValueMod * 4), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Iron:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(75 - (roomValueMod * 3), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Steel:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(45 + (roomValueMod * 2), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Orcish:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(25 + (roomValueMod * 1), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Mithril:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(35 + (roomValueMod * 2), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Dwarven:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(20 + (roomValueMod * 1), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Adamantium:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(15 + (roomValueMod * 1), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Daedric:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(5 + (roomValueMod * 1), 1, 300) : 0; break;
+                    default:
+                        fillElements = 0; break;
+                }
 
-            return ChestMaterials.Wood;
+                if (fillElements <= 0)
+                    continue;
+
+                itemRolls = FillArray(itemRollsList, arrayStart, fillElements, i);
+            }
+
+            int chosenMaterial = -1;
+
+            if (itemRolls.Length > 0)
+                chosenMaterial = PickOneOf(itemRolls);
+
+            if (chosenMaterial == -1)
+            {
+                Debug.Log("For some reason this chest material did not get chosen properly, defaulting to wood...");
+                return ChestMaterials.Wood;
+            }
+            else
+            {
+                chosenMaterial += 1; // Add 1 to this to factor out the "none" value from both chest and lock material enums.
+                return (ChestMaterials)chosenMaterial; // Will have to see if this works to return the proper enum value, I think it should but will see with live debugging.
+            }
         }
 
-        public static LockMaterials RollLockMaterial(PermittedMaterials allowedMats, int roomValueMod)
+        // I eventually will want the lock material to be somewhat restricted depending on what material the chest it is attached to is made of. So like a daedric chest won't have a wooden lock
+        // and stuff like that. Or so that it's unlikely for a wooden chest to have a daedric lock, that sort of thing. I don't know how I will do it right this moment, but I'll try and get that
+        // resolved later on for polishing and such. For now, just leave it the same process as for determing chest material basically, just for testing and proof of working and such, etc.
+        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats)
         {
+            int[] itemRolls = new int[] { };
+            List<int> itemRollsList = new List<int>();
 
+            for (int i = 0; i < allowedMats.Length; i++)
+            {
+                int arrayStart = itemRollsList.Count;
+                int fillElements = 0;
+                switch (i)
+                {
+                    case (int)PermittedMaterials.Wood:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(95 - (roomValueMod * 4), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Iron:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(75 - (roomValueMod * 3), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Steel:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(45 + (roomValueMod * 2), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Orcish:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(25 + (roomValueMod * 1), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Mithril:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(35 + (roomValueMod * 2), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Dwarven:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(20 + (roomValueMod * 1), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Adamantium:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(15 + (roomValueMod * 1), 1, 300) : 0; break;
+                    case (int)PermittedMaterials.Daedric:
+                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(5 + (roomValueMod * 1), 1, 300) : 0; break;
+                    default:
+                        fillElements = 0; break;
+                }
 
-            return LockMaterials.Wood;
+                if (fillElements <= 0)
+                    continue;
+
+                itemRolls = FillArray(itemRollsList, arrayStart, fillElements, i);
+            }
+
+            int chosenMaterial = -1;
+
+            if (itemRolls.Length > 0)
+                chosenMaterial = PickOneOf(itemRolls);
+
+            if (chosenMaterial == -1)
+            {
+                Debug.Log("For some reason this chest material did not get chosen properly, defaulting to wood...");
+                return LockMaterials.Wood;
+            }
+            else
+            {
+                chosenMaterial += 1; // Add 1 to this to factor out the "none" value from both chest and lock material enums.
+                return (LockMaterials)chosenMaterial; // Will have to see if this works to return the proper enum value, I think it should but will see with live debugging.
+            }
         }
 
         public static int EnemyRoomValueMods(EnemyEntity enemyEntity) // Will want to take into account modded enemies and such later on when getting to the polishing parts.
@@ -425,6 +533,21 @@ namespace LockedLootContainers
                 return 14;
 
             return 0;
+        }
+
+        public static T[] FillArray<T>(List<T> list, int start, int count, T value)
+        {
+            for (var i = start; i < start + count; i++)
+            {
+                list.Add(value);
+            }
+
+            return list.ToArray();
+        }
+
+        public static int PickOneOf(params int[] values) // Pango provided assistance in making this much cleaner way of doing the random value choice part, awesome.
+        {
+            return values[UnityEngine.Random.Range(0, values.Length)];
         }
 
         public static string BuildName()
