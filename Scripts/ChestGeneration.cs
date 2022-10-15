@@ -279,6 +279,11 @@ namespace LockedLootContainers
                 Don't know, will have to see tomorrow how it pans out, but might be a bit confusing at first, maybe make the tickets from the pool like 300, 500, or 1000 or something, will see.
                 */
 
+                llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
+                llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
+
+                llcObj.ChestMagicResist = RollChestMagicResist(llcObj.ChestMaterial, llcObj.ChestSturdiness, totalRoomValueMod);
+                llcObj.LockMagicResist = RollLockMagicResist(llcObj.LockMaterial, llcObj.LockSturdiness, totalRoomValueMod);
                 // Now that I have the chest and lock materials determined at a very basic and ready for testing state. Possibly the next aspect to try and determine after that might be the other
                 // various more specific attributes such as the general toughness, magic resistance, lock complexity, etc, all of that stuff. Now that I can use the materials to help modify these
                 // values, I think that's a good starting point for getting those resolved in a similar way, more random rolls basically with some ranges determined by roomValueMod and such. Tomorrow.
@@ -291,6 +296,82 @@ namespace LockedLootContainers
 
                 Destroy(lootPile.gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
             }
+        }
+
+        public static int RollChestMagicResist(ChestMaterials chestMat, int chestSturdy, int roomValueMod)
+        {
+            // Start With These Tomorrow.
+
+            return 0;
+        }
+
+        public static int RollLockMagicResist(LockMaterials lockMat, int lockSturdy, int roomValueMod)
+        {
+            // Start With These Tomorrow.
+
+            return 0;
+        }
+
+        public static int RollChestSturdiness(ChestMaterials chestMat, string dungBlocName, int roomValueMod)
+        {
+            int chestSturdiness = 1;
+            int randomMod = UnityEngine.Random.Range(-20, 21);
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
+
+            switch (chestMat)
+            {
+                default:
+                case ChestMaterials.Wood:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-15, 1) + 10 : 10; break;
+                case ChestMaterials.Iron:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-15, 1) + 40 : 40; break;
+                case ChestMaterials.Steel:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-10, 1) + 60 : 60; break;
+                case ChestMaterials.Orcish:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-10, 1) + 80 : 80; break;
+                case ChestMaterials.Mithril:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-5, 1) + 70 : 70; break;
+                case ChestMaterials.Dwarven:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-5, 1) + 50 : 50; break;
+                case ChestMaterials.Adamantium:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-5, 1) + 30 : 30; break;
+                case ChestMaterials.Daedric:
+                    chestSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-10, 1) + 75 : 75; break;
+            }
+
+            return (int)Mathf.Clamp(chestSturdiness + randomMod + roomMod, 1, 100);
+        }
+
+        public static int RollLockSturdiness(LockMaterials lockMat, string dungBlocName, int roomValueMod)
+        {
+            int lockSturdiness = 1;
+            int randomMod = UnityEngine.Random.Range(-20, 21);
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
+
+            switch (lockMat)
+            {
+                default:
+                case LockMaterials.Wood:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-15, 1) + 10 : 10; break;
+                case LockMaterials.Iron:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-15, 1) + 40 : 40; break;
+                case LockMaterials.Steel:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-10, 1) + 60 : 60; break;
+                case LockMaterials.Orcish:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-10, 1) + 80 : 80; break;
+                case LockMaterials.Mithril:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-5, 1) + 70 : 70; break;
+                case LockMaterials.Dwarven:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-5, 1) + 50 : 50; break;
+                case LockMaterials.Adamantium:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-5, 1) + 30 : 30; break;
+                case LockMaterials.Daedric:
+                    lockSturdiness = (insideWaterBlock) ? UnityEngine.Random.Range(-10, 1) + 75 : 75; break;
+            }
+
+            return (int)Mathf.Clamp(lockSturdiness + randomMod + roomMod, 1, 100);
         }
 
         public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
