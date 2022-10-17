@@ -286,7 +286,7 @@ namespace LockedLootContainers
                 llcObj.LockMagicResist = RollLockMagicResist(llcObj.LockMaterial, llcObj.LockSturdiness, totalRoomValueMod);
 
                 llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
-                llcObj.LockComplexity = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
+                llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
 
                 // ALSO NOTE: Add console debug helper comments/lines to make viewing generation results quicker, DO THIS BEFORE THE BELOW STUFF TOMORROW!
                 // Possibly also look at giving more random seeds somehow during chest generation to reduce potential overservable patterns, using stuff like hashcodes or something.
@@ -301,6 +301,8 @@ namespace LockedLootContainers
                 chestParentObj.transform.position = pos;
                 chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
                 GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
+
+                Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
                 Destroy(lootPile.gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
             }

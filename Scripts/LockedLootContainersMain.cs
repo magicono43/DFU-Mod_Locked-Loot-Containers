@@ -150,7 +150,7 @@ namespace LockedLootContainers
                 case PlayerActivateModes.Info: // Attempt To Inspect Chest
                 case PlayerActivateModes.Talk:
                     DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    inspectChestPopup.SetText("Good job, you inspected the chest!");
+                    inspectChestPopup.SetText("Good job, you inspected the chest!"); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
                     inspectChestPopup.Show();
                     inspectChestPopup.ClickAnywhereToClose = true;
                     break;
@@ -238,7 +238,7 @@ namespace LockedLootContainers
             {
                 sender.CloseWindow();
                 DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                string[] message = { "Good job, you inspected the chest!" };
+                string[] message = { "Good job, you inspected the chest!" }; // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
                 inspectChestPopup.SetText(message);
                 inspectChestPopup.Show();
                 inspectChestPopup.ClickAnywhereToClose = true;
