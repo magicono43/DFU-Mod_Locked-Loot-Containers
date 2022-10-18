@@ -19,6 +19,7 @@ using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
+using DaggerfallConnect.Arena2;
 
 namespace LockedLootContainers
 {
@@ -149,10 +150,29 @@ namespace LockedLootContainers
             {
                 case PlayerActivateModes.Info: // Attempt To Inspect Chest
                 case PlayerActivateModes.Talk:
-                    DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    inspectChestPopup.SetText("Good job, you inspected the chest!"); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
-                    inspectChestPopup.Show();
-                    inspectChestPopup.ClickAnywhereToClose = true;
+                    if (ChestObjRef != null)
+                    {
+                        LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
+
+                        TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
+                        "This chest is made of: " + chestData.ChestMaterial.ToString(),
+                        "Chest sturdiness is: " + chestData.ChestSturdiness,
+                        "Chest magic resist is: " + chestData.ChestMagicResist,
+                        "Its lock is made of: " + chestData.LockMaterial.ToString(),
+                        "Lock sturdiness is: " + chestData.LockSturdiness,
+                        "Lock magic resist is: " + chestData.LockMagicResist,
+                        "Lock complexity is: " + chestData.LockComplexity,
+                        "Lock jam resist is: " + chestData.JamResist);
+
+                        DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                        inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
+                        inspectChestPopup.Show();
+                        inspectChestPopup.ClickAnywhereToClose = true;
+                    }
+                    else
+                    {
+                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                    }
                     break;
                 case PlayerActivateModes.Steal: // Attempt To Lock-pick Chest
                     if (ChestObjRef != null)
@@ -237,11 +257,30 @@ namespace LockedLootContainers
             if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Copy) // Inspect
             {
                 sender.CloseWindow();
-                DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                string[] message = { "Good job, you inspected the chest!" }; // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
-                inspectChestPopup.SetText(message);
-                inspectChestPopup.Show();
-                inspectChestPopup.ClickAnywhereToClose = true;
+
+                if (ChestObjRef != null)
+                {
+                    LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
+
+                    TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
+                    "This chest is made of: " + chestData.ChestMaterial.ToString(),
+                    "Chest sturdiness is: " + chestData.ChestSturdiness,
+                    "Chest magic resist is: " + chestData.ChestMagicResist,
+                    "Its lock is made of: " + chestData.LockMaterial.ToString(),
+                    "Lock sturdiness is: " + chestData.LockSturdiness,
+                    "Lock magic resist is: " + chestData.LockMagicResist,
+                    "Lock complexity is: " + chestData.LockComplexity,
+                    "Lock jam resist is: " + chestData.JamResist);
+
+                    DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                    inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
+                    inspectChestPopup.Show();
+                    inspectChestPopup.ClickAnywhereToClose = true;
+                }
+                else
+                {
+                    DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                }
             }
             else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Accept) // Pick-lock
             {
