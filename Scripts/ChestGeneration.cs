@@ -264,6 +264,9 @@ namespace LockedLootContainers
                 llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
                 llcObj.LoadID = oldLoadID;
 
+                int seed = 1; // Make this seed value some combination probably of the loot-pile LoadID with some transform values spliced in and then all turned into hashcode or something, will see later.
+                UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
+
                 // Adding new properties to chest based on rolls for chest materials, rarity, possibly traps later, etc.
                 llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod); // Alright for now just do something simple without a limited ticket sort of system, will try that more later on.
                 llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
@@ -287,6 +290,8 @@ namespace LockedLootContainers
 
                 llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
                 llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
+
+                UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
                 // ALSO NOTE: Add console debug helper comments/lines to make viewing generation results quicker, DO THIS BEFORE THE BELOW STUFF TOMORROW!
                 // Possibly also look at giving more random seeds somehow during chest generation to reduce potential overservable patterns, using stuff like hashcodes or something.
@@ -372,6 +377,9 @@ namespace LockedLootContainers
 
             for (int i = 0; i < allowedMats.Length; i++)
             {
+                if (i < (int)chestMats - 2 || i >= (int)chestMats + 2) // Maybe do this based on a "rarity" value or something, or a general "protection level" or something instead of this current method.
+                    continue; // Still need to test this, possibly with live-debugging, because for some reason the concept in numbers is confusing me a bit, will test and see the results.
+
                 int arrayStart = itemRollsList.Count;
                 int fillElements = 0;
                 switch (i)
