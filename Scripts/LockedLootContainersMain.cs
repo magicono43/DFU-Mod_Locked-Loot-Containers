@@ -20,6 +20,7 @@ using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using DaggerfallConnect.Arena2;
+using System.Collections.Generic;
 
 namespace LockedLootContainers
 {
@@ -321,6 +322,21 @@ namespace LockedLootContainers
             {
                 sender.CloseWindow();
             }
+        }
+
+        public static T[] FillArray<T>(List<T> list, int start, int count, T value)
+        {
+            for (var i = start; i < start + count; i++)
+            {
+                list.Add(value);
+            }
+
+            return list.ToArray();
+        }
+
+        public static int PickOneOf(params int[] values) // Pango provided assistance in making this much cleaner way of doing the random value choice part, awesome.
+        {
+            return values[UnityEngine.Random.Range(0, values.Length)];
         }
     }
 }

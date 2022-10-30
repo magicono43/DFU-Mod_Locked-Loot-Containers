@@ -264,11 +264,23 @@ namespace LockedLootContainers
                 llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
                 llcObj.LoadID = oldLoadID;
 
-                int seed = 1; // Make this seed value some combination probably of the loot-pile LoadID with some transform values spliced in and then all turned into hashcode or something, will see later.
+                // Creates random seed for determining chest material value
+                string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();
+                string truncText = (combinedText.Length > 9) ? combinedText.Substring(0, 9) : combinedText; // Might get index out of range, but will see.
+                Debug.LogFormat("Attempting to parse value for chest seed: {0}", truncText);
+                int seed = int.Parse(truncText);
                 UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
 
                 // Adding new properties to chest based on rolls for chest materials, rarity, possibly traps later, etc.
                 llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod); // Alright for now just do something simple without a limited ticket sort of system, will try that more later on.
+
+                // Creates random seed for determining lock material value and other values
+                string jumbledText = truncText.Substring(5) + UnityEngine.Random.Range(333, 99999).ToString();
+                truncText = (jumbledText.Length > 9) ? jumbledText.Substring(0, 9) : jumbledText; // Might get index out of range, but will see.
+                Debug.LogFormat("Attempting to parse value for lock & others seed: {0}", truncText);
+                seed = int.Parse(truncText);
+                UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
+
                 llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
                 /*
                 So I'm thinking I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
@@ -310,6 +322,12 @@ namespace LockedLootContainers
                 Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
                 Destroy(lootPile.gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
+
+                // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
+
+                // This is where chest loot generation starts, for now atleast.
+                // Will have to change some stuff around in the actual chest "replacement" part to instead use the "new" loot collection rather than just the old one like for testing so far.
+                PopulateChestLoot(llcObj, totalRoomValueMod);
             }
         }
 
@@ -377,7 +395,7 @@ namespace LockedLootContainers
 
             for (int i = 0; i < allowedMats.Length; i++)
             {
-                if (i < (int)chestMats - 2 || i >= (int)chestMats + 2) // Maybe do this based on a "rarity" value or something, or a general "protection level" or something instead of this current method.
+                if (i < (int)chestMats - 3 || i >= (int)chestMats + 3) // Maybe do this based on a "rarity" value or something, or a general "protection level" or something instead of this current method.
                     continue; // Still need to test this, possibly with live-debugging, because for some reason the concept in numbers is confusing me a bit, will test and see the results.
 
                 int arrayStart = itemRollsList.Count;
@@ -403,6 +421,9 @@ namespace LockedLootContainers
                     default:
                         fillElements = 0; break;
                 }
+
+                if (i == (int)chestMats)
+                    fillElements = (int)Mathf.Floor(fillElements / 4); // This is here to attempt to make having the same material chest and lock less likely, giving the dupe material less tickets.
 
                 if (fillElements <= 0)
                     continue;
@@ -737,100 +758,6 @@ namespace LockedLootContainers
                 return 14;
 
             return 0;
-        }
-
-        public static T[] FillArray<T>(List<T> list, int start, int count, T value)
-        {
-            for (var i = start; i < start + count; i++)
-            {
-                list.Add(value);
-            }
-
-            return list.ToArray();
-        }
-
-        public static int PickOneOf(params int[] values) // Pango provided assistance in making this much cleaner way of doing the random value choice part, awesome.
-        {
-            return values[UnityEngine.Random.Range(0, values.Length)];
-        }
-
-        public static string BuildName()
-        {
-            return GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.displayName;
-        }
-
-        public static string CityName()
-        {   // %cn
-            PlayerGPS gps = GameManager.Instance.PlayerGPS;
-            if (gps.HasCurrentLocation)
-                return gps.CurrentLocation.Name;
-            else
-                return gps.CurrentRegion.Name;
-        }
-
-        private static string CurrentRegion()
-        {   // %crn going to use for %reg as well here
-            return GameManager.Instance.PlayerGPS.CurrentRegion.Name;
-        }
-
-        public static string OneWordQuality(int quality)
-        {
-            int variant = UnityEngine.Random.Range(0, 11);
-            string word = "Bugged";
-
-            if (quality <= 3) // 01 - 03
-            {
-                if (variant == 0) { word = "Dreadful"; }
-                else if (variant == 1) { word = "Horrendous"; }
-                else if (variant == 2) { word = "Horrible"; }
-                else if (variant == 3) { word = "Atrocious"; }
-                else if (variant == 4) { word = "Horrid"; }
-                else if (variant == 5) { word = "Awful"; }
-                else { word = "Terrible"; }
-            }
-            else if (quality <= 7) // 04 - 07
-            {
-                if (variant == 0) { word = "Bad"; }
-                else if (variant == 1) { word = "Reduced"; }
-                else if (variant == 2) { word = "Low"; }
-                else if (variant == 3) { word = "Inferior"; }
-                else if (variant == 4) { word = "Meager"; }
-                else if (variant == 5) { word = "Scant"; }
-                else { word = "Poor"; }
-            }
-            else if (quality <= 13) // 08 - 13
-            {
-                if (variant == 0) { word = "Modest"; }
-                else if (variant == 1) { word = "Medium"; }
-                else if (variant == 2) { word = "Moderate"; }
-                else if (variant == 3) { word = "Passable"; }
-                else if (variant == 4) { word = "Adequate"; }
-                else if (variant == 5) { word = "Typical"; }
-                else { word = "Average"; }
-            }
-            else if (quality <= 17) // 14 - 17
-            {
-                if (variant == 0) { word = "Reasonable"; }
-                else if (variant == 1) { word = "Solid"; }
-                else if (variant == 2) { word = "Honorable"; }
-                else if (variant == 3) { word = "Nice"; }
-                else if (variant == 4) { word = "True"; }
-                else if (variant == 5) { word = "Worthy"; }
-                else { word = "Good"; }
-            }
-            else // 18 - 20
-            {
-                if (variant == 0) { word = "Exemplary"; }
-                else if (variant == 1) { word = "Esteemed"; }
-                else if (variant == 2) { word = "Astonishing"; }
-                else if (variant == 3) { word = "Marvelous"; }
-                else if (variant == 4) { word = "Wonderful"; }
-                else if (variant == 5) { word = "Spectacular"; }
-                else if (variant == 6) { word = "Incredible"; }
-                else { word = "Exceptional"; }
-            }
-
-            return word;
         }
     }
 }
