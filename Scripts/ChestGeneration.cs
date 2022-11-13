@@ -32,51 +32,121 @@ namespace LockedLootContainers
 
             bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             int baseChestOdds = 20; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
+            // Allowed Item Groups:    Drug, Armor, Weap, Cloth, Book, Jewel, Supply, Relic, Ingred
+            // Item Group Odds %: 
+            int[] itemGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            // When I work on this next. Add these new "allowedItemGroups" and "itemGroupOdds" arrays to each dungeon type with their respective values to modify the allowed item groups and odds later on.
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
             {
                 switch (locationData.MapTableData.DungeonType) // These will give various modifier values which will then be used afterward to do the actual "work" part in the generation process.
                 {
                     case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
-                        allowedMats = PermittedMaterials_All; baseChestOdds = 35; break;
+                        allowedMats = PermittedMaterials_All;
+                        baseChestOdds = 35;
+                        itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                        break;
                     case DFRegion.DungeonTypes.OrcStronghold:
-                        allowedMats = new bool[] { false, true, true, true, true, false, false, false }; baseChestOdds = 35; break;
+                        allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                        baseChestOdds = 35;
+                        itemGroupOdds = new int[] { 15, 10, 25, 75, 20, 20, 60, 60, 20, 20, 0, 10, 25, 30, 20, 60, 0, 20, 30, 30, 30, 20, 10, 5, 15, 30 };
+                        break;
                     case DFRegion.DungeonTypes.HumanStronghold:
-                        allowedMats = PermittedMaterials_All; baseChestOdds = 40; break;
+                        allowedMats = PermittedMaterials_All;
+                        baseChestOdds = 40;
+                        itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
+                        break;
                     case DFRegion.DungeonTypes.Prison:
-                        allowedMats = new bool[] { true, true, false, false, false, false, false, false }; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, false, false, false, false, false, false };
+                        baseChestOdds = 20;
+                        itemGroupOdds = new int[] { 75, 40, 0, 0, 0, 200, 0, 0, 40, 40, 0, 5, 10, 10, 15, 40, 0, 15, 0, 0, 0, 0, 0, 0, 15, 3 };
+                        break;
                     case DFRegion.DungeonTypes.DesecratedTemple:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 35; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                        baseChestOdds = 35;
+                        itemGroupOdds = new int[] { 5, 20, 20, 0, 0, 10, 30, 20, 75, 75, 40, 15, 40, 5, 30, 70, 60, 200, 30, 30, 30, 30, 20, 10, 30, 10 };
+                        break;
                     case DFRegion.DungeonTypes.Mine:
-                        allowedMats = new bool[] { true, true, true, false, true, true, false, false }; baseChestOdds = 25; break;
+                        allowedMats = new bool[] { true, true, true, false, true, true, false, false };
+                        baseChestOdds = 25;
+                        itemGroupOdds = new int[] { 5, 30, 10, 0, 0, 10, 10, 25, 15, 15, 0, 65, 0, 300, 200, 80, 0, 0, 0, 0, 0, 15, 0, 0, 10, 500 };
+                        break;
                     case DFRegion.DungeonTypes.NaturalCave:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                        baseChestOdds = 20;
+                        itemGroupOdds = new int[] { 15, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 15, 15, 15, 15, 45, 15, 5, 20, 200 };
+                        break;
                     case DFRegion.DungeonTypes.Coven:
-                        allowedMats = new bool[] { true, false, false, false, true, true, true, true }; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { true, false, false, false, true, true, true, true };
+                        baseChestOdds = 30;
+                        itemGroupOdds = new int[] { 10, 15, 0, 0, 0, 85, 0, 0, 35, 35, 70, 25, 30, 0, 0, 30, 0, 70, 200, 200, 200, 300, 150, 55, 200, 40 };
+                        break;
                     case DFRegion.DungeonTypes.VampireHaunt:
-                        allowedMats = PermittedMaterials_All; baseChestOdds = 30; break;
+                        allowedMats = PermittedMaterials_All;
+                        baseChestOdds = 30;
+                        itemGroupOdds = new int[] { 0, 35, 20, 10, 10, 75, 40, 15, 60, 60, 40, 30, 45, 0, 0, 20, 0, 0, 0, 0, 0, 35, 25, 10, 5, 0 };
+                        break;
                     case DFRegion.DungeonTypes.Laboratory:
-                        allowedMats = new bool[] { false, true, true, false, true, true, true, true }; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { false, true, true, false, true, true, true, true };
+                        baseChestOdds = 30;
+                        itemGroupOdds = new int[] { 10, 15, 0, 0, 0, 60, 0, 0, 15, 15, 300, 20, 10, 10, 60, 85, 0, 0, 100, 100, 100, 300, 200, 80, 300, 125 };
+                        break;
                     case DFRegion.DungeonTypes.HarpyNest:
-                        allowedMats = new bool[] { true, true, true, false, true, true, true, true }; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, false, true, true, true, true };
+                        baseChestOdds = 20;
+                        itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 0, 25, 25, 25, 250, 25, 10, 20, 30 };
+                        break;
                     case DFRegion.DungeonTypes.RuinedCastle:
-                        allowedMats = PermittedMaterials_All; baseChestOdds = 50; break;
+                        allowedMats = PermittedMaterials_All;
+                        baseChestOdds = 50;
+                        itemGroupOdds = new int[] { 5, 20, 40, 80, 20, 60, 60, 60, 20, 20, 30, 40, 50, 0, 15, 25, 0, 40, 0, 0, 0, 0, 0, 0, 0, 20 };
+                        break;
                     case DFRegion.DungeonTypes.SpiderNest:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                        baseChestOdds = 20;
+                        itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 0, 25, 25, 25, 250, 25, 10, 20, 30 };
+                        break;
                     case DFRegion.DungeonTypes.GiantStronghold:
-                        allowedMats = new bool[] { true, true, true, false, false, false, false, false }; baseChestOdds = 25; break;
+                        allowedMats = new bool[] { true, true, true, false, false, false, false, false };
+                        baseChestOdds = 25;
+                        itemGroupOdds = new int[] { 20, 15, 15, 15, 40, 10, 20, 50, 10, 10, 0, 10, 20, 0, 20, 20, 0, 0, 10, 10, 10, 150, 10, 0, 0, 20 };
+                        break;
                     case DFRegion.DungeonTypes.DragonsDen:
-                        allowedMats = PermittedMaterials_FireProof; baseChestOdds = 55; break;
+                        allowedMats = PermittedMaterials_FireProof;
+                        baseChestOdds = 55;
+                        itemGroupOdds = new int[] { 0, 10, 45, 90, 60, 30, 70, 70, 0, 0, 10, 100, 100, 0, 30, 30, 10, 40, 0, 0, 0, 40, 20, 70, 20, 80 };
+                        break;
                     case DFRegion.DungeonTypes.BarbarianStronghold:
-                        allowedMats = new bool[] { true, true, true, true, true, false, false, false }; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { true, true, true, true, true, false, false, false };
+                        baseChestOdds = 30;
+                        itemGroupOdds = new int[] { 20, 60, 30, 0, 20, 20, 40, 80, 20, 20, 0, 10, 25, 10, 50, 50, 0, 0, 20, 20, 20, 100, 10, 5, 10, 30 };
+                        break;
                     case DFRegion.DungeonTypes.VolcanicCaves:
-                        allowedMats = PermittedMaterials_FireProof; baseChestOdds = 25; break;
+                        allowedMats = PermittedMaterials_FireProof;
+                        baseChestOdds = 25;
+                        itemGroupOdds = new int[] { 0, 0, 20, 50, 40, 30, 30, 30, 0, 0, 0, 60, 40, 0, 50, 0, 0, 20, 0, 0, 0, 50, 15, 10, 0, 200 };
+                        break;
                     case DFRegion.DungeonTypes.ScorpionNest:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false }; baseChestOdds = 20; break;
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                        baseChestOdds = 20;
+                        itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 0, 25, 25, 25, 250, 25, 10, 20, 30 };
+                        break;
                     case DFRegion.DungeonTypes.Cemetery:
-                        allowedMats = new bool[] { true, true, false, false, false, false, false, false }; baseChestOdds = 30; break;
+                        allowedMats = new bool[] { true, true, false, false, false, false, false, false };
+                        baseChestOdds = 30;
+                        itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                        break;
                     default:
-                        allowedMats = PermittedMaterials_All; baseChestOdds = 20; break;
+                        allowedMats = PermittedMaterials_All;
+                        baseChestOdds = 20;
+                        itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
+                        break;
+                        // Start back here next time I suppose. Keep getting the feeling that I'm going to be reworking this entire system as I go along, but if I keep trying to find this unattainable
+                        // "Perfect Method" I'm just going to be sitting here spinning my wheels and getting nowhere. So even if this method has to be reworked/redone later, getting to there is more
+                        // important than it actually working in the end honestly. Main thing I'm still not sure how I'm going to do is specifying certain items from each item group so they make
+                        // more sense depending on the context, etc. But I'll just have to probably fail a few times before I find "better" method to do this, so just keep chugging along even if
+                        // it does not seem like it makes sense, otherwise I"ll be getting nowhere no matter how much I contemplate and think about it, just go.
+                        // Might want to consider a sort of point based system here for the loot odds or something, so it's easier to try and "balance out" while doing this maybe.
                 }
 
                 // Make list of loot-piles currently in the dungeon "scene."
