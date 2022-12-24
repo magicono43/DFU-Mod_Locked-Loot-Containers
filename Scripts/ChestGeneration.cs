@@ -295,7 +295,7 @@ namespace LockedLootContainers
                         Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
                         Debug.LogFormat("-------------------------------------- {0}-", i);
 
-                        RollIfChestShouldBeCreated(lootPiles[i], allowedMats, baseChestOdds, totalRoomValueMod);
+                        RollIfChestShouldBeCreated(lootPiles[i], allowedMats, baseChestOdds, totalRoomValueMod, itemGroupOdds);
                     }
                 }
             }
@@ -303,7 +303,7 @@ namespace LockedLootContainers
 
         // This is really rough, mainly just for testing, because having some trouble thinking of a good formula for it all atm.
         // Definitely going to have to tweak and probably reconsider how the room context stuff modifies the chest odds, might be too drastic in some contexts and dungeon types, will have to see.
-        public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod)
+        public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod, int[] itemGroupOdds)
         {
             int chestOdds = baseChestOdds + totalRoomValueMod;
             int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
@@ -397,7 +397,7 @@ namespace LockedLootContainers
 
                 // This is where chest loot generation starts, for now atleast.
                 // Will have to change some stuff around in the actual chest "replacement" part to instead use the "new" loot collection rather than just the old one like for testing so far.
-                PopulateChestLoot(llcObj, totalRoomValueMod);
+                PopulateChestLoot(llcObj, totalRoomValueMod, itemGroupOdds);
             }
         }
 
