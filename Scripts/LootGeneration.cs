@@ -60,7 +60,7 @@ namespace LockedLootContainers
                     lowOddsMod = 4.5f; midOddsMod = 3.2f; highOddsMod = 2.5f; break;
             }
 
-            for (int i = 0; i < itemGroupOdds.Length; i++)
+            for (int i = 0; i < itemGroupOdds.Length; i++) // Odds are modified in this loop for each item group within the "itemGroupOdds" array.
             {
                 if (itemGroupOdds[i] <= 0)
                     continue;
@@ -72,11 +72,32 @@ namespace LockedLootContainers
                     itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * highOddsMod);
             }
 
-            // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
+            for (int i = 0; i < itemGroupOdds.Length; i++) // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
+            {
+                int itemChance = itemGroupOdds[i];
 
+                if (itemChance <= 0)
+                    continue;
+
+                while (Dice100.SuccessRoll(itemChance))
+                {
+                    DaggerfallUnityItem item = DetermineLootItem(i);
+                    chestItems.AddItem(item);
+                    itemChance -= 100;
+                }
+            }
+
+            // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
             // Will continue working on this loot generation stuff tomorrow. For now, keep using "Jewelry Additions" loot generation code and methods as a primary example to copy/pull from.
             // Next maybe work on actually generating items and resources in the chest based on various factors such as dungeon type, totalRoomValueMod, and the various chest attributes possibly?
             // Now that I have the items groups sort of proposed for the chest loot system, will probably want to actually start on some coding for the generation with this "complete" for now?
+        }
+
+        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC)
+        {
+            ItemBuilder.CreateRandomWeapon(4); // Use a switch-case most likely to determine the itemGroup requested and then generate a random item from that group and return, tomorrow.
+
+            return null;
         }
     }
 }
