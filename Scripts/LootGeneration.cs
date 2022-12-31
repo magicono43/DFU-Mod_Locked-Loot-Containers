@@ -12,6 +12,7 @@ using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Collections.Generic;
 using System;
 using DaggerfallWorkshop.Game.Utility;
+using DaggerfallWorkshop.Game.Formulas;
 
 namespace LockedLootContainers
 {
@@ -95,9 +96,37 @@ namespace LockedLootContainers
 
         public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC)
         {
-            ItemBuilder.CreateRandomWeapon(4); // Use a switch-case most likely to determine the itemGroup requested and then generate a random item from that group and return, tomorrow.
+            Genders gender = GameManager.Instance.PlayerEntity.Gender;
+            Races race = GameManager.Instance.PlayerEntity.Race;
+            Array enumArray;
+            int enumIndex = -1;
 
-            return null;
+            switch (itemGroupLLC)
+            {
+                default:
+                    return null;
+                case (int)ChestLootItemGroups.Drugs:
+                    return ItemBuilder.CreateRandomDrug(); // Just vanilla selection for now.
+                case (int)ChestLootItemGroups.LightArmor: // Will take modded/custom items into consideration later, after this works for the vanilla stuff atleast, for all item groups here.
+                    enumArray = Enum.GetValues(typeof(HeavyArmor));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Leather); // Will need testing to see if casting to vanilla enum works here.
+                case (int)ChestLootItemGroups.MediumArmor:
+                    enumArray = Enum.GetValues(typeof(HeavyArmor));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Chain); // Will need testing to see if casting to vanilla enum works here.
+                case (int)ChestLootItemGroups.HeavyArmor:
+                    enumArray = Enum.GetValues(typeof(HeavyArmor));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    ArmorMaterialTypes plateType = (ArmorMaterialTypes)0x0200 + UnityEngine.Random.Range(0, 10); // Will have materials be determined based on other factors later, placeholder for now.
+                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), plateType); // Will need testing to see if casting to vanilla enum works here.
+                case (int)ChestLootItemGroups.Shields:
+                    enumArray = Enum.GetValues(typeof(Shields));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), FormulaHelper.RandomArmorMaterial(UnityEngine.Random.Range(1, 21))); // Random level for now.
+                case (int)ChestLootItemGroups.SmallWeapons:
+                    return null; // Start here tomorrow with "small weapons" will have to do some weird stuff due to having some modded values inside this enum and also the "wand" item, etc will see.
+            }
         }
     }
 }
