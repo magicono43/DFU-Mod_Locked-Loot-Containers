@@ -83,7 +83,10 @@ namespace LockedLootContainers
                 while (Dice100.SuccessRoll(itemChance))
                 {
                     DaggerfallUnityItem item = DetermineLootItem(i);
-                    chestItems.AddItem(item);
+
+                    if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
+                        chestItems.AddItem(item);
+
                     itemChance -= 100;
                 }
             }
@@ -98,6 +101,7 @@ namespace LockedLootContainers
         {
             Genders gender = GameManager.Instance.PlayerEntity.Gender;
             Races race = GameManager.Instance.PlayerEntity.Race;
+            DaggerfallUnityItem item = null;
             Array enumArray;
             int enumIndex = -1;
 
@@ -125,7 +129,62 @@ namespace LockedLootContainers
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), FormulaHelper.RandomArmorMaterial(UnityEngine.Random.Range(1, 21))); // Random level for now.
                 case (int)ChestLootItemGroups.SmallWeapons:
-                    return null; // Start here tomorrow with "small weapons" will have to do some weird stuff due to having some modded values inside this enum and also the "wand" item, etc will see.
+                    enumArray = Enum.GetValues(typeof(SmallWeapons));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 2);
+                    return (enumIndex >= 0 && enumIndex <= 3) ? ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10)) : ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)Jewellery.Wand);
+                case (int)ChestLootItemGroups.MediumWeapons:
+                    enumArray = Enum.GetValues(typeof(MediumWeapons));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    if (enumIndex >= 8) // Arrows
+                        return ItemBuilder.CreateWeapon(Weapons.Arrow, (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10)); // Will likely want to change their stack amount to something else later.
+                    else // Other Medium Sized Weapons
+                        return ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
+                case (int)ChestLootItemGroups.LargeWeapons:
+                    enumArray = Enum.GetValues(typeof(LargeWeapons));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
+                case (int)ChestLootItemGroups.MensClothing:
+                    enumArray = Enum.GetValues(typeof(MensClothing));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateMensClothing((DaggerfallWorkshop.Game.Items.MensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
+                case (int)ChestLootItemGroups.WomensClothing:
+                    enumArray = Enum.GetValues(typeof(WomensClothing));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateWomensClothing((DaggerfallWorkshop.Game.Items.WomensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
+                case (int)ChestLootItemGroups.Books:
+                    return ItemBuilder.CreateRandomBook(); // Will need alot of work later if wanting to take into consideration book topic, and modded skill books, etc.
+                case (int)ChestLootItemGroups.Gems:
+                    return ItemBuilder.CreateRandomGem(); // Once again, will need work later to take into consideration modded gems and such.
+                case (int)ChestLootItemGroups.Jewelry:
+                    enumArray = Enum.GetValues(typeof(Jewelry));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 8);
+                    return ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                case (int)ChestLootItemGroups.Tools: // Will deal with this when mod compatibility stuff is taken into account, later.
+                    return null;
+                case (int)ChestLootItemGroups.Lights:
+                    enumArray = Enum.GetValues(typeof(Lights));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                case (int)ChestLootItemGroups.Supplies:
+                    enumArray = Enum.GetValues(typeof(Supplies));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.stackCount = UnityEngine.Random.Range(3, 10); // Might want to change values later, but fine for time being.
+                    return item;
+                case (int)ChestLootItemGroups.BlessedItems:
+                    enumArray = Enum.GetValues(typeof(BlessedItems));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return (enumIndex <= 0) ? ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)MiscellaneousIngredients1.Holy_relic) : ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex));
+                case (int)ChestLootItemGroups.ReligiousStuff:
+                    enumArray = Enum.GetValues(typeof(ReligiousStuff));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                case (int)ChestLootItemGroups.GenericPlants:
+                    enumArray = Enum.GetValues(typeof(GenericPlants));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    return ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                case (int)ChestLootItemGroups.ColdClimatePlants:
+                    return null; // Made good progress on this part today atleast, will continue from here next time I work on this.
             }
         }
     }
