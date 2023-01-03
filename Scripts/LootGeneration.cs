@@ -82,7 +82,8 @@ namespace LockedLootContainers
 
                 while (Dice100.SuccessRoll(itemChance))
                 {
-                    DaggerfallUnityItem item = DetermineLootItem(i);
+                    DaggerfallUnityItem item = null;
+                    item = DetermineLootItem(i);
 
                     if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
                         chestItems.AddItem(item);
@@ -90,6 +91,9 @@ namespace LockedLootContainers
                     itemChance -= 100;
                 }
             }
+
+            // Still need to do the other items such as maps, potions, painting, soul-gems, magic items, and obviously gold and letters of credit. But I think before getting into any of that,
+            // I'm going to actually try to do some testing in-game next time I work on this and see how much is not working as expected and also what the results are looking like so far, etc.
 
             // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
             // Will continue working on this loot generation stuff tomorrow. For now, keep using "Jewelry Additions" loot generation code and methods as a primary example to copy/pull from.
@@ -182,9 +186,98 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.GenericPlants:
                     enumArray = Enum.GetValues(typeof(GenericPlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.stackCount = UnityEngine.Random.Range(1, 6); // Might want to change values later, but fine for time being.
+                    return item;
                 case (int)ChestLootItemGroups.ColdClimatePlants:
-                    return null; // Made good progress on this part today atleast, will continue from here next time I work on this.
+                    enumArray = Enum.GetValues(typeof(ColdClimatePlants));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.stackCount = UnityEngine.Random.Range(1, 6); // Might want to change values later, but fine for time being.
+                    return item;
+                case (int)ChestLootItemGroups.WarmClimatePlants:
+                    enumArray = Enum.GetValues(typeof(WarmClimatePlants));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.stackCount = UnityEngine.Random.Range(1, 7); // Might want to change values later, but fine for time being.
+                    return item;
+                case (int)ChestLootItemGroups.CommonCreatureParts:
+                    enumArray = Enum.GetValues(typeof(CommonCreatureParts));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Spider_venom) // Just doing a simple but messy chain of if-else statements here since the vanilla ingredients groups are all over the place.
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Spider_venom);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Snake_venom)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Snake_venom);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients2.Small_scorpion_stinger)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients2, (int)CreatureIngredients2.Small_scorpion_stinger);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Giant_blood)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Giant_blood);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)MiscellaneousIngredients1.Big_tooth)
+                        return ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)MiscellaneousIngredients1.Big_tooth);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)MiscellaneousIngredients1.Medium_tooth)
+                        return ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)MiscellaneousIngredients1.Medium_tooth);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)MiscellaneousIngredients1.Small_tooth)
+                        return ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)MiscellaneousIngredients1.Small_tooth);
+                    else
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Orcs_blood);
+                case (int)ChestLootItemGroups.UncommonCreatureParts:
+                    enumArray = Enum.GetValues(typeof(UncommonCreatureParts));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Werewolfs_blood) // Just doing a simple but messy chain of if-else statements here since the vanilla ingredients groups are all over the place.
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Werewolfs_blood);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients3.Wereboar_tusk)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients3, (int)CreatureIngredients3.Wereboar_tusk);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients3.Nymph_hair)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients3, (int)CreatureIngredients3.Nymph_hair);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Wraith_essence)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Wraith_essence);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Ectoplasm)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Ectoplasm);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Ghouls_tongue)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Ghouls_tongue);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Troll_blood)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Troll_blood);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients2.Giant_scorpion_stinger)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients2, (int)CreatureIngredients2.Giant_scorpion_stinger);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients2.Mummy_wrappings)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients2, (int)CreatureIngredients2.Mummy_wrappings);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients2.Gryphon_Feather)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients2, (int)CreatureIngredients2.Gryphon_Feather);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)MiscellaneousIngredients2.Ivory)
+                        return ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients2, (int)MiscellaneousIngredients2.Ivory);
+                    else
+                        return ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients2, (int)MiscellaneousIngredients2.Pearl);
+                case (int)ChestLootItemGroups.RareCreatureParts:
+                    enumArray = Enum.GetValues(typeof(RareCreatureParts));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Fairy_dragon_scales) // Just doing a simple but messy chain of if-else statements here since the vanilla ingredients groups are all over the place.
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Fairy_dragon_scales);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients3.Unicorn_horn)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients3, (int)CreatureIngredients3.Unicorn_horn);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Gorgon_snake)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Gorgon_snake);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Lich_dust)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Lich_dust);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients2.Dragons_scales)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients2, (int)CreatureIngredients2.Dragons_scales);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Basilisk_eye)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Basilisk_eye);
+                    else if ((int)enumArray.GetValue(enumIndex) == (int)CreatureIngredients1.Daedra_heart)
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Daedra_heart);
+                    else
+                        return ItemBuilder.CreateItem(ItemGroups.CreatureIngredients1, (int)CreatureIngredients1.Saints_hair);
+                case (int)ChestLootItemGroups.LiquidSolvents:
+                    enumArray = Enum.GetValues(typeof(LiquidSolvents));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    item = ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.stackCount = UnityEngine.Random.Range(1, 4); // Might want to change values later, but fine for time being.
+                    return item;
+                case (int)ChestLootItemGroups.TraceMetals:
+                    enumArray = Enum.GetValues(typeof(TraceMetals));
+                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
+                    item = ItemBuilder.CreateItem(ItemGroups.MetalIngredients, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.stackCount = UnityEngine.Random.Range(1, 4); // Might want to change values later, but fine for time being.
+                    return item;
             }
         }
     }
