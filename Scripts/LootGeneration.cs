@@ -18,9 +18,10 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] itemGroupOdds)
+        public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] dungTypeItemOdds)
         {
-            llcObj.AttachedLoot.TransferAll(llcObj.Oldloot);
+            int[] itemGroupOdds = (int[])dungTypeItemOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.
+            llcObj.AttachedLoot.ReplaceAll(llcObj.Oldloot);
             ItemCollection chestItems = llcObj.AttachedLoot;
             int initialItemCount = chestItems.Count;
 
@@ -61,6 +62,9 @@ namespace LockedLootContainers
                     lowOddsMod = 4.5f; midOddsMod = 3.2f; highOddsMod = 2.5f; break;
             }
 
+            // Just testing stuff mostly for gold generation.
+            chestItems.AddItem(ItemBuilder.CreateGoldPieces((int)Mathf.Round(UnityEngine.Random.Range(1, 51) * highOddsMod)));
+
             for (int i = 0; i < itemGroupOdds.Length; i++) // Odds are modified in this loop for each item group within the "itemGroupOdds" array.
             {
                 if (itemGroupOdds[i] <= 0)
@@ -72,6 +76,15 @@ namespace LockedLootContainers
                 else
                     itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * highOddsMod);
             }
+
+            // Debug log string creator.
+            string baseString = "";
+            for (int i = 0; i < itemGroupOdds.Length; i++)
+            {
+                string valueString = "[" + itemGroupOdds[i].ToString() + "]";
+                baseString = baseString + ", " + valueString;
+            }
+            Debug.LogFormat("Item Group Odds For Chest: {0}", baseString);
 
             for (int i = 0; i < itemGroupOdds.Length; i++) // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             {
@@ -86,14 +99,15 @@ namespace LockedLootContainers
                     item = DetermineLootItem(i);
 
                     if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
-                        chestItems.AddItem(item);
+                        chestItems.AddItem(item); // Find a way to stack items that don't natively stack like bandages and parchment so they do if multiple are created, like ingredients and oil do.
 
                     itemChance -= 100;
                 }
             }
 
-            // Still need to do the other items such as maps, potions, painting, soul-gems, magic items, and obviously gold and letters of credit. But I think before getting into any of that,
-            // I'm going to actually try to do some testing in-game next time I work on this and see how much is not working as expected and also what the results are looking like so far, etc.
+            // Still need to do the other items such as maps, potions, painting, soul-gems, magic items, and obviously gold and letters of credit.
+            // Now that I finally did some testing in the Unity editor and fixed some obvious bugs and oversights, I should continue doing similar next time and try refining this all more, progress.
+			// Also idea for the stacking thing, might just scan through the item collection after generation and "manually" check for which things should stack or something, will see.
 
             // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
             // Will continue working on this loot generation stuff tomorrow. For now, keep using "Jewelry Additions" loot generation code and methods as a primary example to copy/pull from.
@@ -148,10 +162,14 @@ namespace LockedLootContainers
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     return ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
                 case (int)ChestLootItemGroups.MensClothing:
+                    if (gender == Genders.Female)
+                        return null;
                     enumArray = Enum.GetValues(typeof(MensClothing));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     return ItemBuilder.CreateMensClothing((DaggerfallWorkshop.Game.Items.MensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
                 case (int)ChestLootItemGroups.WomensClothing:
+                    if (gender == Genders.Male)
+                        return null;
                     enumArray = Enum.GetValues(typeof(WomensClothing));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     return ItemBuilder.CreateWomensClothing((DaggerfallWorkshop.Game.Items.WomensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
@@ -187,13 +205,13 @@ namespace LockedLootContainers
                     enumArray = Enum.GetValues(typeof(GenericPlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 6); // Might want to change values later, but fine for time being.
+                    item.stackCount = UnityEngine.Random.Range(1, 7); // Might want to change values later, but fine for time being.
                     return item;
                 case (int)ChestLootItemGroups.ColdClimatePlants:
                     enumArray = Enum.GetValues(typeof(ColdClimatePlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 6); // Might want to change values later, but fine for time being.
+                    item.stackCount = UnityEngine.Random.Range(1, 7); // Might want to change values later, but fine for time being.
                     return item;
                 case (int)ChestLootItemGroups.WarmClimatePlants:
                     enumArray = Enum.GetValues(typeof(WarmClimatePlants));
