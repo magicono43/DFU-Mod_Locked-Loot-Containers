@@ -18,9 +18,10 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] dungTypeItemOdds)
+        public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] dungTypeMiscOdds, int[] dungTypeItemOdds)
         {
-            int[] itemGroupOdds = (int[])dungTypeItemOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.
+            int[] miscGroupOdds = (int[])dungTypeMiscOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.
+            int[] itemGroupOdds = (int[])dungTypeItemOdds.Clone();
             llcObj.AttachedLoot.ReplaceAll(llcObj.Oldloot);
             ItemCollection chestItems = llcObj.AttachedLoot;
             int initialItemCount = chestItems.Count;
@@ -77,7 +78,12 @@ namespace LockedLootContainers
                     itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * highOddsMod);
             }
 
-            // Debug log string creator.
+            // Next time I work on this, finish the "miscGroupOdds" values in ChestGeneration.cs and after that work on the actual use of said numbers here in this script, and other stuff.
+            // Harpy Nest is the next that needs values filled.
+            // Oh yeah, something to note, I may want to consider making a spreadsheet or something with all those various values for all the dungeon types and such, to make it easier to work with, etc.
+            // Possibly create maps, potions, etc here after everything else has been added already. (Also add debug log for these as well.)
+
+            // Debug log string creator, for testing purposes only.
             string baseString = "";
             for (int i = 0; i < itemGroupOdds.Length; i++)
             {
@@ -99,7 +105,7 @@ namespace LockedLootContainers
                     item = DetermineLootItem(i);
 
                     if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
-                        chestItems.AddItem(item); // Find a way to stack items that don't natively stack like bandages and parchment so they do if multiple are created, like ingredients and oil do.
+                        chestItems.AddItem(item);
 
                     itemChance -= 100;
                 }
@@ -107,7 +113,6 @@ namespace LockedLootContainers
 
             // Still need to do the other items such as maps, potions, painting, soul-gems, magic items, and obviously gold and letters of credit.
             // Now that I finally did some testing in the Unity editor and fixed some obvious bugs and oversights, I should continue doing similar next time and try refining this all more, progress.
-			// Also idea for the stacking thing, might just scan through the item collection after generation and "manually" check for which things should stack or something, will see.
 
             // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
             // Will continue working on this loot generation stuff tomorrow. For now, keep using "Jewelry Additions" loot generation code and methods as a primary example to copy/pull from.
@@ -191,8 +196,8 @@ namespace LockedLootContainers
                     enumArray = Enum.GetValues(typeof(Supplies));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(3, 10); // Might want to change values later, but fine for time being.
-                    return item;
+                    item.stackCount = UnityEngine.Random.Range(2, 6); // Might want to change values later, but fine for time being.
+                    return (item.IsStackable()) ? item : null; // So just for now, instead of checking other mods that make these "supplies" useful, just checking for stackability and spawn based on that.
                 case (int)ChestLootItemGroups.BlessedItems:
                     enumArray = Enum.GetValues(typeof(BlessedItems));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
