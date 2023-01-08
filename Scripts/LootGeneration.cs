@@ -63,8 +63,13 @@ namespace LockedLootContainers
                     lowOddsMod = 4.5f; midOddsMod = 3.2f; highOddsMod = 2.5f; break;
             }
 
-            // Just testing stuff mostly for gold generation.
-            chestItems.AddItem(ItemBuilder.CreateGoldPieces((int)Mathf.Round(UnityEngine.Random.Range(1, 51) * highOddsMod)));
+            for (int i = 0; i < miscGroupOdds.Length; i++) // Heavily placeholder for now, but don't feel like going too deep into this right now.
+            {
+                if (miscGroupOdds[i] <= 0 || miscGroupOdds[i] == 12 || miscGroupOdds[i] == 13)
+                    continue;
+                else
+                    miscGroupOdds[i] = (int)Mathf.Round(miscGroupOdds[i] * midOddsMod);
+            }
 
             for (int i = 0; i < itemGroupOdds.Length; i++) // Odds are modified in this loop for each item group within the "itemGroupOdds" array.
             {
@@ -78,13 +83,101 @@ namespace LockedLootContainers
                     itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * highOddsMod);
             }
 
-            // Next time I work on this, finish the "miscGroupOdds" values in ChestGeneration.cs and after that work on the actual use of said numbers here in this script, and other stuff.
-            // Harpy Nest is the next that needs values filled.
-            // Oh yeah, something to note, I may want to consider making a spreadsheet or something with all those various values for all the dungeon types and such, to make it easier to work with, etc.
-            // Possibly create maps, potions, etc here after everything else has been added already. (Also add debug log for these as well.)
-
             // Debug log string creator, for testing purposes only.
             string baseString = "";
+            for (int i = 0; i < miscGroupOdds.Length; i++)
+            {
+                string valueString = "[" + miscGroupOdds[i].ToString() + "]";
+                baseString = baseString + ", " + valueString;
+            }
+            Debug.LogFormat("Misc Group Odds For Chest: {0}", baseString);
+
+            for (int i = 0; i < miscGroupOdds.Length; i++) // Groups within "miscGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
+            {
+                int itemChance = miscGroupOdds[i];
+                int conditionMod = UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1);
+                DaggerfallUnityItem item = null;
+                int amount = 0;
+
+                switch (i)
+                {
+                    default:
+                        break;
+                    case 0: // Add Gold
+                        amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(miscGroupOdds[2], miscGroupOdds[3] + 1) : 0;
+                        if (amount > 0)
+                            chestItems.AddItem(ItemBuilder.CreateGoldPieces(amount));
+                        break;
+                    case 1: // Add Letter of Credit
+                        amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(miscGroupOdds[4], miscGroupOdds[5] + 1) : 0;
+                        if (amount > 0)
+                        {
+                            item = ItemBuilder.CreateItem(ItemGroups.MiscItems, (int)MiscItems.Letter_of_credit);
+                            item.value = amount;
+                            chestItems.AddItem(item);
+                        }
+                        break;
+                    case 6: // Add Potions
+                        if (Dice100.SuccessRoll(itemChance))
+                        {
+                            amount = UnityEngine.Random.Range(1, 5);
+                            for (int p = 0; p < amount; p++)
+                            {
+                                chestItems.AddItem(ItemBuilder.CreateRandomPotion());
+                            }
+                        }
+                        break;
+                    case 7: // Add Map
+                        if (Dice100.SuccessRoll(itemChance))
+                            chestItems.AddItem(new DaggerfallUnityItem(ItemGroups.MiscItems, 8));
+                        break;
+                    case 8: // Add Potion Recipe
+                        if (Dice100.SuccessRoll(itemChance))
+                        {
+                            int recipeIdx = UnityEngine.Random.Range(0, DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys.Length);
+                            int recipeKey = DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys[recipeIdx];
+                            item = new DaggerfallUnityItem(ItemGroups.MiscItems, 4) { PotionRecipeKey = recipeKey };
+                            chestItems.AddItem(item);
+                        }
+                        break;
+                    case 9: // Add Painting, no idea if this CreateItem will work, nor if it is properly given a random painting value, etc.
+                        if (Dice100.SuccessRoll(itemChance))
+                        {
+                            item = ItemBuilder.CreateItem(ItemGroups.Paintings, (int)Paintings.Painting);
+                            item.currentCondition = (int)(item.maxCondition * conditionMod);
+                            chestItems.AddItem(item);
+                        }
+                        break;
+                    case 10: // Add Soul-gem
+                        if (Dice100.SuccessRoll(itemChance))
+                        {
+                            if (Dice100.FailedRoll(25))
+                            {
+                                // Empty soul trap
+                                item = ItemBuilder.CreateItem(ItemGroups.MiscItems, (int)MiscItems.Soul_trap);
+                                item.value = 5000;
+                                item.TrappedSoulType = MobileTypes.None;
+                            }
+                            else
+                            {
+                                // Filled soul trap
+                                item = ItemBuilder.CreateRandomlyFilledSoulTrap();
+                            }
+                            chestItems.AddItem(item);
+                        }
+                        break;
+                    case 11: // Add Magic Item, it is unidentified when created.
+                        if (Dice100.SuccessRoll(itemChance))
+                        {
+                            item = ItemBuilder.CreateRandomMagicItem(UnityEngine.Random.Range(1, 22), GameManager.Instance.PlayerEntity.Gender, GameManager.Instance.PlayerEntity.Race);
+                            item.currentCondition = (int)(item.maxCondition * conditionMod);
+                            chestItems.AddItem(item);
+                        }
+                        break;
+                }
+            }
+
+            // Debug log string creator, for testing purposes only.
             for (int i = 0; i < itemGroupOdds.Length; i++)
             {
                 string valueString = "[" + itemGroupOdds[i].ToString() + "]";
@@ -95,6 +188,7 @@ namespace LockedLootContainers
             for (int i = 0; i < itemGroupOdds.Length; i++) // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             {
                 int itemChance = itemGroupOdds[i];
+                int conditionMod = UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1);
 
                 if (itemChance <= 0)
                     continue;
@@ -102,7 +196,7 @@ namespace LockedLootContainers
                 while (Dice100.SuccessRoll(itemChance))
                 {
                     DaggerfallUnityItem item = null;
-                    item = DetermineLootItem(i);
+                    item = DetermineLootItem(i, conditionMod);
 
                     if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
                         chestItems.AddItem(item);
@@ -111,16 +205,16 @@ namespace LockedLootContainers
                 }
             }
 
-            // Still need to do the other items such as maps, potions, painting, soul-gems, magic items, and obviously gold and letters of credit.
-            // Now that I finally did some testing in the Unity editor and fixed some obvious bugs and oversights, I should continue doing similar next time and try refining this all more, progress.
+            // Next time I work on this, I should probably do testing for the newly added items taken into account from "miscGroupOdds" array, as well as the added condition damage modifier, etc.
+            // After that is tested and stuff, not certain what part to work on next, will have to see.
 
+            // Oh yeah, something to note, I may want to consider making a spreadsheet or something with all those various values for all the dungeon types and such, to make it easier to work with, etc.
             // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
             // Will continue working on this loot generation stuff tomorrow. For now, keep using "Jewelry Additions" loot generation code and methods as a primary example to copy/pull from.
             // Next maybe work on actually generating items and resources in the chest based on various factors such as dungeon type, totalRoomValueMod, and the various chest attributes possibly?
-            // Now that I have the items groups sort of proposed for the chest loot system, will probably want to actually start on some coding for the generation with this "complete" for now?
         }
 
-        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC)
+        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, int conditionMod)
         {
             Genders gender = GameManager.Instance.PlayerEntity.Gender;
             Races race = GameManager.Instance.PlayerEntity.Race;
@@ -137,61 +231,87 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.LightArmor: // Will take modded/custom items into consideration later, after this works for the vanilla stuff atleast, for all item groups here.
                     enumArray = Enum.GetValues(typeof(HeavyArmor));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Leather); // Will need testing to see if casting to vanilla enum works here.
+                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Leather); // Will need testing to see if casting to vanilla enum works here.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.MediumArmor:
                     enumArray = Enum.GetValues(typeof(HeavyArmor));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Chain); // Will need testing to see if casting to vanilla enum works here.
+                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Chain); // Will need testing to see if casting to vanilla enum works here.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.HeavyArmor:
                     enumArray = Enum.GetValues(typeof(HeavyArmor));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     ArmorMaterialTypes plateType = (ArmorMaterialTypes)0x0200 + UnityEngine.Random.Range(0, 10); // Will have materials be determined based on other factors later, placeholder for now.
-                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), plateType); // Will need testing to see if casting to vanilla enum works here.
+                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), plateType); // Will need testing to see if casting to vanilla enum works here.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.Shields:
                     enumArray = Enum.GetValues(typeof(Shields));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), FormulaHelper.RandomArmorMaterial(UnityEngine.Random.Range(1, 21))); // Random level for now.
+                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), FormulaHelper.RandomArmorMaterial(UnityEngine.Random.Range(1, 21))); // Random level for now.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.SmallWeapons:
                     enumArray = Enum.GetValues(typeof(SmallWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 2);
-                    return (enumIndex >= 0 && enumIndex <= 3) ? ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10)) : ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)Jewellery.Wand);
+                    item = (enumIndex >= 0 && enumIndex <= 3) ? ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10)) : ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)Jewellery.Wand);
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.MediumWeapons:
                     enumArray = Enum.GetValues(typeof(MediumWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     if (enumIndex >= 8) // Arrows
                         return ItemBuilder.CreateWeapon(Weapons.Arrow, (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10)); // Will likely want to change their stack amount to something else later.
                     else // Other Medium Sized Weapons
-                        return ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
+                    {
+                        item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
+                        item.currentCondition = (int)(item.maxCondition * conditionMod);
+                        return item;
+                    }
                 case (int)ChestLootItemGroups.LargeWeapons:
                     enumArray = Enum.GetValues(typeof(LargeWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
+                    item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)UnityEngine.Random.Range(0, 10));
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.MensClothing:
                     if (gender == Genders.Female)
                         return null;
                     enumArray = Enum.GetValues(typeof(MensClothing));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateMensClothing((DaggerfallWorkshop.Game.Items.MensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
+                    item = ItemBuilder.CreateMensClothing((DaggerfallWorkshop.Game.Items.MensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.WomensClothing:
                     if (gender == Genders.Male)
                         return null;
                     enumArray = Enum.GetValues(typeof(WomensClothing));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateWomensClothing((DaggerfallWorkshop.Game.Items.WomensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
+                    item = ItemBuilder.CreateWomensClothing((DaggerfallWorkshop.Game.Items.WomensClothing)enumArray.GetValue(enumIndex), race, -1, ItemBuilder.RandomClothingDye());
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.Books:
-                    return ItemBuilder.CreateRandomBook(); // Will need alot of work later if wanting to take into consideration book topic, and modded skill books, etc.
+                    item = ItemBuilder.CreateRandomBook(); // Will need alot of work later if wanting to take into consideration book topic, and modded skill books, etc.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.Gems:
                     return ItemBuilder.CreateRandomGem(); // Once again, will need work later to take into consideration modded gems and such.
                 case (int)ChestLootItemGroups.Jewelry:
                     enumArray = Enum.GetValues(typeof(Jewelry));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 8);
-                    return ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item = ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.Tools: // Will deal with this when mod compatibility stuff is taken into account, later.
                     return null;
                 case (int)ChestLootItemGroups.Lights:
                     enumArray = Enum.GetValues(typeof(Lights));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.Supplies:
                     enumArray = Enum.GetValues(typeof(Supplies));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
@@ -201,11 +321,15 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.BlessedItems:
                     enumArray = Enum.GetValues(typeof(BlessedItems));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return (enumIndex <= 0) ? ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)MiscellaneousIngredients1.Holy_relic) : ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex));
+                    item = (enumIndex <= 0) ? ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)MiscellaneousIngredients1.Holy_relic) : ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex));
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.ReligiousStuff:
                     enumArray = Enum.GetValues(typeof(ReligiousStuff));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    return ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item = ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item.currentCondition = (int)(item.maxCondition * conditionMod);
+                    return item;
                 case (int)ChestLootItemGroups.GenericPlants:
                     enumArray = Enum.GetValues(typeof(GenericPlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);

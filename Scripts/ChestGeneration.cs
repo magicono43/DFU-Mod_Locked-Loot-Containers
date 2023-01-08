@@ -106,61 +106,61 @@ namespace LockedLootContainers
                     case DFRegion.DungeonTypes.HarpyNest:
                         allowedMats = new bool[] { true, true, true, false, true, true, true, true };
                         baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
                         itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 0, 25, 25, 25, 250, 25, 10, 20, 30 };
                         break;
                     case DFRegion.DungeonTypes.RuinedCastle:
                         allowedMats = PermittedMaterials_All;
                         baseChestOdds = 50;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 50, 8, 70, 600, 1250, 6000, 2, 3, 0, 12, 0, 2, 60, 30 };
                         itemGroupOdds = new int[] { 5, 20, 40, 80, 20, 60, 60, 60, 20, 20, 30, 40, 50, 0, 15, 25, 0, 40, 0, 0, 0, 0, 0, 0, 0, 20 };
                         break;
                     case DFRegion.DungeonTypes.SpiderNest:
                         allowedMats = new bool[] { true, true, true, true, true, true, true, false };
                         baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
                         itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 0, 25, 25, 25, 250, 25, 10, 20, 30 };
                         break;
                     case DFRegion.DungeonTypes.GiantStronghold:
                         allowedMats = new bool[] { true, true, true, false, false, false, false, false };
                         baseChestOdds = 25;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 65, 1, 60, 650, 500, 1500, 3, 6, 2, 1, 0, 1, 65, 25 };
                         itemGroupOdds = new int[] { 20, 15, 15, 15, 40, 10, 20, 50, 10, 10, 0, 10, 20, 0, 20, 20, 0, 0, 10, 10, 10, 150, 10, 0, 0, 20 };
                         break;
                     case DFRegion.DungeonTypes.DragonsDen:
                         allowedMats = PermittedMaterials_FireProof;
                         baseChestOdds = 55;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 90, 0, 150, 2500, 0, 0, 5, 7, 3, 10, 6, 12, 70, 25 };
                         itemGroupOdds = new int[] { 0, 10, 45, 90, 60, 30, 70, 70, 0, 0, 10, 100, 100, 0, 30, 30, 10, 40, 0, 0, 0, 40, 20, 70, 20, 80 };
                         break;
                     case DFRegion.DungeonTypes.BarbarianStronghold:
                         allowedMats = new bool[] { true, true, true, true, true, false, false, false };
                         baseChestOdds = 30;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 70, 1, 90, 700, 500, 1750, 4, 6, 3, 1, 0, 2, 75, 35 };
                         itemGroupOdds = new int[] { 20, 60, 30, 0, 20, 20, 40, 80, 20, 20, 0, 10, 25, 10, 50, 50, 0, 0, 20, 20, 20, 100, 10, 5, 10, 30 };
                         break;
                     case DFRegion.DungeonTypes.VolcanicCaves:
                         allowedMats = PermittedMaterials_FireProof;
                         baseChestOdds = 25;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 70, 1, 120, 1200, 300, 1250, 8, 2, 2, 0, 15, 7, 55, 25 };
                         itemGroupOdds = new int[] { 0, 0, 20, 50, 40, 30, 30, 30, 0, 0, 0, 60, 40, 0, 50, 0, 0, 20, 0, 0, 0, 50, 15, 10, 0, 200 };
                         break;
                     case DFRegion.DungeonTypes.ScorpionNest:
                         allowedMats = new bool[] { true, true, true, true, true, true, true, false };
                         baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
                         itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 0, 25, 25, 25, 250, 25, 10, 20, 30 };
                         break;
                     case DFRegion.DungeonTypes.Cemetery:
                         allowedMats = new bool[] { true, true, false, false, false, false, false, false };
                         baseChestOdds = 30;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 25, 1, 20, 400, 500, 1750, 0, 6, 2, 4, 1, 3, 65, 25 };
                         itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
                         break;
                     default:
                         allowedMats = PermittedMaterials_All;
                         baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        miscGroupOdds = new int[] { 50, 5, 50, 500, 500, 5000, 5, 5, 5, 5, 5, 5, 55, 5 };
                         itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
                         break;
                         // Start back here next time I suppose. Keep getting the feeling that I'm going to be reworking this entire system as I go along, but if I keep trying to find this unattainable
