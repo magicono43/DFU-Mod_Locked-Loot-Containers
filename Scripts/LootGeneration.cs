@@ -65,7 +65,7 @@ namespace LockedLootContainers
 
             for (int i = 0; i < miscGroupOdds.Length; i++) // Heavily placeholder for now, but don't feel like going too deep into this right now.
             {
-                if (miscGroupOdds[i] <= 0 || miscGroupOdds[i] == 12 || miscGroupOdds[i] == 13)
+                if (i <= 0 || i == 12 || i == 13)
                     continue;
                 else
                     miscGroupOdds[i] = (int)Mathf.Round(miscGroupOdds[i] * midOddsMod);
@@ -95,7 +95,7 @@ namespace LockedLootContainers
             for (int i = 0; i < miscGroupOdds.Length; i++) // Groups within "miscGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             {
                 int itemChance = miscGroupOdds[i];
-                int conditionMod = UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1);
+                float conditionMod = (float)UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1) / 100f;
                 DaggerfallUnityItem item = null;
                 int amount = 0;
 
@@ -178,6 +178,7 @@ namespace LockedLootContainers
             }
 
             // Debug log string creator, for testing purposes only.
+            baseString = "";
             for (int i = 0; i < itemGroupOdds.Length; i++)
             {
                 string valueString = "[" + itemGroupOdds[i].ToString() + "]";
@@ -188,7 +189,7 @@ namespace LockedLootContainers
             for (int i = 0; i < itemGroupOdds.Length; i++) // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             {
                 int itemChance = itemGroupOdds[i];
-                int conditionMod = UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1);
+                float conditionMod = (float)UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1) / 100f;
 
                 if (itemChance <= 0)
                     continue;
@@ -205,8 +206,8 @@ namespace LockedLootContainers
                 }
             }
 
-            // Next time I work on this, I should probably do testing for the newly added items taken into account from "miscGroupOdds" array, as well as the added condition damage modifier, etc.
-            // After that is tested and stuff, not certain what part to work on next, will have to see.
+            // Now that I tested the "miscGroupOdds" a bit, and fixed some bugs. I should probably consider moving onto the next feature I plan on working on for the mod.
+            // Still not exactly sure what I should work on next though, maybe try and get the basic trap stuff to work? That or more of the numbers and formula for stuff like pick chance, etc.
 
             // Oh yeah, something to note, I may want to consider making a spreadsheet or something with all those various values for all the dungeon types and such, to make it easier to work with, etc.
             // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
@@ -214,7 +215,7 @@ namespace LockedLootContainers
             // Next maybe work on actually generating items and resources in the chest based on various factors such as dungeon type, totalRoomValueMod, and the various chest attributes possibly?
         }
 
-        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, int conditionMod)
+        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, float conditionMod)
         {
             Genders gender = GameManager.Instance.PlayerEntity.Gender;
             Races race = GameManager.Instance.PlayerEntity.Race;
