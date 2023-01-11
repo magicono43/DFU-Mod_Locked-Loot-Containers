@@ -46,22 +46,50 @@ namespace LockedLootContainers
             {
                 default:
                 case ChestMaterials.Wood:
-                    lowOddsMod = 0.35f; midOddsMod = 0.60f; highOddsMod = 0.80f; break;
+                    lowOddsMod += 0.18f; midOddsMod += 0.30f; highOddsMod += 0.40f; break;
                 case ChestMaterials.Iron:
-                    lowOddsMod = 0.60f; midOddsMod = 0.85f; highOddsMod = 1.0f; break;
+                    lowOddsMod += 0.30f; midOddsMod += 0.43f; highOddsMod += 0.5f; break;
                 case ChestMaterials.Steel:
-                    lowOddsMod = 1.1f; midOddsMod = 1.3f; highOddsMod = 1.5f; break;
+                    lowOddsMod += 0.55f; midOddsMod += 0.65f; highOddsMod += 0.75f; break;
                 case ChestMaterials.Orcish:
-                    lowOddsMod = 2.2f; midOddsMod = 2.6f; highOddsMod = 3.0f; break;
+                    lowOddsMod += 1.1f; midOddsMod += 1.3f; highOddsMod += 1.5f; break;
                 case ChestMaterials.Mithril:
-                    lowOddsMod = 1.4f; midOddsMod = 1.1f; highOddsMod = 1.1f; break;
+                    lowOddsMod += 0.7f; midOddsMod += 0.55f; highOddsMod += 0.55f; break;
                 case ChestMaterials.Dwarven:
-                    lowOddsMod = 2.5f; midOddsMod = 1.3f; highOddsMod = 1.5f; break;
+                    lowOddsMod += 1.25f; midOddsMod += 0.65f; highOddsMod += 0.75f; break;
                 case ChestMaterials.Adamantium:
-                    lowOddsMod = 2.9f; midOddsMod = 1.7f; highOddsMod = 2.0f; break;
+                    lowOddsMod += 1.45f; midOddsMod += 0.85f; highOddsMod += 1.0f; break;
                 case ChestMaterials.Daedric:
-                    lowOddsMod = 4.5f; midOddsMod = 3.2f; highOddsMod = 2.5f; break;
+                    lowOddsMod += 2.25f; midOddsMod += 1.6f; highOddsMod += 1.25f; break;
             }
+
+            switch (llcObj.LockMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
+            {
+                default:
+                case LockMaterials.Wood:
+                    lowOddsMod += 0.09f; midOddsMod += 0.15f; highOddsMod += 0.20f; break;
+                case LockMaterials.Iron:
+                    lowOddsMod += 0.15f; midOddsMod += 0.22f; highOddsMod += 0.25f; break;
+                case LockMaterials.Steel:
+                    lowOddsMod += 0.28f; midOddsMod += 0.33f; highOddsMod += 0.38f; break;
+                case LockMaterials.Orcish:
+                    lowOddsMod += 0.55f; midOddsMod += 0.65f; highOddsMod += 0.75f; break;
+                case LockMaterials.Mithril:
+                    lowOddsMod += 0.35f; midOddsMod += 0.28f; highOddsMod += 0.28f; break;
+                case LockMaterials.Dwarven:
+                    lowOddsMod += 0.63f; midOddsMod += 0.33f; highOddsMod += 0.38f; break;
+                case LockMaterials.Adamantium:
+                    lowOddsMod += 0.73f; midOddsMod += 0.43f; highOddsMod += 0.5f; break;
+                case LockMaterials.Daedric:
+                    lowOddsMod += 1.13f; midOddsMod += 0.8f; highOddsMod += 0.63f; break;
+            }
+
+            // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
+            if (llcObj.LockComplexity < 0 || (llcObj.LockComplexity >= 0 && llcObj.LockComplexity <= 19)) { lowOddsMod += 0.15f; midOddsMod += 0.22f; highOddsMod += 0.25f; }
+            else if (llcObj.LockComplexity >= 20 && llcObj.LockComplexity <= 39) { lowOddsMod += 0.35f; midOddsMod += 0.28f; highOddsMod += 0.28f; }
+            else if (llcObj.LockComplexity >= 40 && llcObj.LockComplexity <= 59) { lowOddsMod += 0.63f; midOddsMod += 0.33f; highOddsMod += 0.38f; }
+            else if (llcObj.LockComplexity >= 60 && llcObj.LockComplexity <= 79) { lowOddsMod += 0.73f; midOddsMod += 0.43f; highOddsMod += 0.5f; }
+            else { lowOddsMod += 1.13f; midOddsMod += 0.8f; highOddsMod += 0.63f; }
 
             for (int i = 0; i < miscGroupOdds.Length; i++) // Heavily placeholder for now, but don't feel like going too deep into this right now.
             {
