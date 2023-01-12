@@ -21,6 +21,7 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using DaggerfallConnect.Arena2;
 using System.Collections.Generic;
+using DaggerfallWorkshop.Game.Utility;
 
 namespace LockedLootContainers
 {
@@ -183,6 +184,11 @@ namespace LockedLootContainers
                         Transform closedChestTransform = ChestObjRef.transform;
                         Vector3 pos = ChestObjRef.transform.position;
 
+                        if (Dice100.SuccessRoll(LockPickChance(closedChestData)))
+                        {
+                            // Do stuff here.
+                        }
+
                         DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
                         openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
@@ -323,6 +329,28 @@ namespace LockedLootContainers
                 sender.CloseWindow();
             }
         }
+
+        // Consider adding these to their own script called like, "LLCFormulaHelper" or something.
+
+        public static int LockPickChance(LLCObject chest) // As usual, these are fairly placeholder values, but I think for now it's not too bad for what it is.
+        {
+            // Next I work on this, I'm going to have to mess around with this so it feels like lock-picking skill gives better odds alone depending on lock complexity.
+            // Like possibly use some if-else statements to check the different between lock-picking skill and lock complexity or something, then have the other values modify those odds somehow? Will see.
+
+            float lockDiff = (float)chest.LockComplexity * -1;
+            int lockP = Mathf.Clamp((int)Mathf.Round(Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket) * 1.65f), 0, 300);
+            int pickP = Mathf.Clamp((int)Mathf.Round(Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket) / 10), 0, 20);
+            int intel = (Player.Stats.LiveIntelligence - 50);
+            int agili = (Player.Stats.LiveAgility - 50);
+            int speed = (Player.Stats.LiveSpeed - 50);
+            int luck = (Player.Stats.LiveLuck - 50);
+
+            float finalValue = lockDiff + lockP + pickP + Mathf.Round(intel * .4f) + Mathf.Round(agili * .7f) + Mathf.Round(speed * .15f) + Mathf.Round(luck * .25f);
+
+            return (int)Mathf.Round(Mathf.Clamp(finalValue, 1f, 98f)); // Potentially add specific text depending on initial odds, like "Through dumb-luck, you somehow unlocked it", etc.
+        }
+
+        // Consider adding these to their own script called like, "LLCFormulaHelper" or something.
 
         public static T[] FillArray<T>(List<T> list, int start, int count, T value)
         {
