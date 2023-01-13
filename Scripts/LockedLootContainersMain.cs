@@ -186,6 +186,7 @@ namespace LockedLootContainers
 
                         if (Dice100.SuccessRoll(LockPickChance(closedChestData)))
                         {
+                            // Now that I have the basic lock-pick formula, next time I work on this I suppose I should work on the actual logic for what happens from failure/success on the chest, etc.
                             // Do stuff here.
                         }
 
@@ -332,22 +333,47 @@ namespace LockedLootContainers
 
         // Consider adding these to their own script called like, "LLCFormulaHelper" or something.
 
-        public static int LockPickChance(LLCObject chest) // As usual, these are fairly placeholder values, but I think for now it's not too bad for what it is.
+        public static int LockPickChance(LLCObject chest) // Still not entirely happy with the current form here, but I think it's alot better than the first draft atleast, so fine for now, I think.
         {
-            // Next I work on this, I'm going to have to mess around with this so it feels like lock-picking skill gives better odds alone depending on lock complexity.
-            // Like possibly use some if-else statements to check the different between lock-picking skill and lock complexity or something, then have the other values modify those odds somehow? Will see.
+            int lockComp = chest.LockComplexity;
+            int lockP = Player.Skills.GetLiveSkillValue(DFCareer.Skills.Lockpicking);
+            int pickP = Mathf.Clamp((int)Mathf.Round(Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket) / 10), 0, 11);
+            int intel = Player.Stats.LiveIntelligence - 50;
+            int agili = Player.Stats.LiveAgility - 50;
+            int speed = Player.Stats.LiveSpeed - 50;
+            int luck = Player.Stats.LiveLuck - 50;
+            float successChance = 0f;
 
-            float lockDiff = (float)chest.LockComplexity * -1;
-            int lockP = Mathf.Clamp((int)Mathf.Round(Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket) * 1.65f), 0, 300);
-            int pickP = Mathf.Clamp((int)Mathf.Round(Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket) / 10), 0, 20);
-            int intel = (Player.Stats.LiveIntelligence - 50);
-            int agili = (Player.Stats.LiveAgility - 50);
-            int speed = (Player.Stats.LiveSpeed - 50);
-            int luck = (Player.Stats.LiveLuck - 50);
-
-            float finalValue = lockDiff + lockP + pickP + Mathf.Round(intel * .4f) + Mathf.Round(agili * .7f) + Mathf.Round(speed * .15f) + Mathf.Round(luck * .25f);
-
-            return (int)Mathf.Round(Mathf.Clamp(finalValue, 1f, 98f)); // Potentially add specific text depending on initial odds, like "Through dumb-luck, you somehow unlocked it", etc.
+            if (lockComp >= 0 && lockComp <= 19)
+            {
+                lockP = (int)Mathf.Ceil(lockP * 1.6f);
+                successChance = lockComp + lockP + pickP + Mathf.Round(intel * .3f) + Mathf.Round(agili * 1.1f) + Mathf.Round(speed * .35f) + Mathf.Round(luck * .30f);
+                return (int)Mathf.Round(Mathf.Clamp(successChance, 15f, 100f));
+            }
+            else if (lockComp >= 20 && lockComp <= 39)
+            {
+                lockP = (int)Mathf.Ceil(lockP * 1.7f);
+                successChance = lockComp + lockP + pickP + Mathf.Round(intel * .4f) + Mathf.Round(agili * 1f) + Mathf.Round(speed * .30f) + Mathf.Round(luck * .30f);
+                return (int)Mathf.Round(Mathf.Clamp(successChance, 10f, 100f));
+            }
+            else if (lockComp >= 40 && lockComp <= 59)
+            {
+                lockP = (int)Mathf.Ceil(lockP * 1.8f);
+                successChance = lockComp + lockP + pickP + Mathf.Round(intel * .5f) + Mathf.Round(agili * .9f) + Mathf.Round(speed * .25f) + Mathf.Round(luck * .30f);
+                return (int)Mathf.Round(Mathf.Clamp(successChance, 7f, 95f));
+            }
+            else if (lockComp >= 60 && lockComp <= 79)
+            {
+                lockP = (int)Mathf.Ceil(lockP * 1.9f);
+                successChance = lockComp + lockP + pickP + Mathf.Round(intel * .6f) + Mathf.Round(agili * .8f) + Mathf.Round(speed * .20f) + Mathf.Round(luck * .30f);
+                return (int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f));
+            }
+            else
+            {
+                lockP = (int)Mathf.Ceil(lockP * 2f);
+                successChance = lockComp + lockP + pickP + Mathf.Round(intel * .7f) + Mathf.Round(agili * .7f) + Mathf.Round(speed * .15f) + Mathf.Round(luck * .30f);
+                return (int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)); // Potentially add specific text depending on initial odds, like "Through dumb-luck, you somehow unlocked it", etc.
+            }
         }
 
         // Consider adding these to their own script called like, "LLCFormulaHelper" or something.
