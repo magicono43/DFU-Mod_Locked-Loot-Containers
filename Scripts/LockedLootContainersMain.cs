@@ -184,24 +184,25 @@ namespace LockedLootContainers
                         Transform closedChestTransform = ChestObjRef.transform;
                         Vector3 pos = ChestObjRef.transform.position;
 
-                        if (Dice100.SuccessRoll(LockPickChance(closedChestData)))
+                        if (Dice100.SuccessRoll(LockPickChance(closedChestData))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                         {
-                            // Now that I have the basic lock-pick formula, next time I work on this I suppose I should work on the actual logic for what happens from failure/success on the chest, etc.
-                            // Do stuff here.
+                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                            Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                            ChestObjRef = null;
+
+                            // Show success and play unlock sound
+                            DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
+                            DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                            if (dfAudioSource != null)
+                                dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
                         }
-
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                        Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                        ChestObjRef = null;
-
-                        // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
-                        DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
-                        if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+                        else // Next I work on this, I think the primary stuff will be the "failure" part of lock-picking, stuff like counting up the "times attempted" counter and other stuff, etc.
+                        {
+                            // Possibly play different sound on failed pick attempt, and even when the lock gets jammed from a pick attempted, etc.
+                        }
                     }
                     else
                     {
