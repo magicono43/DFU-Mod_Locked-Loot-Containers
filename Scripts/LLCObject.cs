@@ -37,7 +37,9 @@ namespace LockedLootContainers
         int jamResist = 1;
 
         int picksAttempted = 0;
-        int bashesAttempted = 0;
+        int totalBashesAttempted = 0;
+        int lockBashedTimes = 0;
+        int chestBashedTimes = 0;
 
         int trapAmount = 0;
         int trapType = 0; // May eventually if possibly to have more than 1 trap on a chest, that this would be better as an array/list of the effects attached kind of like spell-bundle arrays.
@@ -171,10 +173,22 @@ namespace LockedLootContainers
             set { picksAttempted = value; }
         }
 
-        public int BashesAttempted
+        public int TotalBashesAttempted
         {
-            get { return bashesAttempted; }
-            set { bashesAttempted = value; }
+            get { return totalBashesAttempted; }
+            set { totalBashesAttempted = value; }
+        }
+
+        public int LockBashedTimes
+        {
+            get { return lockBashedTimes; }
+            set { lockBashedTimes = value; }
+        }
+
+        public int ChestBashedTimes
+        {
+            get { return chestBashedTimes; }
+            set { chestBashedTimes = value; }
         }
 
         public int TrapAmount

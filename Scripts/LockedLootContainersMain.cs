@@ -113,11 +113,37 @@ namespace LockedLootContainers
 
         private static void AttemptMeleeChestBash(LLCObject chest, DaggerfallUnityItem weapon) // May eventually put this in LLCObject itself, but for now just keep it here with everything else.
         {
+            // Now that I have the lock-pick and lock-jamming things in an alright place, I think next I'll try working on the similar logic and formula for bashing with melee weapons atleast, etc.
             if (chest != null)
             {
                 ItemCollection closedChestLoot = chest.AttachedLoot;
                 Transform closedChestTransform = chest.gameObject.transform; // Not sure if the explicit "gameObject" reference is necessary, will test eventually and determine if so or not.
                 Vector3 pos = chest.gameObject.transform.position;
+                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+
+                chest.HasBeenBashed = true; // Sets "HasBeenBashed" flag to true.
+                chest.TotalBashesAttempted++; // Increase bashes attempted counter by 1 on the chest.
+
+                if (BashLockRoll(chest, weapon))
+                {
+                    chest.LockBashedTimes++;
+                    if (BreakLockRoll(chest, weapon))
+                    {
+                        // Lock was hit with bash and is now broken, so chest loot is accessible.
+                        if (dfAudioSource != null)
+                            dfAudioSource.PlayOneShot(SoundClips.Parry1); // Will use custom sounds in the end most likely.
+                    }
+                    else
+                    {
+                        // Lock was hit with bash, but is still intact.
+                        if (dfAudioSource != null)
+                            dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                    }
+                }
+                else
+                {
+                    // Do stuff for hitting the chest body instead.
+                }
 
                 DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
                 openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
@@ -127,7 +153,6 @@ namespace LockedLootContainers
 
                 // Show success and play unlock sound
                 DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f);
-                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
                 if (dfAudioSource != null)
                     dfAudioSource.PlayOneShot(SoundClips.PlayerDoorBash); // Might change this later to emit sound from chest audiosource itself instead of player's?
             }
@@ -177,14 +202,21 @@ namespace LockedLootContainers
                     }
                     break;
                 case PlayerActivateModes.Steal: // Attempt To Lock-pick Chest
-                    if (ChestObjRef != null)
+                    if (ChestObjRef != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
                     {
                         LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
+                        DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
                         ItemCollection closedChestLoot = closedChestData.AttachedLoot;
                         Transform closedChestTransform = ChestObjRef.transform;
                         Vector3 pos = ChestObjRef.transform.position;
 
-                        if (Dice100.SuccessRoll(LockPickChance(closedChestData))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                        if (closedChestData.IsLockJammed)
+                        {
+                            DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
+                            if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                                dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
+                        }
+                        else if (Dice100.SuccessRoll(LockPickChance(closedChestData))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                         {
                             DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
                             openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
@@ -195,13 +227,25 @@ namespace LockedLootContainers
 
                             // Show success and play unlock sound
                             DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
-                            DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
-                            if (dfAudioSource != null)
-                                dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+                            if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                                dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
                         }
-                        else // Next I work on this, I think the primary stuff will be the "failure" part of lock-picking, stuff like counting up the "times attempted" counter and other stuff, etc.
+                        else
                         {
-                            // Possibly play different sound on failed pick attempt, and even when the lock gets jammed from a pick attempted, etc.
+                            closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                            if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
+                            {
+                                closedChestData.IsLockJammed = true;
+                                DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
+                                if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                                    dfAudioSource.PlayOneShot(SoundClips.ActivateGrind); // Will use custom sounds in the end most likely.
+                            }
+                            else
+                            {
+                                DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
+                                if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                                    dfAudioSource.PlayOneShot(SoundClips.ActivateGears); // Will use custom sounds in the end most likely.
+                            }
                         }
                     }
                     else
@@ -295,25 +339,51 @@ namespace LockedLootContainers
             {
                 sender.CloseWindow();
 
-                if (ChestObjRef != null)
+                if (ChestObjRef != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
                 {
                     LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
+                    DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
                     ItemCollection closedChestLoot = closedChestData.AttachedLoot;
                     Transform closedChestTransform = ChestObjRef.transform;
                     Vector3 pos = ChestObjRef.transform.position;
 
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
-                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
-                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                    if (closedChestData.IsLockJammed)
+                    {
+                        DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
+                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                            dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
+                    }
+                    else if (Dice100.SuccessRoll(LockPickChance(closedChestData))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                    {
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
-                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                    ChestObjRef = null;
+                        Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                        ChestObjRef = null;
 
-                    // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
-                    DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
-                    if (dfAudioSource != null)
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock);
+                        // Show success and play unlock sound
+                        DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
+                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                            dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                    }
+                    else
+                    {
+                        closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                        if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
+                        {
+                            closedChestData.IsLockJammed = true;
+                            DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
+                            if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                                dfAudioSource.PlayOneShot(SoundClips.ActivateGrind); // Will use custom sounds in the end most likely.
+                        }
+                        else
+                        {
+                            DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
+                            if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                                dfAudioSource.PlayOneShot(SoundClips.ActivateGears); // Will use custom sounds in the end most likely.
+                        }
+                    }
                 }
                 else
                 {
@@ -375,6 +445,41 @@ namespace LockedLootContainers
                 successChance = lockComp + lockP + pickP + Mathf.Round(intel * .7f) + Mathf.Round(agili * .7f) + Mathf.Round(speed * .15f) + Mathf.Round(luck * .30f);
                 return (int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)); // Potentially add specific text depending on initial odds, like "Through dumb-luck, you somehow unlocked it", etc.
             }
+        }
+
+        public static int LockJamChance(LLCObject chest) // Will have to test this out, but I think I'm fairly satisfied with the formula so far.
+        {
+            float jamResist = (float)chest.JamResist / 100f;
+            float resistMod = (jamResist - 1f) * -1f;
+            int luck = (int)Mathf.Round((Player.Stats.LiveLuck - 50) / 5f);
+
+            float jamChance = (int)Mathf.Ceil(chest.PicksAttempted * (UnityEngine.Random.Range(14, 26) - luck) * resistMod);
+            return (int)Mathf.Round(Mathf.Clamp(jamChance, 5f, 95f));
+        }
+
+        public static bool BashLockRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if a bash attempt hit the lock or the chest body instead.
+        {
+            int wepSkill = Player.Skills.GetLiveSkillValue(weapon.GetWeaponSkillIDAsShort()); // Might add accuracy modifier for weapon type, but for now just keep it more simple.
+            int willp = Player.Stats.LiveWillpower - 50; // I sort of see willpower as a very generic sort of thing like a more vague "Perception" attribute in some ways. So for now just include it here.
+            int agili = Player.Stats.LiveAgility - 50;
+            int speed = Player.Stats.LiveSpeed - 50;
+            int luck = Player.Stats.LiveLuck - 50;
+
+            float accuracyCheck = Mathf.Round(wepSkill / 4) + Mathf.Round(willp * .2f) + Mathf.Round(agili * .5f) + Mathf.Round(speed * .1f) + Mathf.Round(luck * .3f);
+
+            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(accuracyCheck, 5f, 70f))))
+                return true;
+            else
+                return false;
+        }
+
+        public static bool BreakLockRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed lock breaks or not this attempt, granting full access to loot.
+        {
+            // Will work on this next time most likely. Idea being if the lock is broken open you are given access with relatively little penalty to the chest contents, but still effected
+            // by how many times the chest was hit previously. However, breaking the chest body open will cause significantly more damage to the contents than breaking the lock off instead, generally.
+            // Many factors will effect this roll, including player strength, weapon used, lock material/stability, and how many times the lock has already been hit, and other factors.
+
+            return false;
         }
 
         // Consider adding these to their own script called like, "LLCFormulaHelper" or something.
