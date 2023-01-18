@@ -122,11 +122,18 @@ namespace LockedLootContainers
                 DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
 
                 chest.HasBeenBashed = true; // Sets "HasBeenBashed" flag to true.
-                chest.TotalBashesAttempted++; // Increase bashes attempted counter by 1 on the chest.
 
                 if (BashLockRoll(chest, weapon))
                 {
-                    chest.LockBashedTimes++;
+                    if (LockHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
+                    {
+                        // Hard Bash, increase counter and such.
+                    }
+                    else
+                    {
+                        // Light Bash, increase counter and such.
+                    }
+
                     if (BreakLockRoll(chest, weapon))
                     {
                         // Lock was hit with bash and is now broken, so chest loot is accessible.
@@ -473,13 +480,122 @@ namespace LockedLootContainers
                 return false;
         }
 
+        public static bool LockHardBashRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed lock was hit hard or lightly, I.E. Effectively or not very effectively.
+        {
+            int stren = Player.Stats.LiveStrength - 50;
+            int endur = Player.Stats.LiveEndurance - 50;
+            int luck = Player.Stats.LiveLuck - 50;
+            int lockMat = lockMaterialToDaggerfallValue(chest.LockMaterial);
+            int weapMat = (weapon != null) ? weapon.NativeMaterialValue : -1;
+            int matDiff = weapMat - lockMat;
+            int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
+            float hardBashChance = 0f;
+
+            // Continue work on this next time. Not sure if I'll do the various other logic outside of the rolls in this method or just have this roll the single bool, then do that other stuff later,
+            // possibly making this do an "out" return values for the other things, but will see, for stuff like damaging health, fatigue, weapon durability, other stuff and such, etc.
+
+            if (wepSkillID == (int)DFCareer.Skills.HandToHand) // Checks if the "weapon" being used is the player's fists.
+            {
+                // This will be heavily against the use of your fists, but still possible in some cases, but generally unlikely to succeed.
+                return false;
+            }
+            else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well, but just this for now.
+            {
+                // Player strength will matter more here than material, but weight of the weapon will likely be the factor over material, unlike with bladed weapon types.
+                return false;
+            }
+            else // For all non-blunt weapons for now.
+            {
+                hardBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(stren / 10f)) * 10f) + (int)Mathf.Round(luck / 5f) + 30f); // Just for now, will have to see through testing if this needs work.
+
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 2f, 97f))))
+                    return true;
+                else
+                    return false;
+            }
+        }
+
         public static bool BreakLockRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed lock breaks or not this attempt, granting full access to loot.
         {
+            // Possibly have different types of bash attempts, "Heavy" and "Light" or something based on weapon material compared to chest material and strength, etc.
             // Will work on this next time most likely. Idea being if the lock is broken open you are given access with relatively little penalty to the chest contents, but still effected
             // by how many times the chest was hit previously. However, breaking the chest body open will cause significantly more damage to the contents than breaking the lock off instead, generally.
             // Many factors will effect this roll, including player strength, weapon used, lock material/stability, and how many times the lock has already been hit, and other factors.
 
             return false;
+        }
+
+        public static int daggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.
+        {
+            switch ((WeaponMaterialTypes)nativeMaterialValue)
+            {
+                default:
+                case WeaponMaterialTypes.Iron:
+                    return 0;
+                case WeaponMaterialTypes.Steel:
+                case WeaponMaterialTypes.Silver:
+                    return 1;
+                case WeaponMaterialTypes.Elven:
+                case WeaponMaterialTypes.Dwarven:
+                    return 2;
+                case WeaponMaterialTypes.Mithril:
+                    return 3;
+                case WeaponMaterialTypes.Adamantium:
+                case WeaponMaterialTypes.Ebony:
+                    return 4;
+                case WeaponMaterialTypes.Orcish:
+                    return 5;
+                case WeaponMaterialTypes.Daedric:
+                    return 6;
+            }
+        }
+
+        public static int chestMaterialToDaggerfallValue(ChestMaterials chestMat)
+        {
+            switch (chestMat)
+            {
+                default:
+                case ChestMaterials.Wood:
+                    return -1;
+                case ChestMaterials.Iron:
+                    return 0;
+                case ChestMaterials.Steel:
+                    return 1;
+                case ChestMaterials.Orcish:
+                    return 5;
+                case ChestMaterials.Mithril:
+                    return 3;
+                case ChestMaterials.Dwarven:
+                    return 2;
+                case ChestMaterials.Adamantium:
+                    return 4;
+                case ChestMaterials.Daedric:
+                    return 6;
+            }
+        }
+
+        public static int lockMaterialToDaggerfallValue(LockMaterials lockMat)
+        {
+            switch (lockMat)
+            {
+                default:
+                case LockMaterials.Wood:
+                    return -1;
+                case LockMaterials.Iron:
+                    return 0;
+                case LockMaterials.Steel:
+                    return 1;
+                case LockMaterials.Orcish:
+                    return 5;
+                case LockMaterials.Mithril:
+                    return 3;
+                case LockMaterials.Dwarven:
+                    return 2;
+                case LockMaterials.Adamantium:
+                    return 4;
+                case LockMaterials.Daedric:
+                    return 6;
+            }
         }
 
         // Consider adding these to their own script called like, "LLCFormulaHelper" or something.
