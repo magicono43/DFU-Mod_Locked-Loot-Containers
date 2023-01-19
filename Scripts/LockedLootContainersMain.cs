@@ -127,6 +127,7 @@ namespace LockedLootContainers
                 {
                     if (LockHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
                     {
+                        // Next time I work on this, work on this part, as well as the actual formula for if the lock should break and such, maybe after the stuff for hitting the chest itself, will see.
                         // Hard Bash, increase counter and such.
                     }
                     else
@@ -491,27 +492,72 @@ namespace LockedLootContainers
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
             float hardBashChance = 0f;
 
-            // Continue work on this next time. Not sure if I'll do the various other logic outside of the rolls in this method or just have this roll the single bool, then do that other stuff later,
+            // I think I'll work on the other "logic/work" parts of this particular action at some other point, and move onto some more of the lock breaking specific formula next instead, so WIP here.
+            // Not sure if I'll do the various other logic outside of the rolls in this method or just have this roll the single bool, then do that other stuff later,
             // possibly making this do an "out" return values for the other things, but will see, for stuff like damaging health, fatigue, weapon durability, other stuff and such, etc.
 
             if (wepSkillID == (int)DFCareer.Skills.HandToHand) // Checks if the "weapon" being used is the player's fists.
             {
-                // This will be heavily against the use of your fists, but still possible in some cases, but generally unlikely to succeed.
-                return false;
+                if (lockMat < 0) // If lock is made of wood
+                {
+                    hardBashChance = Mathf.Round(stren + (int)Mathf.Round(luck / 5f) + 30f);
+
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 5f, 85f))))
+                        return true;
+                    else
+                        return false;
+                }
+                else // If lock is made from any metal
+                {
+                    hardBashChance = Mathf.Round(stren + (int)Mathf.Round(luck / 5f) + 5f);
+
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 1f, 60f))))
+                        return true;
+                    else
+                        return false;
+                }
             }
             else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well, but just this for now.
             {
-                // Player strength will matter more here than material, but weight of the weapon will likely be the factor over material, unlike with bladed weapon types.
-                return false;
+                if (lockMat < 0) // If lock is made of wood
+                {
+                    hardBashChance = Mathf.Round((int)Mathf.Round(Mathf.Clamp(weapon.weightInKg - 2f, 0.75f, 20f) / (0.6f - (stren / 100f))) + (int)Mathf.Round(luck / 5f) + 40f);
+
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 10f, 100f))))
+                        return true;
+                    else
+                        return false;
+                }
+                else // If lock is made from any metal
+                {
+                    hardBashChance = Mathf.Round((int)Mathf.Round(Mathf.Clamp(weapon.weightInKg - 2f, 0.75f, 20f) / (0.6f - (stren / 100f))) + (int)Mathf.Round(luck / 5f) + 5f);
+
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 2f, 97f))))
+                        return true;
+                    else
+                        return false;
+                }
             }
             else // For all non-blunt weapons for now.
             {
-                hardBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(stren / 10f)) * 10f) + (int)Mathf.Round(luck / 5f) + 30f); // Just for now, will have to see through testing if this needs work.
+                if (lockMat < 0) // If lock is made of wood
+                {
+                    hardBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(stren / 10f)) * 10f) + (int)Mathf.Round(luck / 5f) + 40f); // Just for now, will have to see through testing if this needs work.
 
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 2f, 97f))))
-                    return true;
-                else
-                    return false;
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 10f, 100f))))
+                        return true;
+                    else
+                        return false;
+                }
+                else // If lock is made from any metal
+                {
+                    hardBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(stren / 10f)) * 10f) + (int)Mathf.Round(luck / 5f) + 30f); // Just for now, will have to see through testing if this needs work.
+
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 2f, 97f))))
+                        return true;
+                    else
+                        return false;
+                }
             }
         }
 
