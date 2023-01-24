@@ -764,13 +764,13 @@ namespace LockedLootContainers
         public static void ApplyBashingCostLogic(LLCObject chest, DaggerfallUnityItem weapon, bool hitLock = false, bool hitWood = false, bool hardBash = false, int matDiff = -100) // Applies vitals damage to player and the weapon used during bash attempt.
         {
             // Will have to consider later when doing the stuff for "bashing" with the bow, I.E. shooting arrows at a chest, and how to deal with that stuff, possibly different method entirely.
+            int stren = Player.Stats.LiveStrength - 50;
             int willp = Player.Stats.LiveWillpower - 50;
             int endur = Player.Stats.LiveEndurance - 50;
             int luck = Player.Stats.LiveLuck - 50;
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
             int wepSkill = Player.Skills.GetLiveSkillValue(wepSkillID);
-            float lockHitMod = (hitLock) ? 0.6f : 1.0f;
-            float hardHitMod = (hardBash) ? 1.0f : 0.35f;
+            float bashHitMod = 1f;
             float healthDam = 0f;
             float fatigueDam = 0f;
             float weaponDam = 0f;
@@ -778,34 +778,78 @@ namespace LockedLootContainers
             if (chest == null)
                 return;
 
+            if (hitLock && hardBash) { bashHitMod = 0.6f; } // Math was confusing me on how to combine these values together for some reason, so just doing this weird if-else chain here instead, for now.
+            else if (hitLock && !hardBash) { bashHitMod = 0.25f; }
+            else if (!hitLock && hardBash) { bashHitMod = 1f; }
+            else { bashHitMod = 0.4f; }
+
             if (weapon == null && wepSkillID == (short)DFCareer.Skills.HandToHand) // If player is bashing chest with their bare fists
             {
-                if (hitWood)
+                if (hitWood) // Hitting either wooden lock or chest body with bare fists
                 {
-                    float rolledHpPercent = Mathf.Clamp(UnityEngine.Random.Range(1, 5 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f)), 1, 25);
-                    healthDam = Mathf.Clamp((int)Mathf.Floor(Player.MaxHealth * rolledHpPercent), 1, 1000);
+                    float rolledHpPercent = Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.Round(5 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                    healthDam = Mathf.Max(1, (int)Mathf.Floor(Player.MaxHealth * (rolledHpPercent / 100f)));
                     healthDam = (Player.CurrentHealth - healthDam < Mathf.Ceil(Player.MaxHealth * 0.4f)) ? Mathf.Max(0, Player.CurrentHealth - (Player.MaxHealth * 0.4f)) : healthDam;
 
                     if (healthDam > 0)
                     {
-                        // Damage Player Health, nex time start from here probably.
-                        // Afterward Damage Player Fatigue, But At Reduced Rate Since Health Also Went Down. Currently could be abused by something like the "Health Regen" trait, but whatever for now.
+                        float rolledFatiguePercent = Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.Round(5 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                        fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.01f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                        fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                        Player.DecreaseHealth((int)healthDam); // Currently could be abused by something like the "Health Regen" trait, but whatever for now.
+                        Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
                     }
-                    else
+                    else // Since player health is currently at "minimum" level that bashing with fists can reduce it, health is not damaged, but instead fatigue damage is multiplied alot as a cost.
                     {
-                        // Since player health is currently at "minimum" level that bashing with fists can reduce it, health is not damaged, but instead fatigue damage is multiplied alot as a cost
+                        float rolledFatiguePercent = Mathf.Max(3, UnityEngine.Random.Range(3, Mathf.Round(16 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                        fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.03f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                        fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                        Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
                     }
-
-                    Player.DecreaseHealth((int)healthDam);
                 }
-                else
+                else // Hitting either metal lock or chest body with bare fists
                 {
+                    float rolledHpPercent = Mathf.Max(3, UnityEngine.Random.Range(3, Mathf.Round(11 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                    healthDam = Mathf.Max(1, (int)Mathf.Floor(Player.MaxHealth * (rolledHpPercent / 100f)));
+                    healthDam = (Player.CurrentHealth - healthDam < Mathf.Ceil(Player.MaxHealth * 0.4f)) ? Mathf.Max(0, Player.CurrentHealth - (Player.MaxHealth * 0.4f)) : healthDam;
 
+                    if (healthDam > 0)
+                    {
+                        float rolledFatiguePercent = Mathf.Max(3, UnityEngine.Random.Range(3, Mathf.Round(11 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                        fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.03f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                        fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                        Player.DecreaseHealth((int)healthDam); // Currently could be abused by something like the "Health Regen" trait, but whatever for now.
+                        Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    }
+                    else // Since player health is currently at "minimum" level that bashing with fists can reduce it, health is not damaged, but instead fatigue damage is multiplied alot as a cost.
+                    {
+                        float rolledFatiguePercent = Mathf.Max(7, UnityEngine.Random.Range(7, Mathf.Round(25 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                        fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.07f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                        fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                        Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    }
                 }
             }
             else if (weapon != null && wepSkillID == (short)DFCareer.Skills.BluntWeapon) // If player is bashing chest with a blunt type weapon
             {
+                if (hitWood) // Hitting either wooden lock or chest body with a blunt type weapon
+                {
+                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, 4 + (int)Mathf.Round((stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + (int)Mathf.Round(luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
+                    float rolledFatiguePercent = Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.Round(3 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.01f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
+                    Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    // Damage Used Weapon Logic Here? I'll work on this part next I work on this, and continue from here, need to damage the weapon and other logic like when to unequip if it breaks, etc.
+                }
+                else // Hitting either metal lock or chest body with a blunt type weapon
+                {
+
+                }
             }
             else if (weapon != null) // If player is bashing chest with any other types of weapons (in this case all the bladed ones)
             {
