@@ -51,6 +51,18 @@ namespace LockedLootContainers
     }
 
     /// <summary>
+    /// Used to characterize individual item and item groups into different levels of "sturdiness", basically to determine how bashing a chest damages said items and to what degree.
+    /// </summary>
+    public enum LootItemSturdiness
+    {
+        Very_Fragile = 0,
+        Fragile = 1,
+        Solid = 2,
+        Resilient = 3,
+        Unbreakable = 4,
+    }
+
+    /// <summary>
     /// The vanilla item groups that this mod will be checking for and caring about during loot generation, share the same values with the vanilla groups to be used later on.
     /// </summary>
     public enum ChestLootItemGroups

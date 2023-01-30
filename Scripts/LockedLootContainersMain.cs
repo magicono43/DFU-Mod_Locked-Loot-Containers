@@ -769,14 +769,15 @@ namespace LockedLootContainers
             int endur = Player.Stats.LiveEndurance - 50;
             int luck = Player.Stats.LiveLuck - 50;
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
-            int wepSkill = Player.Skills.GetLiveSkillValue(wepSkillID);
+            int wepSkill = Player.Skills.GetLiveSkillValue(wepSkillID); // Have not used this value yet, nor "matDiff" will see if I eventually do or not later.
             float bashHitMod = 1f;
             float healthDam = 0f;
             float fatigueDam = 0f;
-            float weaponDam = 0f;
 
             if (chest == null)
                 return;
+
+            BashingDamageLootContents(chest, weapon, wepSkillID, hitLock, hitWood, hardBash, matDiff);
 
             if (hitLock && hardBash) { bashHitMod = 0.6f; } // Math was confusing me on how to combine these values together for some reason, so just doing this weird if-else chain here instead, for now.
             else if (hitLock && !hardBash) { bashHitMod = 0.25f; }
@@ -844,26 +845,295 @@ namespace LockedLootContainers
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
-                    // Damage Used Weapon Logic Here? I'll work on this part next I work on this, and continue from here, need to damage the weapon and other logic like when to unequip if it breaks, etc.
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
                 }
                 else // Hitting either metal lock or chest body with a blunt type weapon
+                {
+                    float rolledWepDamPercent = Mathf.Max(3, UnityEngine.Random.Range(3, 6 + (int)Mathf.Round((stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + (int)Mathf.Round(luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
+                    float rolledFatiguePercent = Mathf.Max(4, UnityEngine.Random.Range(4, Mathf.Round(10 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.04f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                    Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                }
+            }
+            else if (weapon != null) // If player is bashing chest with any other types of weapons (in this case all the bladed ones)
+            {
+                if (hitWood) // Hitting either wooden lock or chest body with a bladed type weapon
+                {
+                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, 4 + (int)Mathf.Round((stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + (int)Mathf.Round(luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
+                    rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (1 + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (1 + chest.LockSturdiness / 300f));
+                    float rolledFatiguePercent = Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.Round(3 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.01f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                    Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                }
+                else // Hitting either metal lock or chest body with a bladed type weapon
+                {
+                    float rolledWepDamPercent = Mathf.Max(3, UnityEngine.Random.Range(3, 6 + (int)Mathf.Round((stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + (int)Mathf.Round(luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
+                    rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (1 + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (1 + chest.LockSturdiness / 300f));
+                    float rolledFatiguePercent = Mathf.Max(2, UnityEngine.Random.Range(2, Mathf.Round(8 + (int)Mathf.Round(endur / -10f) + (int)Mathf.Round(willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
+
+                    Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                }
+            }
+            else // Catch any other edge cases here
+            {
+                return;
+            }
+        }
+
+        public static void BashingDamageLootContents(LLCObject chest, DaggerfallUnityItem weapon, int wepSkillID, bool hitLock, bool hitWood, bool hardBash, int matDiff)
+        {
+            int luck = Player.Stats.LiveLuck - 50;
+            int initialItemCount = chest.AttachedLoot.Count;
+
+            if (weapon == null && wepSkillID == (short)DFCareer.Skills.HandToHand) // If player is bashing chest with their bare fists
+            {
+                if (hitLock)
+                {
+                    if (hardBash)
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i); // Hmm, this will almost definitely cause an "Index out of range" error, so I'll have to consider how to solve that issue.
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(20 + (int)Mathf.Round(luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    if (hardBash)
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i); // Hmm, this will almost definitely cause an "Index out of range" error, so I'll have to consider how to solve that issue.
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(45 + (int)Mathf.Round(luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(20 + (int)Mathf.Round(luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(5 + (int)Mathf.Round(luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+            else if (weapon != null && wepSkillID == (short)DFCareer.Skills.BluntWeapon) // If player is bashing chest with a blunt type weapon
+            {
+                if (hitLock)
+                {
+
+                }
+                else
                 {
 
                 }
             }
             else if (weapon != null) // If player is bashing chest with any other types of weapons (in this case all the bladed ones)
             {
+                if (hitLock)
+                {
 
+                }
+                else
+                {
+
+                }
             }
-            else // Catch any other edge cases here
+            else
             {
                 return;
             }
 
-            // Next time I work on this, maybe I'll decide how I'll do the logic for damaging player, health, fatigue, weapon durability, etc from the actions of bashing a chest/lock.
-            // Do that, or either work on the condition damage stuff for the actual content of the chest from bashing and such. Probably will do the other logic for damaging player first though, etc.
+            // Next I work on this add variables I will need like chest object and other stuff to properly go through chest loot contents and do stuff to all of it depending on various factors, etc.
+
+            // Guess will just have this here for now, might have bashing the lock only potentially damage certain things like potions and delicate stuff?
+            // Guess will just have this here for now, likely most loot damage will be when hitting the "body" of the chest like in this case, will see.
+
+            // Work on the condition damage stuff for the actual content of the chest from bashing and such. Probably will do the other logic for damaging player first though, etc.
             // Idea being if the lock is broken open you are given access with relatively little penalty to the chest contents, but still effected by how many times the chest was hit previously.
             // However, breaking the chest body open will cause significantly more damage to the contents than breaking the lock off instead, generally.
+        }
+
+        public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
+        {
+            if (chest == null || item == null)
+                return false;
+
+            if ((item.ItemGroup == ItemGroups.Weapons && item.TemplateIndex != (int)Weapons.Arrow) || item.ItemGroup == ItemGroups.Armor)
+            {
+
+            }
+            else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing)
+            {
+                float conditionMod = (float)UnityEngine.Random.Range(5, 16) / 100f;
+
+                item.currentCondition = (int)(item.maxCondition * conditionMod); // Check math first here to make sure.
+                // Continue work on this next time, so certain items take durability damage instead of being destroyed outright, but have to add the extra logic for that here.
+            }
+
+            if (item.IsAStack())
+            {
+                int breakNum = UnityEngine.Random.Range(1, item.stackCount + 1);
+                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                wasteItem.stackCount = breakNum;
+                chest.AttachedLoot.AddItem(wasteItem);
+
+                if (breakNum < item.stackCount)
+                {
+                    item.stackCount -= breakNum;
+                    return false;
+                }
+                else
+                {
+                    chest.AttachedLoot.RemoveItem(item);
+                    return true;
+                }
+            }
+            else
+            {
+                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                chest.AttachedLoot.AddItem(wasteItem);
+                chest.AttachedLoot.RemoveItem(item);
+
+                return true;
+            }
+        }
+
+        public static LootItemSturdiness DetermineLootItemSturdiness(DaggerfallUnityItem item)
+        {
+            if (item.TemplateIndex >= 0 && item.TemplateIndex <= 511) // Vanilla Item Templates
+            {
+                switch(item.ItemGroup)
+                {
+                    case ItemGroups.UselessItems1:
+                        return LootItemSturdiness.Very_Fragile;
+                    case ItemGroups.Drugs:
+                    case ItemGroups.MensClothing:
+                    case ItemGroups.Books:
+                    case ItemGroups.UselessItems2:
+                    case ItemGroups.ReligiousItems:
+                    case ItemGroups.Maps:
+                    case ItemGroups.WomensClothing:
+                    case ItemGroups.Paintings:
+                    case ItemGroups.PlantIngredients1:
+                    case ItemGroups.PlantIngredients2:
+                    case ItemGroups.MiscellaneousIngredients1:
+                    case ItemGroups.Jewellery:
+                    case ItemGroups.MiscItems:
+                        return LootItemSturdiness.Fragile;
+                    case ItemGroups.Weapons:
+                    case ItemGroups.Gems:
+                    case ItemGroups.CreatureIngredients1:
+                    case ItemGroups.CreatureIngredients2:
+                    case ItemGroups.CreatureIngredients3:
+                    case ItemGroups.MetalIngredients:
+                    case ItemGroups.MiscellaneousIngredients2:
+                    case ItemGroups.Currency:
+                    default:
+                        return LootItemSturdiness.Solid;
+                    case ItemGroups.Armor:
+                        return LootItemSturdiness.Resilient;
+                }
+            }
+            else // Modded Item Templates
+            {
+                return LootItemSturdiness.Unbreakable; // Will change eventually, placeholder value for now.
+            }
+        }
+
+        public static DaggerfallUnityItem DetermineDestroyedLootRefuseType(DaggerfallUnityItem item) // Obviously need to add these custom "Junk Items" in at some point.
+        {
+            if (item.TemplateIndex >= 0 && item.TemplateIndex <= 511) // Vanilla Item Templates
+            {
+                switch (item.ItemGroup)
+                {
+                    case ItemGroups.UselessItems1:
+                        if (item.IsPotion) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); } // "Glass Fragments" custom item
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); }
+                    case ItemGroups.Armor:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); // "(Material) Scraps" custom item
+                    case ItemGroups.Weapons:
+                        if (item.TemplateIndex == (int)Weapons.Arrow) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42329); } // "Broken Arrow" custom item
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); }
+                    case ItemGroups.MensClothing:
+                    case ItemGroups.WomensClothing:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); // "Tattered Cloth" custom item
+                    case ItemGroups.Books:
+                    case ItemGroups.Maps:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); // "Paper Shreds" custom item
+                    case ItemGroups.UselessItems2:
+                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); }
+                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); }
+                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); }
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); }
+                    case ItemGroups.Gems:
+                    case ItemGroups.MiscellaneousIngredients2:
+                    case ItemGroups.MetalIngredients:
+                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); } // "Ivory Fragments" custom item
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); } // "Shiny Rubble" custom item
+                    case ItemGroups.Drugs:
+                    case ItemGroups.PlantIngredients1:
+                    case ItemGroups.PlantIngredients2:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42424); // "Clump of Plant Matter" custom item
+                    case ItemGroups.MiscellaneousIngredients1:
+                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); }
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); }
+                    case ItemGroups.CreatureIngredients1:
+                    case ItemGroups.CreatureIngredients2:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); // "Glob of Gore" custom item
+                    case ItemGroups.CreatureIngredients3:
+                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); }
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); }
+                    case ItemGroups.Jewellery:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 24242); // "Destroyed Jewelry" custom item
+                    case ItemGroups.MiscItems:
+                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); }
+                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); }
+                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); }
+                    case ItemGroups.Currency:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91191); // "Ruined Coins" custom item
+                    default:
+                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); // "Useless Refuse" custom item
+                }
+            }
+            else // Modded Item Templates
+            {
+                return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); // "Useless Refuse" custom item?
+            }
         }
 
         public static int daggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.
