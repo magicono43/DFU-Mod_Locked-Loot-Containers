@@ -8,7 +8,6 @@ using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Collections.Generic;
 using System;
 using DaggerfallWorkshop.Game.Utility;
