@@ -4,6 +4,7 @@ using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Utility;
+using DaggerfallWorkshop.Game.MagicAndEffects;
 
 namespace LockedLootContainers
 {
@@ -274,6 +275,12 @@ namespace LockedLootContainers
             }
             else if (missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.SingleTargetAtRange || missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.AreaAtRange)
             {
+                LLCObject hitChest = gameObject.GetComponent<LLCObject>(); // Not 100% certain if this works how I think it should, will have to see with testing and such.
+                if (hitChest)
+                    LockedLootContainersMain.AttemptDestructiveMagicChestImpact(hitChest, missile);
+                else
+                    return;
+
                 DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, gameObject.transform.position, gameObject.transform.parent, 812, 0, LoadID, null, false);
                 openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
                 openChestLoot.Items.TransferAll(AttachedLoot); // Transfers items from this closed chest's items to the new open chest's item collection.

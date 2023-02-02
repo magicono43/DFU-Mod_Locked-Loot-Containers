@@ -16,6 +16,7 @@ namespace LockedLootContainers
         public static int Luck { get { return Player.Stats.LiveLuck - 50; } }
         public static int LockP { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Lockpicking); } }
         public static int PickP { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket); } }
+        public static int Mysti { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Mysticism); } }
 
         public static int LockPickChance(LLCObject chest) // Still not entirely happy with the current form here, but I think it's alot better than the first draft atleast, so fine for now, I think.
         {
@@ -24,31 +25,31 @@ namespace LockedLootContainers
             if (lockComp >= 0 && lockComp <= 19)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.6f);
-                float successChance = lockComp + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .3f) + Mathf.Round(Agili * 1.1f) + Mathf.Round(Speed * .35f) + Mathf.Round(Luck * .30f);
+                float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .3f) + Mathf.Round(Agili * 1.1f) + Mathf.Round(Speed * .35f) + Mathf.Round(Luck * .30f);
                 return (int)Mathf.Round(Mathf.Clamp(successChance, 15f, 100f));
             }
             else if (lockComp >= 20 && lockComp <= 39)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.7f);
-                float successChance = lockComp + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .4f) + Mathf.Round(Agili * 1f) + Mathf.Round(Speed * .30f) + Mathf.Round(Luck * .30f);
+                float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .4f) + Mathf.Round(Agili * 1f) + Mathf.Round(Speed * .30f) + Mathf.Round(Luck * .30f);
                 return (int)Mathf.Round(Mathf.Clamp(successChance, 10f, 100f));
             }
             else if (lockComp >= 40 && lockComp <= 59)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.8f);
-                float successChance = lockComp + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .5f) + Mathf.Round(Agili * .9f) + Mathf.Round(Speed * .25f) + Mathf.Round(Luck * .30f);
+                float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .5f) + Mathf.Round(Agili * .9f) + Mathf.Round(Speed * .25f) + Mathf.Round(Luck * .30f);
                 return (int)Mathf.Round(Mathf.Clamp(successChance, 7f, 95f));
             }
             else if (lockComp >= 60 && lockComp <= 79)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.9f);
-                float successChance = lockComp + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .6f) + Mathf.Round(Agili * .8f) + Mathf.Round(Speed * .20f) + Mathf.Round(Luck * .30f);
+                float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .6f) + Mathf.Round(Agili * .8f) + Mathf.Round(Speed * .20f) + Mathf.Round(Luck * .30f);
                 return (int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f));
             }
             else
             {
                 int lockP = (int)Mathf.Ceil(LockP * 2f);
-                float successChance = lockComp + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .7f) + Mathf.Round(Agili * .7f) + Mathf.Round(Speed * .15f) + Mathf.Round(Luck * .30f);
+                float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .7f) + Mathf.Round(Agili * .7f) + Mathf.Round(Speed * .15f) + Mathf.Round(Luck * .30f);
                 return (int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)); // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
             }
         }
