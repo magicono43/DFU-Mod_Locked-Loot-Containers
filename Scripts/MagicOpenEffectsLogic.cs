@@ -120,22 +120,52 @@ namespace LockedLootContainers
                 Vector3 pos = chest.gameObject.transform.position;
                 DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
 
-                bool validEffectPresent = false;
+                bool hasDamageHealth = false;
+                bool hasDisintegrate = false;
+                int totalDamageMag = 0;
                 EntityEffectBundle payload = missile.Payload;
                 TargetTypes targetType = missile.TargetType;
-                ElementTypes element = missile.ElementType;
+
+                EffectSettings[] bundleSettings = new EffectSettings[3];
+                int[] damOrDisin = new int[payload.Settings.Effects.Length];
+                int[] magOrChance = new int[payload.Settings.Effects.Length];
 
                 for (int i = 0; i < payload.Settings.Effects.Length; i++)
                 {
-                    IEntityEffect effect = GameManager.Instance.EntityEffectBroker.GetEffectTemplate(payload.Settings.Effects[i].Key);
-                    if (effect != null)
+                    damOrDisin[i] = 0; // 0 = no spell or invalid effect, 1 = damage or cont. damage effect, 2 = disintegrate effect.
+                    magOrChance[i] = 0;
+                    EffectEntry effect = payload.Settings.Effects[i];
+                    if (effect.Key != "")
                     {
-                        if (effect.Key == "Damage-Health" || effect.Key == "ContinuousDamage-Health" || effect.Key == "Disintegrate")
-                            validEffectPresent = true;
+                        if (effect.Key == "Damage-Health" || effect.Key == "ContinuousDamage-Health")
+                        {
+                            hasDamageHealth = true;
+                            damOrDisin[i] = 1;
+                            magOrChance[i] = RollEffectMagnitude(effect);
+                        }
+                        else if (effect.Key == "Disintegrate")
+                        {
+                            hasDisintegrate = true;
+                            damOrDisin[i] = 2;
+                            magOrChance[i] = effect.Settings.ChanceBase + effect.Settings.ChancePlus * (int)Mathf.Floor(Player.Level / effect.Settings.ChancePerLevel);
+                        }
                     }
                 }
 
-                // Continue work on this next time. Figure out how I'm going to check the individual spell-effects and try to be "process efficient" with it if possible and such.
+                if (!hasDamageHealth && !hasDisintegrate)
+                    return;
+
+                for (int i = 0; i < damOrDisin.Length; i++)
+                {
+                    EffectEntry effect = payload.Settings.Effects[i];
+                    if (damOrDisin[i] == 2)
+                    {
+                        if (ChestDisintegrationRoll(chest, effect, missile.ElementType))
+                        {
+
+                        }
+                    }
+                }
 
                 chest.HasBeenBashed = true;
 
@@ -202,6 +232,74 @@ namespace LockedLootContainers
             {
                 DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
             }
+        }
+
+        public static bool ChestDisintegrationRoll(LLCObject chest, EffectEntry effect, ElementTypes element) // Roll to determine if disintegrate spell effect "destroys" the chest hit and gives access to what remains.
+        {
+            int magicResist = chest.ChestMagicResist;
+            float elementModifier = ElementModBasedOnChestMaterial(chest, element);
+
+            // Continue work on this next time. Stuff related to formula of odds of a chest being "destroyed" by destruction magic projectiles and such, loot damage, etc.
+
+            if (chestMat < 0) // If chest is made of wood
+            {
+                float chestSmashOpenChance = (int)Mathf.Round((chest.ChestBashedHardTimes * 10) + (chest.ChestBashedLightTimes * 2) * stabilityMod) + (int)Mathf.Round(Luck / 5f);
+
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(chestSmashOpenChance, 0f, 85f))))
+                    return true;
+                else
+                    return false;
+            }
+            else // If chest is made from any metal
+            {
+                float chestSmashOpenChance = (int)Mathf.Round((chest.ChestBashedHardTimes * 5) + (chest.ChestBashedLightTimes * 1) * stabilityMod) + (int)Mathf.Round(Luck / 5f);
+
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(chestSmashOpenChance, 0f, 70f))))
+                    return true;
+                else
+                    return false;
+            }
+        }
+
+        public static float ElementModBasedOnChestMaterial(LLCObject chest, ElementTypes element)
+        {
+            ChestMaterials chestMat = chest.ChestMaterial;
+            if (chestMat == ChestMaterials.Wood)
+            {
+                if (element == ElementTypes.Fire) { return 1.5f; }
+                else if (element == ElementTypes.Magic) { return 0.7f; }
+                else if (element == ElementTypes.Shock) { return 0.5f; }
+                else if (element == ElementTypes.Poison) { return 0.9f; }
+                else if (element == ElementTypes.Cold) { return 1.0f; }
+                else { return 1.0f; }
+            }
+            else
+            {
+                if (element == ElementTypes.Fire) { return 0.7f; }
+                else if (element == ElementTypes.Magic) { return 1.0f; }
+                else if (element == ElementTypes.Shock) { return 1.3f; }
+                else if (element == ElementTypes.Poison) { return 1.3f; }
+                else if (element == ElementTypes.Cold) { return 1.1f; }
+                else { return 1.0f; }
+            }
+        }
+
+        public static int RollEffectMagnitude(EffectEntry effect)
+        {
+            int magnitude = 0;
+            IEntityEffect template = GameManager.Instance.EntityEffectBroker.GetEffectTemplate(effect.Key);
+            if (template != null)
+            {
+                if (template.Properties.SupportMagnitude)
+                {
+                    int level = Player.Level;
+                    int baseMagnitude = UnityEngine.Random.Range(effect.Settings.MagnitudeBaseMin, effect.Settings.MagnitudeBaseMax + 1);
+                    int plusMagnitude = UnityEngine.Random.Range(effect.Settings.MagnitudePlusMin, effect.Settings.MagnitudePlusMax + 1);
+                    int multiplier = (int)Mathf.Floor(level / effect.Settings.MagnitudePerLevel);
+                    magnitude = baseMagnitude + plusMagnitude * multiplier;
+                }
+            }
+            return magnitude;
         }
     }
 }
