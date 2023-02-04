@@ -16,6 +16,7 @@ namespace LockedLootContainers
         public static int Luck { get { return Player.Stats.LiveLuck - 50; } }
         public static int LockP { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Lockpicking); } }
         public static int PickP { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket); } }
+        public static int Destr { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Destruction); } }
         public static int Mysti { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Mysticism); } }
 
         public static int LockPickChance(LLCObject chest) // Still not entirely happy with the current form here, but I think it's alot better than the first draft atleast, so fine for now, I think.
@@ -128,6 +129,88 @@ namespace LockedLootContainers
             else if (item.IsAStack())
             {
                 int breakNum = UnityEngine.Random.Range(1, item.stackCount + 1);
+                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                wasteItem.stackCount = breakNum;
+                chest.AttachedLoot.AddItem(wasteItem);
+
+                if (breakNum < item.stackCount)
+                {
+                    item.stackCount -= breakNum;
+                    return false;
+                }
+                else
+                {
+                    chest.AttachedLoot.RemoveItem(item);
+                    return true;
+                }
+            }
+            else
+            {
+                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                chest.AttachedLoot.AddItem(wasteItem);
+                chest.AttachedLoot.RemoveItem(item);
+
+                return true;
+            }
+        }
+
+        public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, int damOrDisin, int spellMag) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
+        {
+            if (chest == null || item == null)
+                return false;
+
+            if (item.ItemGroup == ItemGroups.Weapons && item.TemplateIndex != (int)Weapons.Arrow)
+            {
+                if (damOrDisin == 2) // Disintegration Effect
+                {
+                    float conditionMod = (float)Mathf.Max(35, UnityEngine.Random.Range(35, 51 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    int damAmount = (int)(item.maxCondition * conditionMod);
+                    return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+                }
+                else if (damOrDisin == 1) // Damage Health Effect
+                {
+                    float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 17 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 50) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    int damAmount = (int)(item.maxCondition * conditionMod);
+                    return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+                }
+                return false;
+            }
+            else if (item.ItemGroup == ItemGroups.Armor)
+            {
+                if (damOrDisin == 2) // Disintegration Effect
+                {
+                    float conditionMod = (float)Mathf.Max(27, UnityEngine.Random.Range(27, 44 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    int damAmount = (int)(item.maxCondition * conditionMod);
+                    return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+                }
+                else if (damOrDisin == 1) // Damage Health Effect
+                {
+                    float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 9 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 40) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    int damAmount = (int)(item.maxCondition * conditionMod);
+                    return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+                }
+                return false;
+            }
+            else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
+                item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
+            {
+                if (damOrDisin == 2) // Disintegration Effect
+                {
+                    float conditionMod = (float)Mathf.Max(60, UnityEngine.Random.Range(60, 110 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    int damAmount = (int)(item.maxCondition * conditionMod);
+                    return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+                }
+                else if (damOrDisin == 1) // Damage Health Effect
+                {
+                    float conditionMod = (float)Mathf.Max(30, UnityEngine.Random.Range(30, 32 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 100) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    int damAmount = (int)(item.maxCondition * conditionMod);
+                    return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+                }
+                return false;
+            }
+            else if (item.IsAStack())
+            {
+                int breakNum = UnityEngine.Random.Range((int)Mathf.Ceil(item.stackCount * 0.8f), item.stackCount + 1);
                 DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
                 wasteItem.stackCount = breakNum;
                 chest.AttachedLoot.AddItem(wasteItem);

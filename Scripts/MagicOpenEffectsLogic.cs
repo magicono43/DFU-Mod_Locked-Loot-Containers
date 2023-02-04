@@ -160,9 +160,54 @@ namespace LockedLootContainers
                     EffectEntry effect = payload.Settings.Effects[i];
                     if (damOrDisin[i] == 2)
                     {
-                        if (ChestDisintegrationRoll(chest, effect, missile.ElementType))
+                        if (ChestDisintegrationRoll(chest, magOrChance[i], missile.ElementType))
                         {
+                            // Chest has been disintegrated and contents are accessible (but damaged greatly, if not outright destroyed.)
+                            SpellDestroyingChestDamagesLoot(chest, damOrDisin[i], magOrChance[i]);
+                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
+                            // Show success and play unlock sound
+                            DaggerfallUI.AddHUDText("The spell causes the flimsy chest to erupt into a splintery mess, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                            if (dfAudioSource)
+                            {
+                                if (dfAudioSource != null)
+                                    dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                            }
+                            Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                        }
+                        else
+                        {
+                            // Disintegrate was attempted, but chest is still intact.
+                            if (dfAudioSource != null)
+                                dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                        }
+                    }
+                    else if (damOrDisin[i] == 1) // Next I work on this, make the loop/logic part for the "Damage Health" effect, similar to disintegrate, but possibly adding magnitudes together, etc.
+                    {
+                        if (ChestDisintegrationRoll(chest, magOrChance[i], missile.ElementType))
+                        {
+                            // Chest has been blown open by damage health spell and contents are accessible (but damaged greatly, if not outright destroyed.)
+                            SpellDestroyingChestDamagesLoot(chest, damOrDisin[i], magOrChance[i]);
+                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                            // Show success and play unlock sound
+                            DaggerfallUI.AddHUDText("The spell causes the flimsy chest to erupt into a splintery mess, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                            if (dfAudioSource)
+                            {
+                                if (dfAudioSource != null)
+                                    dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                            }
+                            Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                        }
+                        else
+                        {
+                            // Destruction spell impact was attempted, but chest is still intact.
+                            if (dfAudioSource != null)
+                                dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
                         }
                     }
                 }
@@ -234,30 +279,77 @@ namespace LockedLootContainers
             }
         }
 
-        public static bool ChestDisintegrationRoll(LLCObject chest, EffectEntry effect, ElementTypes element) // Roll to determine if disintegrate spell effect "destroys" the chest hit and gives access to what remains.
+        public static bool ChestDisintegrationRoll(LLCObject chest, int effectChance, ElementTypes element) // Roll to determine if disintegrate spell effect "destroys" the chest hit and gives access to what remains.
         {
             int magicResist = chest.ChestMagicResist;
             float elementModifier = ElementModBasedOnChestMaterial(chest, element);
+            float disintegrateChestChance = (magicResist * -1f) + Mathf.Round(effectChance * (elementModifier + ((float)Destr / 285f))) + (int)Mathf.Round(Luck / 10f);
 
-            // Continue work on this next time. Stuff related to formula of odds of a chest being "destroyed" by destruction magic projectiles and such, loot damage, etc.
+            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(disintegrateChestChance, 0f, 93f))))
+                return true;
+            else
+                return false;
+        }
 
-            if (chestMat < 0) // If chest is made of wood
+        public static void SpellDestroyingChestDamagesLoot(LLCObject chest, int damOrDisin, int spellMag)
+        {
+            int initialItemCount = chest.AttachedLoot.Count;
+
+            if (damOrDisin == 2) // Disintegration Effect
             {
-                float chestSmashOpenChance = (int)Mathf.Round((chest.ChestBashedHardTimes * 10) + (chest.ChestBashedLightTimes * 2) * stabilityMod) + (int)Mathf.Round(Luck / 5f);
+                for (int i = 0; i < initialItemCount; i++)
+                {
+                    DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                    LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(chestSmashOpenChance, 0f, 85f))))
-                    return true;
-                else
-                    return false;
+                    if (!item.IsQuestItem)
+                    {
+                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(100 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(80 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                    }
+                }
             }
-            else // If chest is made from any metal
+            else if (damOrDisin == 1) // Damage Health Effect
             {
-                float chestSmashOpenChance = (int)Mathf.Round((chest.ChestBashedHardTimes * 5) + (chest.ChestBashedLightTimes * 1) * stabilityMod) + (int)Mathf.Round(Luck / 5f);
+                for (int i = 0; i < initialItemCount; i++)
+                {
+                    DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                    LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(chestSmashOpenChance, 0f, 70f))))
-                    return true;
-                else
-                    return false;
+                    if (!item.IsQuestItem)
+                    {
+                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(65 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                        {
+                            if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
+                        }
+                    }
+                }
             }
         }
 
