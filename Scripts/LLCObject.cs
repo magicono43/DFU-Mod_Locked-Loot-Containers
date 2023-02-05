@@ -259,42 +259,29 @@ namespace LockedLootContainers
             if (missile.Caster != GameManager.Instance.PlayerEntityBehaviour) // Only want these to count for the player's projectiles, but not idea how this might work if enemies are blocked by chests.
                 return;
 
+            bool deleteChest = false;
+
             if (missile.IsArrow)
             {
-                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, gameObject.transform.position, gameObject.transform.parent, 812, 0, LoadID, null, false);
-                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
-                openChestLoot.Items.TransferAll(AttachedLoot); // Transfers items from this closed chest's items to the new open chest's item collection.
-
-                // Show success and play unlock sound
-                DaggerfallUI.AddHUDText("The arrow smashes a large hole in the flimsy chest, granting access to its contents...", 4f);
-                if (dfAudioSource)
+                LLCObject hitChest = gameObject.GetComponent<LLCObject>(); // Not 100% certain if this works how I think it should, will have to see with testing and such.
+                if (hitChest)
                 {
-                    if (dfAudioSource != null)
-                        dfAudioSource.PlayClipAtPoint(SoundClips.PlayerDoorBash, gameObject.transform.position);
+                    if (LockedLootContainersMain.AttemptChestBashWithArrows(hitChest, missile))
+                        deleteChest = true;
                 }
             }
             else if (missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.SingleTargetAtRange || missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.AreaAtRange)
             {
                 LLCObject hitChest = gameObject.GetComponent<LLCObject>(); // Not 100% certain if this works how I think it should, will have to see with testing and such.
                 if (hitChest)
-                    LockedLootContainersMain.AttemptDestructiveMagicChestImpact(hitChest, missile);
-                else
-                    return;
-
-                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, gameObject.transform.position, gameObject.transform.parent, 812, 0, LoadID, null, false);
-                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
-                openChestLoot.Items.TransferAll(AttachedLoot); // Transfers items from this closed chest's items to the new open chest's item collection.
-
-                // Show success and play unlock sound
-                DaggerfallUI.AddHUDText("The spell causes the flimsy chest to erupt into a splintery mess, granting access to its contents...", 4f);
-                if (dfAudioSource)
                 {
-                    if (dfAudioSource != null)
-                        dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, gameObject.transform.position);
+                    if (LockedLootContainersMain.AttemptDestructiveMagicChestImpact(hitChest, missile))
+                        deleteChest = true;
                 }
             }
 
-            Destroy(gameObject);
+            if (deleteChest)
+                Destroy(gameObject);
         }
 
         #endregion

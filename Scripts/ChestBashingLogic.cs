@@ -86,6 +86,74 @@ namespace LockedLootContainers
             }
         }
 
+        public static bool AttemptChestBashWithArrows(LLCObject chest, DaggerfallMissile missile)
+        {
+            if (chest != null)
+            {
+                ItemCollection closedChestLoot = chest.AttachedLoot;
+                Transform closedChestTransform = chest.gameObject.transform; // Not sure if the explicit "gameObject" reference is necessary, will test eventually and determine if so or not.
+                Vector3 pos = chest.gameObject.transform.position;
+                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+
+                chest.HasBeenBashed = true;
+
+                // Would be interesting when an arrow "pings" off a metal chest it would actually leave a physical object nearby that could be clicked instead of adding to chest inventory, but eh.
+                chest.AttachedLoot.AddItem(ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42329)); // "Broken Arrow" custom item
+
+                DaggerfallUnityItem bowUsed = GameManager.Instance.WeaponManager.LastBowUsed;
+                if (bowUsed != null)
+                    bowUsed.LowerCondition(1, Player, Player.Items);
+
+                if (chest.ChestMaterial == ChestMaterials.Wood)
+                {
+                    chest.ChestBashedLightTimes++;
+
+                    if (SmashOpenChestWithArrowRoll(chest))
+                    {
+                        // Chest body has been smashed open and contents are accessible (but damaged significantly.)
+                        BashingOpenChestWithArrowsDamagesLoot(chest);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                        // Show success and play smash open sound
+                        DaggerfallUI.AddHUDText("The arrow smashes a large hole in the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                        if (dfAudioSource)
+                        {
+                            if (dfAudioSource != null)
+                                dfAudioSource.PlayClipAtPoint(SoundClips.StormLightningThunder, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        // Chest body was hit with arrow, but is still intact.
+                        if (dfAudioSource)
+                        {
+                            if (dfAudioSource != null)
+                                dfAudioSource.PlayClipAtPoint(SoundClips.PlayerDoorBash, chest.gameObject.transform.position); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                        }
+                        return false;
+                    }
+                }
+                else
+                {
+                    // Metal chest body was hit with arrow, but it does nothing besides ping off since it's metal.
+                    if (dfAudioSource)
+                    {
+                        if (dfAudioSource != null)
+                            dfAudioSource.PlayClipAtPoint(SoundClips.Parry9, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                    }
+                    return false;
+                }
+            }
+            else
+            {
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+            }
+            return false;
+        }
+
         public static bool BashLockRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if a bash attempt hit the lock or the chest body instead.
         {
             int wepSkill = Player.Skills.GetLiveSkillValue((weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand); // Might add accuracy modifier for weapon type, but for now just keep it more simple.
@@ -317,6 +385,18 @@ namespace LockedLootContainers
                 else
                     return false;
             }
+        }
+
+        public static bool SmashOpenChestWithArrowRoll(LLCObject chest) // Roll to determine if bashed chest body breaks open or not this attempt, granting full access to loot.
+        {
+            float bashResist = (float)chest.ChestSturdiness / 100f;
+            float stabilityMod = (bashResist - 1f) * -1f; // Modifier value might need some work, especially for the very sturdy chest materials, but will see with testing later, etc.
+            float chestSmashOpenChance = (int)Mathf.Round((chest.ChestBashedLightTimes * (int)Mathf.Round((Stren / 25f) + 3)) * stabilityMod) + (int)Mathf.Round(Luck / 10f);
+
+            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(chestSmashOpenChance, 0f, 75f))))
+                return true;
+            else
+                return false;
         }
 
         public static void ApplyBashingCostLogic(LLCObject chest, DaggerfallUnityItem weapon, bool hitLock = false, bool hitWood = false, bool hardBash = false, int matDiff = -100) // Applies vitals damage to player and the weapon used during bash attempt.
@@ -929,6 +1009,37 @@ namespace LockedLootContainers
                 else
                 {
                     return;
+                }
+            }
+        }
+
+        public static void BashingOpenChestWithArrowsDamagesLoot(LLCObject chest)
+        {
+            int initialItemCount = chest.AttachedLoot.Count;
+
+            for (int i = 0; i < initialItemCount; i++)
+            {
+                DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                if (!item.IsQuestItem)
+                {
+                    if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
+                    {
+                        if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                    }
+                    else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
+                    {
+                        if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                    }
+                    else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                    {
+                        if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                    }
+                    else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
+                    {
+                        if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
+                    }
                 }
             }
         }

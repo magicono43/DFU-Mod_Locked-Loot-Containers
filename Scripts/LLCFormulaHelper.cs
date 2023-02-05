@@ -66,6 +66,9 @@ namespace LockedLootContainers
 
         public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, DaggerfallUnityItem bashingWep, int wepSkillID) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
         {
+            DaggerfallUnityItem wasteItem;
+            int wasteAmount;
+
             if (chest == null || item == null)
                 return false;
 
@@ -129,8 +132,8 @@ namespace LockedLootContainers
             else if (item.IsAStack())
             {
                 int breakNum = UnityEngine.Random.Range(1, item.stackCount + 1);
-                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
-                wasteItem.stackCount = breakNum;
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = breakNum * wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
 
                 if (breakNum < item.stackCount)
@@ -146,7 +149,8 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
                 chest.AttachedLoot.RemoveItem(item);
 
@@ -156,6 +160,9 @@ namespace LockedLootContainers
 
         public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, int damOrDisin, int spellMag) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
         {
+            DaggerfallUnityItem wasteItem;
+            int wasteAmount;
+
             if (chest == null || item == null)
                 return false;
 
@@ -211,8 +218,8 @@ namespace LockedLootContainers
             else if (item.IsAStack())
             {
                 int breakNum = UnityEngine.Random.Range((int)Mathf.Ceil(item.stackCount * 0.8f), item.stackCount + 1);
-                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
-                wasteItem.stackCount = breakNum;
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = breakNum * wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
 
                 if (breakNum < item.stackCount)
@@ -228,7 +235,64 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = wasteAmount;
+                chest.AttachedLoot.AddItem(wasteItem);
+                chest.AttachedLoot.RemoveItem(item);
+
+                return true;
+            }
+        }
+
+        public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
+        {
+            DaggerfallUnityItem wasteItem;
+            int wasteAmount;
+
+            if (chest == null || item == null)
+                return false;
+
+            if (item.ItemGroup == ItemGroups.Weapons && item.TemplateIndex != (int)Weapons.Arrow)
+            {
+                float conditionMod = (float)Mathf.Max(11, UnityEngine.Random.Range(11, 26 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                int damAmount = (int)(item.maxCondition * conditionMod);
+                return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+            }
+            else if (item.ItemGroup == ItemGroups.Armor)
+            {
+                float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 23 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                int damAmount = (int)(item.maxCondition * conditionMod);
+                return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+            }
+            else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
+                item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
+            {
+                float conditionMod = (float)Mathf.Max(20, UnityEngine.Random.Range(20, 52 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                int damAmount = (int)(item.maxCondition * conditionMod);
+                return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
+            }
+            else if (item.IsAStack())
+            {
+                int breakNum = UnityEngine.Random.Range((int)Mathf.Ceil(item.stackCount * 0.55f), item.stackCount + 1);
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = breakNum * wasteAmount;
+                chest.AttachedLoot.AddItem(wasteItem);
+
+                if (breakNum < item.stackCount)
+                {
+                    item.stackCount -= breakNum;
+                    return false;
+                }
+                else
+                {
+                    chest.AttachedLoot.RemoveItem(item);
+                    return true;
+                }
+            }
+            else
+            {
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
                 chest.AttachedLoot.RemoveItem(item);
 
@@ -238,6 +302,9 @@ namespace LockedLootContainers
 
         public static bool RemoveOrDamageBasedOnCondition(LLCObject chest, DaggerfallUnityItem item, int damAmount) // Mainly here to reduce repetition in code of parent method a bit.
         {
+            DaggerfallUnityItem wasteItem;
+            int wasteAmount;
+
             if (damAmount < item.currentCondition)
             {
                 item.currentCondition -= damAmount;
@@ -245,7 +312,8 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUnityItem wasteItem = DetermineDestroyedLootRefuseType(item);
+                DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
+                wasteItem.stackCount = wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
                 chest.AttachedLoot.RemoveItem(item);
                 return true;
@@ -294,65 +362,123 @@ namespace LockedLootContainers
             }
         }
 
-        public static DaggerfallUnityItem DetermineDestroyedLootRefuseType(DaggerfallUnityItem item) // Obviously need to add these custom "Junk Items" in at some point.
+        public static void DetermineDestroyedLootRefuseType(DaggerfallUnityItem item, out DaggerfallUnityItem wasteItem, out int wasteAmount) // Obviously need to add these custom "Junk Items" in at some point.
         {
+            wasteAmount = 1;
+
             if (item.TemplateIndex >= 0 && item.TemplateIndex <= 511) // Vanilla Item Templates
             {
                 switch (item.ItemGroup)
                 {
                     case ItemGroups.UselessItems1:
-                        if (item.IsPotion) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); } // "Glass Fragments" custom item
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); }
+                        if (item.IsPotion) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); return; } // "Glass Fragments" custom item
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; }
                     case ItemGroups.Armor:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); // "(Material) Scraps" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); wasteAmount = GetWasteAmount(item); return; // "(Material) Scraps" custom item
                     case ItemGroups.Weapons:
-                        if (item.TemplateIndex == (int)Weapons.Arrow) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42329); } // "Broken Arrow" custom item
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); }
+                        if (item.TemplateIndex == (int)Weapons.Arrow) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42329); return; } // "Broken Arrow" custom item
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); wasteAmount = GetWasteAmount(item); return; }
                     case ItemGroups.MensClothing:
                     case ItemGroups.WomensClothing:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); // "Tattered Cloth" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); return; // "Tattered Cloth" custom item
                     case ItemGroups.Books:
                     case ItemGroups.Maps:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); // "Paper Shreds" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); wasteAmount = GetWasteAmount(item); return; // "Paper Shreds" custom item
                     case ItemGroups.UselessItems2:
-                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); }
-                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); }
-                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); }
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); }
+                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); return; }
+                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); return; }
+                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; }
                     case ItemGroups.Gems:
                     case ItemGroups.MiscellaneousIngredients2:
                     case ItemGroups.MetalIngredients:
-                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); } // "Ivory Fragments" custom item
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); } // "Shiny Rubble" custom item
+                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); return; } // "Ivory Fragments" custom item
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); return; } // "Shiny Rubble" custom item
                     case ItemGroups.Drugs:
                     case ItemGroups.PlantIngredients1:
                     case ItemGroups.PlantIngredients2:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42424); // "Clump of Plant Matter" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42424); return; // "Clump of Plant Matter" custom item
                     case ItemGroups.MiscellaneousIngredients1:
-                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); }
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); }
+                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); return; }
                     case ItemGroups.CreatureIngredients1:
                     case ItemGroups.CreatureIngredients2:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); // "Glob of Gore" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); return; // "Glob of Gore" custom item
                     case ItemGroups.CreatureIngredients3:
-                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); }
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); }
+                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); return; }
                     case ItemGroups.Jewellery:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 24242); // "Destroyed Jewelry" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 24242); return; // "Destroyed Jewelry" custom item
                     case ItemGroups.MiscItems:
-                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); }
-                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); }
-                        else { return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); }
+                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); return; }
+                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; }
                     case ItemGroups.Currency:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91191); // "Ruined Coins" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91191); return; // "Ruined Coins" custom item
                     default:
-                        return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); // "Useless Refuse" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; // "Useless Refuse" custom item
                 }
             }
             else // Modded Item Templates
             {
-                return ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); // "Useless Refuse" custom item?
+                wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; // "Useless Refuse" custom item?
             }
+        }
+
+        public static int GetWasteAmount(DaggerfallUnityItem item)
+        {
+            if (item == null)
+                return 1;
+            // Next I work on this, fill in these values depending on how much "scrap" should be given, likely make a random range between some set values for each, will determine then.
+            if (item.ItemGroup == ItemGroups.Armor)
+            {
+                switch (item.TemplateIndex)
+                {
+                    case (int)Armor.Cuirass:
+                    case (int)Armor.Gauntlets:
+                    case (int)Armor.Greaves:
+                    case (int)Armor.Left_Pauldron:
+                    case (int)Armor.Right_Pauldron:
+                    case (int)Armor.Helm:
+                    case (int)Armor.Boots:
+                    case (int)Armor.Buckler:
+                    case (int)Armor.Round_Shield:
+                    case (int)Armor.Kite_Shield:
+                    case (int)Armor.Tower_Shield:
+                    default:
+                        return 1;
+                }
+            }
+            else if (item.ItemGroup == ItemGroups.Weapons)
+            {
+                switch (item.TemplateIndex)
+                {
+                    case (int)Weapons.Dagger:
+                    case (int)Weapons.Tanto:
+                    case (int)Weapons.Staff:
+                    case (int)Weapons.Shortsword:
+                    case (int)Weapons.Wakazashi:
+                    case (int)Weapons.Broadsword:
+                    case (int)Weapons.Saber:
+                    case (int)Weapons.Longsword:
+                    case (int)Weapons.Katana:
+                    case (int)Weapons.Claymore:
+                    case (int)Weapons.Dai_Katana:
+                    case (int)Weapons.Mace:
+                    case (int)Weapons.Flail:
+                    case (int)Weapons.Warhammer:
+                    case (int)Weapons.Battle_Axe:
+                    case (int)Weapons.War_Axe:
+                    case (int)Weapons.Short_Bow:
+                    case (int)Weapons.Long_Bow:
+                    default:
+                        return 1;
+                }
+            }
+            else if (item.ItemGroup == ItemGroups.Books)
+                return UnityEngine.Random.Range(3, 11);
+            else
+                return 1;
         }
 
         public static int daggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.

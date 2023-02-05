@@ -111,7 +111,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static void AttemptDestructiveMagicChestImpact(LLCObject chest, DaggerfallMissile missile)
+        public static bool AttemptDestructiveMagicChestImpact(LLCObject chest, DaggerfallMissile missile)
         {
             if (chest != null)
             {
@@ -120,13 +120,11 @@ namespace LockedLootContainers
                 Vector3 pos = chest.gameObject.transform.position;
                 DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
 
+                EntityEffectBundle payload = missile.Payload;
                 bool hasDamageHealth = false;
                 bool hasDisintegrate = false;
+                bool alreadyCheckedDamEffects = false;
                 int totalDamageMag = 0;
-                EntityEffectBundle payload = missile.Payload;
-                TargetTypes targetType = missile.TargetType;
-
-                EffectSettings[] bundleSettings = new EffectSettings[3];
                 int[] damOrDisin = new int[payload.Settings.Effects.Length];
                 int[] magOrChance = new int[payload.Settings.Effects.Length];
 
@@ -142,6 +140,7 @@ namespace LockedLootContainers
                             hasDamageHealth = true;
                             damOrDisin[i] = 1;
                             magOrChance[i] = RollEffectMagnitude(effect);
+                            totalDamageMag += magOrChance[i];
                         }
                         else if (effect.Key == "Disintegrate")
                         {
@@ -153,11 +152,12 @@ namespace LockedLootContainers
                 }
 
                 if (!hasDamageHealth && !hasDisintegrate)
-                    return;
+                    return false;
+
+                chest.HasBeenBashed = true;
 
                 for (int i = 0; i < damOrDisin.Length; i++)
                 {
-                    EffectEntry effect = payload.Settings.Effects[i];
                     if (damOrDisin[i] == 2)
                     {
                         if (ChestDisintegrationRoll(chest, magOrChance[i], missile.ElementType))
@@ -168,115 +168,50 @@ namespace LockedLootContainers
                             openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
                             openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
-                            // Show success and play unlock sound
-                            DaggerfallUI.AddHUDText("The spell causes the flimsy chest to erupt into a splintery mess, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                            // Show success and play disintegrate sound
+                            DaggerfallUI.AddHUDText("The spell causes the chest to disintegrate into an unrecognizable pile, granting access to whatever is left...", 4f); // Will possibly change text later on depending on many factors, will see.
                             if (dfAudioSource)
                             {
                                 if (dfAudioSource != null)
                                     dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
                             }
-                            Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                        }
-                        else
-                        {
-                            // Disintegrate was attempted, but chest is still intact.
-                            if (dfAudioSource != null)
-                                dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                            return true;
                         }
                     }
-                    else if (damOrDisin[i] == 1) // Next I work on this, make the loop/logic part for the "Damage Health" effect, similar to disintegrate, but possibly adding magnitudes together, etc.
+                    else if (damOrDisin[i] == 1)
                     {
-                        if (ChestDisintegrationRoll(chest, magOrChance[i], missile.ElementType))
+                        if (!alreadyCheckedDamEffects)
                         {
-                            // Chest has been blown open by damage health spell and contents are accessible (but damaged greatly, if not outright destroyed.)
-                            SpellDestroyingChestDamagesLoot(chest, damOrDisin[i], magOrChance[i]);
-                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
-                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
-                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                            // Show success and play unlock sound
-                            DaggerfallUI.AddHUDText("The spell causes the flimsy chest to erupt into a splintery mess, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
-                            if (dfAudioSource)
+                            alreadyCheckedDamEffects = true;
+                            if (ChestBlownOpenRoll(chest, totalDamageMag, missile.ElementType))
                             {
-                                if (dfAudioSource != null)
-                                    dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                // Chest has been blown open by damage health spell and contents are accessible (but damaged greatly, if not outright destroyed.)
+                                SpellDestroyingChestDamagesLoot(chest, damOrDisin[i], totalDamageMag);
+                                DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
+                                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                                // Show success and play explosion type sound
+                                DaggerfallUI.AddHUDText("The spell causes the chest to erupt into a chaotic mess, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                                if (dfAudioSource)
+                                {
+                                    if (dfAudioSource != null)
+                                        dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                }
+                                return true;
                             }
-                            Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                        }
-                        else
-                        {
-                            // Destruction spell impact was attempted, but chest is still intact.
-                            if (dfAudioSource != null)
-                                dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
                         }
                     }
                 }
-
-                chest.HasBeenBashed = true;
-
-                if (BashLockRoll(chest, weapon))
-                {
-                    if (LockHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
-                        chest.LockBashedHardTimes++;
-                    else
-                        chest.LockBashedLightTimes++;
-
-                    if (BreakLockRoll(chest, weapon))
-                    {
-                        // Lock was hit with bash and is now broken, so chest loot is accessible.
-                        BashingOpenChestDamagesLoot(chest, weapon, false);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-
-                        // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f); // Will possibly change text later on depending on many factors, will see.
-                        if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.Parry1); // Will use custom sounds in the end most likely.
-                    }
-                    else
-                    {
-                        // Lock was hit with bash, but is still intact.
-                        if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
-                    }
-                }
-                else
-                {
-                    if (ChestHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
-                        chest.ChestBashedHardTimes++;
-                    else
-                        chest.ChestBashedLightTimes++;
-
-                    if (SmashOpenChestRoll(chest, weapon))
-                    {
-                        // Chest body has been smashed open and contents are accessible (but damaged greatly most likely.)
-                        BashingOpenChestDamagesLoot(chest, weapon, true);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-
-                        // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
-                        if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.StormLightningThunder); // Will use custom sounds in the end most likely.
-                    }
-                    else
-                    {
-                        // Chest body was hit with bash, but is still intact.
-                        if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.PlayerDoorBash); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
-                    }
-                }
+                // Destruction spell impact was attempted, but chest is still intact.
+                if (dfAudioSource != null)
+                    dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
             }
             else
             {
                 DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
             }
+            return false;
         }
 
         public static bool ChestDisintegrationRoll(LLCObject chest, int effectChance, ElementTypes element) // Roll to determine if disintegrate spell effect "destroys" the chest hit and gives access to what remains.
@@ -286,6 +221,19 @@ namespace LockedLootContainers
             float disintegrateChestChance = (magicResist * -1f) + Mathf.Round(effectChance * (elementModifier + ((float)Destr / 285f))) + (int)Mathf.Round(Luck / 10f);
 
             if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(disintegrateChestChance, 0f, 93f))))
+                return true;
+            else
+                return false;
+        }
+
+        public static bool ChestBlownOpenRoll(LLCObject chest, int effectMagnitude, ElementTypes element) // Roll to determine if damage health spell effect(s) "blow open" the chest hit and gives access to what remains.
+        {
+            int magicResist = chest.ChestMagicResist;
+            int sturdiness = chest.ChestSturdiness;
+            float elementModifier = ElementModBasedOnChestMaterial(chest, element);
+            float blowOpenChestChance = (magicResist * -1f) + Mathf.Floor(sturdiness / -4f) + Mathf.Round(effectMagnitude * (elementModifier + ((float)Destr / 500f))) + (int)Mathf.Round(Luck / 10f);
+
+            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(blowOpenChestChance, 0f, 93f))))
                 return true;
             else
                 return false;
