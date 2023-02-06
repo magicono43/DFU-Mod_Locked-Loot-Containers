@@ -427,24 +427,35 @@ namespace LockedLootContainers
 
         public static int GetWasteAmount(DaggerfallUnityItem item)
         {
+            float luckMod = ((float)Luck / 200f) + 0.5f;
+
             if (item == null)
                 return 1;
-            // Next I work on this, fill in these values depending on how much "scrap" should be given, likely make a random range between some set values for each, will determine then.
+
             if (item.ItemGroup == ItemGroups.Armor)
             {
                 switch (item.TemplateIndex)
                 {
                     case (int)Armor.Cuirass:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(20f * luckMod) + 1));
                     case (int)Armor.Gauntlets:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(6f * luckMod) + 1));
                     case (int)Armor.Greaves:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(12f * luckMod) + 1));
                     case (int)Armor.Left_Pauldron:
                     case (int)Armor.Right_Pauldron:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
                     case (int)Armor.Helm:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(12f * luckMod) + 1));
                     case (int)Armor.Boots:
                     case (int)Armor.Buckler:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
                     case (int)Armor.Round_Shield:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(14f * luckMod) + 1));
                     case (int)Armor.Kite_Shield:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(18f * luckMod) + 1));
                     case (int)Armor.Tower_Shield:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(25f * luckMod) + 1));
                     default:
                         return 1;
                 }
@@ -454,29 +465,45 @@ namespace LockedLootContainers
                 switch (item.TemplateIndex)
                 {
                     case (int)Weapons.Dagger:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(2f * luckMod) + 1));
                     case (int)Weapons.Tanto:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(3f * luckMod) + 1));
                     case (int)Weapons.Staff:
                     case (int)Weapons.Shortsword:
                     case (int)Weapons.Wakazashi:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(6f * luckMod) + 1));
                     case (int)Weapons.Broadsword:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(13f * luckMod) + 1));
                     case (int)Weapons.Saber:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(9f * luckMod) + 1));
                     case (int)Weapons.Longsword:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
                     case (int)Weapons.Katana:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(8f * luckMod) + 1));
                     case (int)Weapons.Claymore:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(18f * luckMod) + 1));
                     case (int)Weapons.Dai_Katana:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(15f * luckMod) + 1));
                     case (int)Weapons.Mace:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
                     case (int)Weapons.Flail:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(16f * luckMod) + 1));
                     case (int)Weapons.Warhammer:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(14f * luckMod) + 1));
                     case (int)Weapons.Battle_Axe:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
                     case (int)Weapons.War_Axe:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(14f * luckMod) + 1));
                     case (int)Weapons.Short_Bow:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(2f * luckMod) + 1));
                     case (int)Weapons.Long_Bow:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(4f * luckMod) + 1));
                     default:
                         return 1;
                 }
             }
             else if (item.ItemGroup == ItemGroups.Books)
-                return UnityEngine.Random.Range(3, 11);
+                return UnityEngine.Random.Range(3, 10 + 1);
             else
                 return 1;
         }
