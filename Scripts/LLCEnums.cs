@@ -51,6 +51,18 @@ namespace LockedLootContainers
     }
 
     /// <summary>
+    /// Used to determine how clear or unclear the information given is when inspecting/identifying a chest.
+    /// </summary>
+    public enum InfoVagueness
+    {
+        Unknown = 0,
+        Bare = 1,
+        Simple = 2,
+        Vivid = 3,
+        Complete = 4,
+    }
+
+    /// <summary>
     /// Used to characterize individual item and item groups into different levels of "sturdiness", basically to determine how bashing a chest damages said items and to what degree.
     /// </summary>
     public enum LootItemSturdiness

@@ -14,7 +14,12 @@
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/811_0-0.PNG",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/812_0-0.PNG",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/LLCEnums.cs",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/ChestGeneration.cs"
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/ChestGeneration.cs",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/ChestBashingLogic.cs",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/LLCFormulaHelper.cs",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/MagicOpenEffectsLogic.cs",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/InspectionLogic.cs",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/InspectionTextHolder.cs"
     ],
     "Dependencies": []
 }
