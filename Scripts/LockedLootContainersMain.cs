@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		2/4/2023, 11:50 PM
+// Last Edit:		2/7/2023, 11:55 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -130,6 +130,7 @@ namespace LockedLootContainers
                         LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
 
                         TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
+                        "CHEST",
                         "This chest is made of: " + chestData.ChestMaterial.ToString(),
                         "Chest sturdiness is: " + chestData.ChestSturdiness,
                         "Chest magic resist is: " + chestData.ChestMagicResist,
@@ -138,6 +139,16 @@ namespace LockedLootContainers
                         "Lock magic resist is: " + chestData.LockMagicResist,
                         "Lock complexity is: " + chestData.LockComplexity,
                         "Lock jam resist is: " + chestData.JamResist);
+
+                        /*TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
+                        "This chest is made of: " + chestData.ChestMaterial.ToString(),
+                        "Chest sturdiness is: " + chestData.ChestSturdiness,
+                        "Chest magic resist is: " + chestData.ChestMagicResist,
+                        "Its lock is made of: " + chestData.LockMaterial.ToString(),
+                        "Lock sturdiness is: " + chestData.LockSturdiness,
+                        "Lock magic resist is: " + chestData.LockMagicResist,
+                        "Lock complexity is: " + chestData.LockComplexity,
+                        "Lock jam resist is: " + chestData.JamResist);*/
 
                         DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
                         inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.

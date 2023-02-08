@@ -14,13 +14,51 @@ namespace LockedLootContainers
     {
         public static int IdentifyChestMaterialRoll(LLCObject chest)
         {
-            ChestMaterials chestMat = chest.ChestMaterial;
-            float blowOpenChestChance = (magicResist * -1f) + Mathf.Floor(sturdiness / -4f) + Mathf.Round(effectMagnitude * (elementModifier + ((float)Destr / 500f))) + (int)Mathf.Round(Luck / 10f);
+            int identifyRoll = (chest.ChestMaterial == ChestMaterials.Wood) ? 10 : 0;
+            identifyRoll += (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 1.66f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 2.5f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 5f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
 
-            int identifyRoll = UnityEngine.Random.Range(0, 40 + 1);
+        public static int IdentifyChestSturdinessRoll(LLCObject chest)
+        {
+            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 3.33f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 1.42f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 5f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
 
-            // + Int + Will + Lockpicking?
-            // Next time I work on this, somehow do the formula for this identification roll, maybe have wooden chests give a bonus to identifying as well or something, will see then continue on.
+        public static int IdentifyMagicResistRoll(LLCObject chest)
+        {
+            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 3.33f) + (int)Mathf.Round(Mathf.Clamp(Alter, 0, 130) / 6.66f) + (int)Mathf.Round(Mathf.Clamp(Mysti, 0, 130) / 6.66f) + (int)Mathf.Round(Mathf.Clamp(Thaum, 0, 130) / 6.66f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
+
+        public static int IdentifyLocktMaterialRoll(LLCObject chest)
+        {
+            int identifyRoll = (chest.LockMaterial == LockMaterials.Wood) ? 10 : 0;
+            identifyRoll += (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 2.5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 3.33f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 2.85f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
+
+        public static int IdentifyLockComplexityRoll(LLCObject chest)
+        {
+            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 3.33f) + (int)Mathf.Round(Mathf.Clamp(Agili, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 2.85f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
+
+        public static int IdentifyJamResistRoll(LLCObject chest)
+        {
+            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 2.5f) + (int)Mathf.Round(Mathf.Clamp(Agili, -50, 70) / 2.5f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 3.33f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
+
+        public static int IdentifyLockSturdinessRoll(LLCObject chest)
+        {
+            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 1.66f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 3.33f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
+
+        public static int DetermineInfoTextVagueness(int identifyRoll)
+        {
+            identifyRoll += UnityEngine.Random.Range(0, 35 + 1);
 
             if (identifyRoll <= 9) { return (int)InfoVagueness.Unknown; }
             else if (identifyRoll >= 10 && identifyRoll <= 35) { return (int)InfoVagueness.Bare; }
