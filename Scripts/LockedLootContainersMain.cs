@@ -21,6 +21,8 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallConnect.Arena2;
 using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Utility;
+using Wenzil.Console;
+using System;
 
 namespace LockedLootContainers
 {
@@ -67,6 +69,8 @@ namespace LockedLootContainers
 
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
 
+            RegisterLLCCommands(); // For testing custom windows
+
             Debug.Log("Finished mod init: Locked Loot Containers");
         }
 
@@ -109,6 +113,39 @@ namespace LockedLootContainers
             // However, looking at the DaggerfallMissile.cs code under the "DoAreaOfEffect" method, I have a feeling without a PR, I won't be able to do a clean/easy
             // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal all other successes considered.
         }
+
+        // For Testing Custom Windows
+
+        public static void RegisterLLCCommands()
+        {
+            Debug.Log("[LockLootContainers] Trying to register console commands.");
+            try
+            {
+                ConsoleCommandsDatabase.RegisterCommand(ShowBORegionWindow.command, ShowBORegionWindow.description, ShowBORegionWindow.usage, ShowBORegionWindow.Execute);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(string.Format("Error Registering LockLootContainers Console commands: {0}", e.Message));
+            }
+        }
+
+        private static class ShowBORegionWindow
+        {
+            public static readonly string command = "showchestchoicewindow";
+            public static readonly string description = "Shows the custom Locked Loot Containers Chest Choice Window.)";
+            public static readonly string usage = "showchestchoicewindow";
+
+            public static string Execute(params string[] args)
+            {
+                ChestChoiceWindow chestChoiceWindow;
+
+                chestChoiceWindow = new ChestChoiceWindow(DaggerfallUI.UIManager);
+                DaggerfallUI.UIManager.PushWindow(chestChoiceWindow);
+                return "Complete";
+            }
+        }
+
+        // For Testing Custom Windows
 
         private static void ChestActivation(RaycastHit hit)
         {

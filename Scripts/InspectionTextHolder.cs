@@ -135,7 +135,7 @@ namespace LockedLootContainers
                     }
             }
         }
-
+        /*
         public static TextFile.Token[] sdfsf()
         {
 
@@ -376,10 +376,10 @@ namespace LockedLootContainers
                 }
             }
         }
-
+        */
 
         #region Shop Text
-
+        /*
         public static TextFile.Token[] HotFallShopText(int weatherID)
         {
             int variant = UnityEngine.Random.Range(0, 3);
@@ -414,7 +414,7 @@ namespace LockedLootContainers
             }
             return TextTokenFromRawString(raw);
         }
-
+        */
         #endregion
     }
 }
