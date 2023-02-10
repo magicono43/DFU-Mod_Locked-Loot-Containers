@@ -121,7 +121,8 @@ namespace LockedLootContainers
             Debug.Log("[LockLootContainers] Trying to register console commands.");
             try
             {
-                ConsoleCommandsDatabase.RegisterCommand(ShowBORegionWindow.command, ShowBORegionWindow.description, ShowBORegionWindow.usage, ShowBORegionWindow.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(ShowChestChoiceWindow.command, ShowChestChoiceWindow.description, ShowChestChoiceWindow.usage, ShowChestChoiceWindow.Execute);
             }
             catch (Exception e)
             {
@@ -129,7 +130,40 @@ namespace LockedLootContainers
             }
         }
 
-        private static class ShowBORegionWindow
+        private static class ChangeButtonRect
+        {
+            public static readonly string command = "butt";
+            public static readonly string description = "Changes the dimensions of this GUI button.";
+            public static readonly string usage = "butt [butt#] [x] [y] [w] [h]";
+
+            public static string Execute(params string[] args)
+            {
+                if (args.Length < 5 || args.Length > 5) return "Invalid entry, see usage notes.";
+
+                if (!int.TryParse(args[0], out int buttNum))
+                    return string.Format("`{0}` is not a number, please use a number for [butt#].", args[0]);
+                if (!int.TryParse(args[1], out int x))
+                    return string.Format("`{0}` is not a number, please use a number for [x].", args[1]);
+                if (!int.TryParse(args[2], out int y))
+                    return string.Format("`{0}` is not a number, please use a number for [y].", args[2]);
+                if (!int.TryParse(args[3], out int w))
+                    return string.Format("`{0}` is not a number, please use a number for [w].", args[3]);
+                if (!int.TryParse(args[4], out int h))
+                    return string.Format("`{0}` is not a number, please use a number for [h].", args[4]);
+
+                if (buttNum == 1)
+                    ChestChoiceWindow.butt1 = new Rect(x, y, w, h);
+                else if (buttNum == 2)
+                    ChestChoiceWindow.butt2 = new Rect(x, y, w, h);
+                else if (buttNum == 3)
+                    ChestChoiceWindow.butt3 = new Rect(x, y, w, h);
+                else
+                    return "Error: Something went wrong.";
+                return string.Format("Button {0} Rect Adjusted.", buttNum);
+            }
+        }
+
+        private static class ShowChestChoiceWindow
         {
             public static readonly string command = "showchestchoicewindow";
             public static readonly string description = "Shows the custom Locked Loot Containers Chest Choice Window.)";

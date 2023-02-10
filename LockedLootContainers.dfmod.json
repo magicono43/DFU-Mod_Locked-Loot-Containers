@@ -21,7 +21,8 @@
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/InspectionLogic.cs",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/InspectionTextHolder.cs",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/ChestChoiceWindow.cs",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/Chest_Choice_Menu_1.png"
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/Chest_Choice_Menu_1.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/InspectionInfoWindow.cs"
     ],
     "Dependencies": []
 }

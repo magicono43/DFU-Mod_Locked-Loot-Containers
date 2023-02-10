@@ -17,7 +17,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
     /// <summary>
     /// Implements Locked Loot Containers' Chest Choice Interface Window.
     /// </summary>
-    public class ChestChoiceWindow : DaggerfallPopupWindow
+    public class InspectionInfoWindow : DaggerfallPopupWindow
     {
         PlayerEntity player;
 
@@ -38,7 +38,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         #region Constructors
 
-        public ChestChoiceWindow(IUserInterfaceManager uiManager)
+        public InspectionInfoWindow(IUserInterfaceManager uiManager)
             : base(uiManager)
         {
         }
@@ -48,7 +48,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         #region UI Textures
 
         Texture2D baseTexture;
-        const string baseTextureName = "Chest_Choice_Menu_1";
+        const string baseTextureName = "MASK00I0.IMG";
+        const int alternateAlphaIndex = 12;
+        //const string baseTextureName = "Chest_Choice_Menu_1";
 
         #endregion
 
@@ -71,7 +73,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             ParentPanel.BackgroundColor = ScreenDimColor;
 
             // Setup native panel background
-            NativePanel.BackgroundColor = ScreenDimColor;
+            //NativePanel.BackgroundColor = ScreenDimColor;
             NativePanel.BackgroundTexture = baseTexture;
 			
 			/*
@@ -95,18 +97,21 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             NativePanel.Components.Add(lPikButPanel);
 			*/
 
-            SetupSkillProgressText();
+            //SetupSkillProgressText();
         }
 
         protected virtual void LoadTextures()
         {
+            baseTexture = ImageReader.GetTexture(baseTextureName, 0, 0, true, alternateAlphaIndex);
+            /*
             Texture2D baseTex;
 
             TextureReplacement.TryImportTexture(baseTextureName, true, out baseTex);
 
             baseTexture = baseTex;
+            */
         }
-
+        /*
         protected void SetupSkillProgressText()
         {
             // Primary skills button
@@ -115,7 +120,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             primarySkillsButton.ToolTip = defaultToolTip;
             primarySkillsButton.ToolTipText = "Inspect Chest";
             primarySkillsButton.OnMouseClick += PrimarySkillsButton_OnMouseClick;
-            primarySkillsButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
             primarySkillsButton.Hotkey = DaggerfallShortcut.GetBinding(DaggerfallShortcut.Buttons.CharacterSheetPrimarySkills);
 
             // Major skills button
@@ -136,10 +140,14 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         private void PrimarySkillsButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
-            CloseWindow();
-            InspectionInfoWindow inspectionInfoWindow;
-            inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager);
-            DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
+            //ShowSkillsDialog(PlayerEntity.GetPrimarySkills());
+            TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
+            "Redial The Number");
+
+            DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+            inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
+            inspectChestPopup.Show();
+            inspectChestPopup.ClickAnywhereToClose = true;
         }
 
         private void MajorSkillsButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
@@ -159,5 +167,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             //ShowSkillsDialog(PlayerEntity.GetMiscSkills(), true);
             CloseWindow();
         }
+        */
     }
 }
