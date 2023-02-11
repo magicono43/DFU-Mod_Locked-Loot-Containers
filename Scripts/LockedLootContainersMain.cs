@@ -152,11 +152,11 @@ namespace LockedLootContainers
                     return string.Format("`{0}` is not a number, please use a number for [h].", args[4]);
 
                 if (buttNum == 1)
-                    ChestChoiceWindow.butt1 = new Rect(x, y, w, h);
+                    InspectionInfoWindow.butt1 = new Rect(x, y, w, h);
                 else if (buttNum == 2)
-                    ChestChoiceWindow.butt2 = new Rect(x, y, w, h);
+                    InspectionInfoWindow.butt2 = new Rect(x, y, w, h);
                 else if (buttNum == 3)
-                    ChestChoiceWindow.butt3 = new Rect(x, y, w, h);
+                    InspectionInfoWindow.butt3 = new Rect(x, y, w, h);
                 else
                     return "Error: Something went wrong.";
                 return string.Format("Button {0} Rect Adjusted.", buttNum);

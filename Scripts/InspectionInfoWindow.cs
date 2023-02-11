@@ -48,18 +48,16 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         #region UI Textures
 
         Texture2D baseTexture;
-        const string baseTextureName = "MASK00I0.IMG";
-        const int alternateAlphaIndex = 12;
-        //const string baseTextureName = "Chest_Choice_Menu_1";
+        const string baseTextureName = "Inspection_Info_GUI_1";
 
         #endregion
 
         #region UI Panels
-		/*
+
         Panel exitButPanel = new Panel();
         Panel idenButPanel = new Panel();
         Panel lPikButPanel = new Panel();
-		*/
+
         #endregion
 
         protected override void Setup()
@@ -73,44 +71,86 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             ParentPanel.BackgroundColor = ScreenDimColor;
 
             // Setup native panel background
-            //NativePanel.BackgroundColor = ScreenDimColor;
+            NativePanel.BackgroundColor = ScreenDimColor;
             NativePanel.BackgroundTexture = baseTexture;
-			
-			/*
-            // Setup button locations and textures around native panel background
-            exitButPanel.Size = new Vector2(24, 16);
-            exitButPanel.Position = new Vector2(0, 131);
-            exitButPanel.HorizontalAlignment = HorizontalAlignment.Center;
-            exitButPanel.BackgroundTexture = exitTexture;
-            NativePanel.Components.Add(exitButPanel);
 
-            idenButPanel.Size = new Vector2(28, 28);
-            idenButPanel.Position = new Vector2(192, 0);
-            idenButPanel.VerticalAlignment = VerticalAlignment.Middle;
-            idenButPanel.BackgroundTexture = idenTexture;
-            NativePanel.Components.Add(idenButPanel);
+            Panel chestPictureBox = DaggerfallUI.AddPanel(new Rect(113, 64, 30, 22), NativePanel);
+            chestPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+            chestPictureBox.ToolTip = defaultToolTip;
+            chestPictureBox.ToolTipText = "Chest Info";
 
-            lPikButPanel.Size = new Vector2(28, 28);
-            lPikButPanel.Position = new Vector2(99, 0);
-            lPikButPanel.VerticalAlignment = VerticalAlignment.Middle;
-            lPikButPanel.BackgroundTexture = lPikTexture;
-            NativePanel.Components.Add(lPikButPanel);
-			*/
+            Panel lockPictureBox = DaggerfallUI.AddPanel(new Rect(176, 64, 30, 22), NativePanel);
+            lockPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+            lockPictureBox.ToolTip = defaultToolTip;
+            lockPictureBox.ToolTipText = "Lock Info";
+
+            // Exit Button
+            Button exitButton = DaggerfallUI.AddButton(new Rect(139, 122, 43, 15), NativePanel);
+            exitButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+            exitButton.OnMouseClick += ExitButton_OnMouseClick;
+            exitButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
+
+            // Setup Chest Info panels and text
+            for (int i = 0; i < 3; i++)
+            {
+                string boxText = "", toolTipText = "";
+                if (i == 0) { boxText = "Chest Material"; toolTipText = "Chest Material"; }
+                else if (i == 1) { boxText = "Chest Sturdiness"; toolTipText = "Chest Sturdiness"; }
+                else { boxText = "Chest Magic Resist"; toolTipText = "Chest Magic Resist"; }
+
+                Panel chestInfoPan = DaggerfallUI.AddPanel(new Rect(100, 90 + (i * 6), 57, 5), NativePanel);
+                chestInfoPan.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+                chestInfoPan.ToolTip = defaultToolTip;
+                chestInfoPan.ToolTipText = toolTipText;
+                TextLabel chestInfoText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, chestInfoPan);
+                chestInfoText.HorizontalAlignment = HorizontalAlignment.Center;
+                chestInfoText.VerticalAlignment = VerticalAlignment.Middle;
+                chestInfoText.TextScale = 0.9f;
+                //lockInfoText.TextColor = new Color(0.8f, 0.4f, 0.2f, 1f); // Brown?
+                chestInfoText.Text = boxText;
+            }
+
+            // Setup Lock Info panels and text
+            for (int i = 0; i < 5; i++)
+            {
+                string boxText = "", toolTipText = "";
+                if (i == 0) { boxText = "Lock Material"; toolTipText = "Lock Material"; }
+                else if (i == 1) { boxText = "Lock Sturdiness"; toolTipText = "Lock Sturdiness"; }
+                else if (i == 2) { boxText = "Lock Magic Resist"; toolTipText = "Lock Magic Resist"; }
+                else if (i == 3) { boxText = "Lock Complexity"; toolTipText = "Lock Complexity"; }
+                else { boxText = "Lock Jam Resist"; toolTipText = "Lock Jam Resist"; }
+
+                Panel lockInfoPan = DaggerfallUI.AddPanel(new Rect(163, 90 + (i * 6), 57, 5), NativePanel);
+                lockInfoPan.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+                lockInfoPan.ToolTip = defaultToolTip;
+                lockInfoPan.ToolTipText = toolTipText;
+                TextLabel lockInfoText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, lockInfoPan);
+                lockInfoText.HorizontalAlignment = HorizontalAlignment.Center;
+                lockInfoText.VerticalAlignment = VerticalAlignment.Middle;
+                lockInfoText.TextScale = 0.9f;
+                //lockInfoText.TextColor = new Color(0.8f, 0.4f, 0.2f, 1f); // Brown?
+                lockInfoText.Text = boxText;
+            }
+
+            // Maybe next I work on this, add buttons on the info panels, that when clicked will show a message-box giving a summary on what that piece of info means and such, also colored text, etc.
 
             //SetupSkillProgressText();
         }
 
         protected virtual void LoadTextures()
         {
-            baseTexture = ImageReader.GetTexture(baseTextureName, 0, 0, true, alternateAlphaIndex);
-            /*
             Texture2D baseTex;
 
             TextureReplacement.TryImportTexture(baseTextureName, true, out baseTex);
 
             baseTexture = baseTex;
-            */
         }
+
+        private void ExitButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            CloseWindow();
+        }
+
         /*
         protected void SetupSkillProgressText()
         {
