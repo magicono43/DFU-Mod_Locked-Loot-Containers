@@ -26,7 +26,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             get { return (player != null) ? player : player = GameManager.Instance.PlayerEntity; }
         }
 
-        public static Outline outline;
+        protected LLCObject chest = null;
 
         #region Testing Properties
 
@@ -38,9 +38,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         #region Constructors
 
-        public ChestChoiceWindow(IUserInterfaceManager uiManager)
+        public ChestChoiceWindow(IUserInterfaceManager uiManager, LLCObject chest = null)
             : base(uiManager)
         {
+            this.chest = chest;
         }
 
         #endregion
@@ -137,8 +138,8 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void PrimarySkillsButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             CloseWindow();
-            InspectionInfoWindow inspectionInfoWindow;
-            inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager);
+            chest.RecentInspectValues = LockedLootContainersMain.GetInspectionValues(chest);
+            InspectionInfoWindow inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager, chest);
             DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
         }
 

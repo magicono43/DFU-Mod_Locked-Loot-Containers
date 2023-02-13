@@ -18,6 +18,7 @@ namespace LockedLootContainers
         TextFile.Token[] onClickText;
         TextFile.Token[] regionManufacturedText;
         TextFile.Token[] companyManufacturedText;
+        int[] recentInspectValues = { -1, -1, -1, -1, -1, -1, -1, -1 };
 
         bool isLocked = false; // Value is kind of pointless right now, since as soon as the chest unlocks it changes into a loot-pile and does not persist in an "unlocked" state or whatever.
         bool isTrapped = false;
@@ -77,6 +78,12 @@ namespace LockedLootContainers
         {
             get { return companyManufacturedText; }
             set { companyManufacturedText = value; }
+        }
+
+        public int[] RecentInspectValues
+        {
+            get { return recentInspectValues; }
+            set { recentInspectValues = value; }
         }
 
         public bool IsLocked

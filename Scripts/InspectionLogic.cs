@@ -12,6 +12,22 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
+        public static int[] GetInspectionValues(LLCObject chest)
+        {
+            int[] values = chest.RecentInspectValues;
+
+            values[0] = IdentifyChestMaterialRoll(chest);
+            values[1] = IdentifyChestSturdinessRoll(chest);
+            values[2] = IdentifyMagicResistRoll(chest);
+            values[3] = IdentifyLocktMaterialRoll(chest);
+            values[4] = IdentifyLockSturdinessRoll(chest);
+            values[5] = IdentifyMagicResistRoll(chest);
+            values[6] = IdentifyLockComplexityRoll(chest);
+            values[7] = IdentifyJamResistRoll(chest);
+
+            return values;
+        }
+
         public static int IdentifyChestMaterialRoll(LLCObject chest)
         {
             int identifyRoll = (chest.ChestMaterial == ChestMaterials.Wood) ? 10 : 0;
@@ -38,6 +54,12 @@ namespace LockedLootContainers
             return DetermineInfoTextVagueness(identifyRoll);
         }
 
+        public static int IdentifyLockSturdinessRoll(LLCObject chest)
+        {
+            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 1.66f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 3.33f);
+            return DetermineInfoTextVagueness(identifyRoll);
+        }
+
         public static int IdentifyLockComplexityRoll(LLCObject chest)
         {
             int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 3.33f) + (int)Mathf.Round(Mathf.Clamp(Agili, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 2.85f);
@@ -47,12 +69,6 @@ namespace LockedLootContainers
         public static int IdentifyJamResistRoll(LLCObject chest)
         {
             int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 2.5f) + (int)Mathf.Round(Mathf.Clamp(Agili, -50, 70) / 2.5f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 3.33f);
-            return DetermineInfoTextVagueness(identifyRoll);
-        }
-
-        public static int IdentifyLockSturdinessRoll(LLCObject chest)
-        {
-            int identifyRoll = (int)Mathf.Round(Mathf.Clamp(Intel, -50, 70) / 5f) + (int)Mathf.Round(Mathf.Clamp(Willp, -50, 70) / 1.66f) + (int)Mathf.Round(Mathf.Clamp(LockP, 0, 130) / 3.33f);
             return DetermineInfoTextVagueness(identifyRoll);
         }
 

@@ -135,10 +135,223 @@ namespace LockedLootContainers
                     }
             }
         }
-        /*
-        public static TextFile.Token[] sdfsf()
+        
+        public static string GetChestMaterialText(LLCObject chest, int vagueness)
         {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMaterialText(chest.ChestMaterial); }
+            else if (vagueness == (int)InfoVagueness.Vivid || vagueness == (int)InfoVagueness.Complete) { return GetCompleteMaterialText(chest.ChestMaterial); }
+            else { return "ERROR"; }
+        }
 
+        public static string GetBasicMaterialText(ChestMaterials mat)
+        {
+            if (mat == ChestMaterials.Wood || mat == ChestMaterials.Dwarven || mat == ChestMaterials.Adamantium) { return "Soft"; }
+            else if (mat == ChestMaterials.Iron || mat == ChestMaterials.Steel || mat == ChestMaterials.Orcish || mat == ChestMaterials.Mithril || mat == ChestMaterials.Daedric) { return "Hard"; }
+            else return "ERROR";
+        }
+
+        public static string GetCompleteMaterialText(ChestMaterials mat)
+        {
+            if (mat == ChestMaterials.Wood) { return "Wooden"; }
+            else if (mat == ChestMaterials.Iron) { return "Iron"; }
+            else if (mat == ChestMaterials.Steel) { return "Steel"; }
+            else if (mat == ChestMaterials.Orcish) { return "Orcish"; }
+            else if (mat == ChestMaterials.Mithril) { return "Mithril"; }
+            else if (mat == ChestMaterials.Dwarven) { return "Dwarven"; }
+            else if (mat == ChestMaterials.Adamantium) { return "Adamantium"; }
+            else if (mat == ChestMaterials.Daedric) { return "Daedric"; }
+            else { return "ERROR"; }
+        }
+
+        public static string GetBasicMaterialText(LockMaterials mat)
+        {
+            if (mat == LockMaterials.Wood || mat == LockMaterials.Dwarven || mat == LockMaterials.Adamantium) { return "Soft"; }
+            else if (mat == LockMaterials.Iron || mat == LockMaterials.Steel || mat == LockMaterials.Orcish || mat == LockMaterials.Mithril || mat == LockMaterials.Daedric) { return "Hard"; }
+            else return "ERROR";
+        }
+
+        public static string GetCompleteMaterialText(LockMaterials mat)
+        {
+            if (mat == LockMaterials.Wood) { return "Wooden"; }
+            else if (mat == LockMaterials.Iron) { return "Iron"; }
+            else if (mat == LockMaterials.Steel) { return "Steel"; }
+            else if (mat == LockMaterials.Orcish) { return "Orcish"; }
+            else if (mat == LockMaterials.Mithril) { return "Mithril"; }
+            else if (mat == LockMaterials.Dwarven) { return "Dwarven"; }
+            else if (mat == LockMaterials.Adamantium) { return "Adamantium"; }
+            else if (mat == LockMaterials.Daedric) { return "Daedric"; }
+            else { return "ERROR"; }
+        }
+
+        public static string GetChestSturdinessText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicSturdinessText(chest.ChestSturdiness); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividSturdinessText(chest.ChestSturdiness); }
+            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteSturdinessText(chest.ChestSturdiness); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetBasicSturdinessText(int stab)
+        {
+            if (stab <= 35) { return "Flimsy"; }
+            else if (stab >= 36 && stab <= 75) { return "Sturdy"; }
+            else { return "Fortified"; }
+        }
+
+        public static string GetVividSturdinessText(int stab)
+        {
+            if (stab <= 16) { return "Fragile"; }
+            else if (stab >= 17 && stab <= 35) { return "Flimsy"; }
+            else if (stab >= 36 && stab <= 50) { return "Stable"; }
+            else if (stab >= 51 && stab <= 75) { return "Sturdy"; }
+            else if (stab >= 76 && stab <= 90) { return "Fortified"; }
+            else { return "Impenetrable"; }
+        }
+
+        public static string GetCompleteSturdinessText(int stab)
+        {
+            if (stab <= 16) { return "Fragile" + " (" + stab.ToString() + ")"; }
+            else if (stab >= 17 && stab <= 35) { return "Flimsy" + " (" + stab.ToString() + ")"; }
+            else if (stab >= 36 && stab <= 50) { return "Stable" + " (" + stab.ToString() + ")"; }
+            else if (stab >= 51 && stab <= 75) { return "Sturdy" + " (" + stab.ToString() + ")"; }
+            else if (stab >= 76 && stab <= 90) { return "Fortified" + " (" + stab.ToString() + ")"; }
+            else { return "Impenetrable" + " (" + stab.ToString() + ")"; }
+        }
+
+        public static string GetChestMagicResistText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMagicResistText(chest.ChestMagicResist); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividMagicResistText(chest.ChestMagicResist); }
+            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteMagicResistText(chest.ChestMagicResist); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetBasicMagicResistText(int res)
+        {
+            if (res <= 35) { return "Defenseless"; }
+            else if (res >= 36 && res <= 75) { return "Resistant"; }
+            else { return "Immune"; }
+        }
+
+        public static string GetVividMagicResistText(int res)
+        {
+            if (res <= 16) { return "Defenseless"; }
+            else if (res >= 17 && res <= 35) { return "Vulnerable"; }
+            else if (res >= 36 && res <= 50) { return "Resistant"; }
+            else if (res >= 51 && res <= 75) { return "Protected"; }
+            else if (res >= 76 && res <= 90) { return "Warded"; }
+            else { return "Immune"; }
+        }
+
+        public static string GetCompleteMagicResistText(int res)
+        {
+            if (res <= 16) { return "Defenseless" + " (" + res.ToString() + ")"; }
+            else if (res >= 17 && res <= 35) { return "Vulnerable" + " (" + res.ToString() + ")"; }
+            else if (res >= 36 && res <= 50) { return "Resistant" + " (" + res.ToString() + ")"; }
+            else if (res >= 51 && res <= 75) { return "Protected" + " (" + res.ToString() + ")"; }
+            else if (res >= 76 && res <= 90) { return "Warded" + " (" + res.ToString() + ")"; }
+            else { return "Immune" + " (" + res.ToString() + ")"; }
+        }
+
+        public static string GetLockMaterialText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMaterialText(chest.LockMaterial); }
+            else if (vagueness == (int)InfoVagueness.Vivid || vagueness == (int)InfoVagueness.Complete) { return GetCompleteMaterialText(chest.LockMaterial); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetLockSturdinessText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicSturdinessText(chest.LockSturdiness); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividSturdinessText(chest.LockSturdiness); }
+            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteSturdinessText(chest.LockSturdiness); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetLockMagicResistText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMagicResistText(chest.LockMagicResist); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividMagicResistText(chest.LockMagicResist); }
+            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteMagicResistText(chest.LockMagicResist); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetLockComplexityText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicComplexityText(chest.LockComplexity); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividComplexityText(chest.LockComplexity); }
+            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteComplexityText(chest.LockComplexity); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetBasicComplexityText(int comp)
+        {
+            if (comp <= 35) { return "Simple"; }
+            else if (comp >= 36 && comp <= 75) { return "Complex"; }
+            else { return "Elaborate"; }
+        }
+
+        public static string GetVividComplexityText(int comp)
+        {
+            if (comp <= 16) { return "Crude"; }
+            else if (comp >= 17 && comp <= 35) { return "Simple"; }
+            else if (comp >= 36 && comp <= 50) { return "Complex"; }
+            else if (comp >= 51 && comp <= 75) { return "Elaborate"; }
+            else if (comp >= 76 && comp <= 90) { return "Tricky"; }
+            else { return "Devious"; }
+        }
+
+        public static string GetCompleteComplexityText(int comp)
+        {
+            if (comp <= 16) { return "Crude" + " (" + comp.ToString() + ")"; }
+            else if (comp >= 17 && comp <= 35) { return "Simple" + " (" + comp.ToString() + ")"; }
+            else if (comp >= 36 && comp <= 50) { return "Complex" + " (" + comp.ToString() + ")"; }
+            else if (comp >= 51 && comp <= 75) { return "Elaborate" + " (" + comp.ToString() + ")"; }
+            else if (comp >= 76 && comp <= 90) { return "Tricky" + " (" + comp.ToString() + ")"; }
+            else { return "Devious" + " (" + comp.ToString() + ")"; }
+        }
+
+        public static string GetLockJamResistText(LLCObject chest, int vagueness)
+        {
+            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicJamResistText(chest.JamResist); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividJamResistText(chest.JamResist); }
+            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteJamResistText(chest.JamResist); }
+            else { return "ERROR"; }
+        }
+
+        public static string GetBasicJamResistText(int jam)
+        {
+            if (jam <= 35) { return "Eroded"; }
+            else if (jam >= 36 && jam <= 75) { return "Springy"; }
+            else { return "Oiled"; }
+        }
+
+        public static string GetVividJamResistText(int jam)
+        {
+            if (jam <= 16) { return "Eroded"; }
+            else if (jam >= 17 && jam <= 35) { return "Deteriorated"; }
+            else if (jam >= 36 && jam <= 50) { return "Stiff"; }
+            else if (jam >= 51 && jam <= 75) { return "Springy"; }
+            else if (jam >= 76 && jam <= 90) { return "Oiled"; }
+            else { return "Effortless"; }
+        }
+
+        public static string GetCompleteJamResistText(int jam)
+        {
+            if (jam <= 16) { return "Eroded" + " (" + jam.ToString() + ")"; }
+            else if (jam >= 17 && jam <= 35) { return "Deteriorated" + " (" + jam.ToString() + ")"; }
+            else if (jam >= 36 && jam <= 50) { return "Stiff" + " (" + jam.ToString() + ")"; }
+            else if (jam >= 51 && jam <= 75) { return "Springy" + " (" + jam.ToString() + ")"; }
+            else if (jam >= 76 && jam <= 90) { return "Oiled" + " (" + jam.ToString() + ")"; }
+            else { return "Effortless" + " (" + jam.ToString() + ")"; }
         }
 
         public static void testerslser()
@@ -151,270 +364,5 @@ namespace LockedLootContainers
                 "Do you attempt disarming it to get to the contents of the pouch, at risk of triggering the trap?", "",
                 "(Odds Determined By: Thaumaturgy, Destruction, Lockpicking, and of course, Luck)");
         }
-		
-		public static TextFile.Token[] TextTokenFromRawString(string rawString)
-        {
-            var listOfCompLines = new List<string>();
-            int partLength = 115;
-            if (!DaggerfallUnity.Settings.SDFFontRendering)
-                partLength = 65;
-            string sentence = rawString;
-            string[] words = sentence.Split(' ');
-            TextDelay = 5f + (words.Length * 0.25f);
-            var parts = new Dictionary<int, string>();
-            string part = string.Empty;
-            int partCounter = 0;
-            foreach (var word in words)
-            {
-                if (part.Length + word.Length < partLength)
-                {
-                    part += string.IsNullOrEmpty(part) ? word : " " + word;
-                }
-                else
-                {
-                    parts.Add(partCounter, part);
-                    part = word;
-                    partCounter++;
-                }
-            }
-            parts.Add(partCounter, part);
-
-            foreach (var item in parts)
-            {
-                listOfCompLines.Add(item.Value);
-            }
-
-            return DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter, listOfCompLines.ToArray());
-        }
-		
-		public void ShowFlavorText_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
-        {
-            WeatherType weatherType = GetCurrentWeatherType();
-            DaggerfallDateTime.Seasons currentSeason = DaggerfallUnity.Instance.WorldTime.Now.SeasonValue;
-            DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
-
-            ulong currentTimeSeconds = DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.ToSeconds(); // 15 * 86400 = Number of seconds in 15 days.
-
-            TextFile.Token[] tokens = null;
-
-            if (playerEnterExit.IsPlayerInside)
-            {
-                if (playerGPS.CurrentRegionIndex == 17 && locationData.Name == "Daggerfall" && (currentTimeSeconds - lastSeenCastleDFText) > 86400 * (uint)CastleDFTextCooldown) // Daggerfall Region
-                {
-                    lastSeenCastleDFText = currentTimeSeconds;
-
-                    switch (currentSeason)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = FallDFPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = FallDFPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = FallDFPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Spring:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = SpringDFPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = SpringDFPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = SpringDFPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Summer:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = SummerDFPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = SummerDFPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = SummerDFPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Winter:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = WinterDFPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = WinterDFPalaceText(1); break;
-                                case WeatherType.Snow: tokens = WinterDFPalaceText(3); break;
-                            }
-                            break;
-                    }
-                }
-                else if (playerGPS.CurrentRegionIndex == 20 && locationData.Name == "Sentinel" && (currentTimeSeconds - lastSeenCastleSentText) > 86400 * (uint)CastleSentTextCooldown) // Sentinel Region
-                {
-                    lastSeenCastleSentText = currentTimeSeconds;
-
-                    switch (currentSeason)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = FallSentPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = FallSentPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = FallSentPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Spring:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = SpringSentPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = SpringSentPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = SpringSentPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Summer:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = SummerSentPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = SummerSentPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = SummerSentPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Winter:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = WinterSentPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = WinterSentPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = WinterSentPalaceText(2); break;
-                            }
-                            break;
-                    }
-                }
-                else if (playerGPS.CurrentRegionIndex == 23 && locationData.Name == "Wayrest" && (currentTimeSeconds - lastSeenCastleWayText) > 86400 * (uint)CastleWayTextCooldown) // Wayrest Region
-                {
-                    lastSeenCastleWayText = currentTimeSeconds;
-
-                    switch (currentSeason)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = FallWayPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = FallWayPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = FallWayPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Spring:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = SpringWayPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = SpringWayPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = SpringWayPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Summer:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = SummerWayPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = SummerWayPalaceText(1); break;
-                                case WeatherType.Rain:
-                                case WeatherType.Thunder: tokens = SummerWayPalaceText(2); break;
-                            }
-                            break;
-                        case DaggerfallDateTime.Seasons.Winter:
-                            switch (weatherType)
-                            {
-                                case WeatherType.Sunny:
-                                default: tokens = WinterWayPalaceText(0); break;
-                                case WeatherType.Overcast:
-                                case WeatherType.Fog: tokens = WinterWayPalaceText(1); break;
-                                case WeatherType.Snow: tokens = WinterWayPalaceText(3); break;
-                            }
-                            break;
-                    }
-                }
-            }
-
-            if (tokens != null)
-            {
-                if (MinDisplayDuration != 0 && TextDelay < MinDisplayDuration) // If not set to 0, the minimum number of seconds a message can show for
-                    TextDelay = MinDisplayDuration;
-
-                if (MaxDisplayDuration != 0 && TextDelay > MaxDisplayDuration) // If not set to 0, the maximum number of seconds a message can show for
-                    TextDelay = MaxDisplayDuration;
-
-                if (TextDisplayType == 0) // For HUD display of text
-                {
-                    DaggerfallUI.AddHUDText(tokens, TextDelay);
-                }
-                else // For MessageBox display of text
-                {
-                    DaggerfallMessageBox textBox = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    textBox.SetTextTokens(tokens);
-                    textBox.ClickAnywhereToClose = true;
-                    textBox.Show();
-                }
-            }
-        }
-        */
-
-        #region Shop Text
-        /*
-        public static TextFile.Token[] HotFallShopText(int weatherID)
-        {
-            int variant = UnityEngine.Random.Range(0, 3);
-            string raw = "";
-
-            if (weatherID == 1) // Cloudy
-            {
-                if (variant == 0)
-                    raw = "You enter " + BuildName() + ". Many items of interest sit on display shelves around the shopkeeper...";
-                else if (variant == 1)
-                    raw = "It is a miserable autumn day outside, and it is good to get inside " + BuildName() + ". You glance over the new shipments of supplies and wares.";
-                else
-                    raw = "It is a bit early in the year for this sort of slightly colder weather, but new supplies arrived at " + BuildName() + " with the chill. You find a few useful items immediately...";
-            }
-            else if (weatherID == 2) // Rainy
-            {
-                if (variant == 0)
-                    raw = "You enter " + BuildName() + ", happy to be out of the warm shower. As you dry off you notice the many items of interest that sit on the display shelves around the shop...";
-                else if (variant == 1)
-                    raw = "You are handed a towel as you come into " + BuildName() + " from the autumn thunderstorm. There is a new shipment of wares and supplies, and you notice several pieces worth looking at...";
-                else
-                    raw = "You are dripping with warm rain water as you enter " + BuildName() + ". It is a neat and clean chamber with a wide assortment of supplies and wares from this shop's speciality...";
-            }
-            else // Sunny or anything else
-            {
-                if (variant == 0)
-                    raw = "As you enter " + BuildName() + ", golden glints from the autumn sun reflect off of the many items of interest scattered about...";
-                else if (variant == 1)
-                    raw = "You enter " + BuildName() + " from the sunny autumn day. Display shelves of this store's speciality are featured next to some of the more peaceful supplies and gear...";
-                else
-                    raw = "The pleasant autumn weather has given " + BuildName() + " an air of joviality. You browse through cases and displays of various supplies...";
-            }
-            return TextTokenFromRawString(raw);
-        }
-        */
-        #endregion
     }
 }

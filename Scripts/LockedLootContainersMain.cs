@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		2/7/2023, 11:55 PM
+// Last Edit:		2/13/2023, 12:45 AM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -123,6 +123,8 @@ namespace LockedLootContainers
             {
                 ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(ShowChestChoiceWindow.command, ShowChestChoiceWindow.description, ShowChestChoiceWindow.usage, ShowChestChoiceWindow.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
+                // Add a tele2qmarker type command that teleports you to a random chest in the current scene, for much easier chest testing and such.
             }
             catch (Exception e)
             {
@@ -166,7 +168,7 @@ namespace LockedLootContainers
         private static class ShowChestChoiceWindow
         {
             public static readonly string command = "showchestchoicewindow";
-            public static readonly string description = "Shows the custom Locked Loot Containers Chest Choice Window.)";
+            public static readonly string description = "Shows the custom Locked Loot Containers Chest Choice Window.";
             public static readonly string usage = "showchestchoicewindow";
 
             public static string Execute(params string[] args)
@@ -176,6 +178,42 @@ namespace LockedLootContainers
                 chestChoiceWindow = new ChestChoiceWindow(DaggerfallUI.UIManager);
                 DaggerfallUI.UIManager.PushWindow(chestChoiceWindow);
                 return "Complete";
+            }
+        }
+
+        private static class TeleportToRandomChest // Will need to test this next time I'm in the Unity Editor, absolutely no clue if these position values will work for the player or not.
+        {
+            public static readonly string command = "tele2chest";
+            public static readonly string description = "Chooses random chest object from current scene and teleports player to its location.";
+            public static readonly string usage = "tele2chest";
+
+            public static string Execute(params string[] args)
+            {
+                LLCObject[] chests = FindObjectsOfType<LLCObject>();
+                if (chests.Length <= 0)
+                    return "Error: No chests in scene.";
+
+                LLCObject chest = chests[UnityEngine.Random.Range(0, chests.Length)];
+                if (chest == null)
+                    return "Error: Something went wrong.";
+
+                Vector3 chestPos = chest.transform.position;
+
+                if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
+                {
+                    GameManager.Instance.PlayerObject.transform.localPosition = chestPos;
+                }
+                else if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
+                {
+                    GameManager.Instance.PlayerObject.transform.position = chestPos;
+                }
+                else
+                {
+                    return "Error: Something went wrong.";
+                }
+                GameManager.Instance.PlayerMotor.FixStanding();
+
+                return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length - 1);
             }
         }
 
@@ -200,6 +238,10 @@ namespace LockedLootContainers
                     {
                         LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
 
+                        chestData.RecentInspectValues = GetInspectionValues(chestData);
+                        InspectionInfoWindow inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager, chestData);
+                        DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
+
                         TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
                         "CHEST",
                         "This chest is made of: " + chestData.ChestMaterial.ToString(),
@@ -210,16 +252,6 @@ namespace LockedLootContainers
                         "Lock magic resist is: " + chestData.LockMagicResist,
                         "Lock complexity is: " + chestData.LockComplexity,
                         "Lock jam resist is: " + chestData.JamResist);
-
-                        /*TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-                        "This chest is made of: " + chestData.ChestMaterial.ToString(),
-                        "Chest sturdiness is: " + chestData.ChestSturdiness,
-                        "Chest magic resist is: " + chestData.ChestMagicResist,
-                        "Its lock is made of: " + chestData.LockMaterial.ToString(),
-                        "Lock sturdiness is: " + chestData.LockSturdiness,
-                        "Lock magic resist is: " + chestData.LockMagicResist,
-                        "Lock complexity is: " + chestData.LockComplexity,
-                        "Lock jam resist is: " + chestData.JamResist);*/
 
                         DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
                         inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
