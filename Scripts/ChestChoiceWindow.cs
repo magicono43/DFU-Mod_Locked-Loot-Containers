@@ -11,6 +11,7 @@ using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using LockedLootContainers;
 using DaggerfallWorkshop.Game.Entity;
+using DaggerfallWorkshop.Game.Items;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 {
@@ -53,14 +54,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         #endregion
 
-        #region UI Panels
-		/*
-        Panel exitButPanel = new Panel();
-        Panel idenButPanel = new Panel();
-        Panel lPikButPanel = new Panel();
-		*/
-        #endregion
-
         protected override void Setup()
         {
             base.Setup();
@@ -74,68 +67,39 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             // Setup native panel background
             NativePanel.BackgroundColor = ScreenDimColor;
             NativePanel.BackgroundTexture = baseTexture;
-			
-			/*
-            // Setup button locations and textures around native panel background
-            exitButPanel.Size = new Vector2(24, 16);
-            exitButPanel.Position = new Vector2(0, 131);
-            exitButPanel.HorizontalAlignment = HorizontalAlignment.Center;
-            exitButPanel.BackgroundTexture = exitTexture;
-            NativePanel.Components.Add(exitButPanel);
 
-            idenButPanel.Size = new Vector2(28, 28);
-            idenButPanel.Position = new Vector2(192, 0);
-            idenButPanel.VerticalAlignment = VerticalAlignment.Middle;
-            idenButPanel.BackgroundTexture = idenTexture;
-            NativePanel.Components.Add(idenButPanel);
-
-            lPikButPanel.Size = new Vector2(28, 28);
-            lPikButPanel.Position = new Vector2(99, 0);
-            lPikButPanel.VerticalAlignment = VerticalAlignment.Middle;
-            lPikButPanel.BackgroundTexture = lPikTexture;
-            NativePanel.Components.Add(lPikButPanel);
-			*/
-
-            SetupSkillProgressText();
+            SetupChestChoiceButtons();
         }
 
         protected virtual void LoadTextures()
         {
-            Texture2D baseTex;
-
-            TextureReplacement.TryImportTexture(baseTextureName, true, out baseTex);
-
+            TextureReplacement.TryImportTexture(baseTextureName, true, out Texture2D baseTex);
             baseTexture = baseTex;
         }
 
-        protected void SetupSkillProgressText()
+        protected void SetupChestChoiceButtons()
         {
-            // Primary skills button
-            Button primarySkillsButton = DaggerfallUI.AddButton(new Rect(144, 70, 33, 16), NativePanel);
-            primarySkillsButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For Testing Purposes
-            primarySkillsButton.ToolTip = defaultToolTip;
-            primarySkillsButton.ToolTipText = "Inspect Chest";
-            primarySkillsButton.OnMouseClick += PrimarySkillsButton_OnMouseClick;
-            primarySkillsButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
-            primarySkillsButton.Hotkey = DaggerfallShortcut.GetBinding(DaggerfallShortcut.Buttons.CharacterSheetPrimarySkills);
+            // Inspect Chest button
+            Button inspectChestButton = DaggerfallUI.AddButton(new Rect(144, 70, 33, 16), NativePanel);
+            inspectChestButton.ToolTip = defaultToolTip;
+            inspectChestButton.ToolTipText = "Inspect Chest";
+            inspectChestButton.OnMouseClick += InspectChestButton_OnMouseClick;
+            inspectChestButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
 
-            // Major skills button
-            Button majorSkillsButton = DaggerfallUI.AddButton(new Rect(144, 92, 33, 16), NativePanel);
-            majorSkillsButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For Testing Purposes
-            majorSkillsButton.ToolTip = defaultToolTip;
-            majorSkillsButton.ToolTipText = "Attempt Lockpick";
-            majorSkillsButton.OnMouseClick += MajorSkillsButton_OnMouseClick;
-            majorSkillsButton.Hotkey = DaggerfallShortcut.GetBinding(DaggerfallShortcut.Buttons.CharacterSheetMajorSkills);
+            // Attempt Lockpick button
+            Button attemptLockpickButton = DaggerfallUI.AddButton(new Rect(144, 92, 33, 16), NativePanel);
+            attemptLockpickButton.ToolTip = defaultToolTip;
+            attemptLockpickButton.ToolTipText = "Attempt Lockpick";
+            attemptLockpickButton.OnMouseClick += AttemptLockpickButton_OnMouseClick;
+            attemptLockpickButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick); // May remove this click sound if it interfers with lockpicking sounds, etc.
 
-            // Miscellaneous skills button
-            Button miscSkillsButton = DaggerfallUI.AddButton(new Rect(142, 114, 36, 17), NativePanel);
-            miscSkillsButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For Testing Purposes
-            miscSkillsButton.OnMouseClick += MiscSkillsButton_OnMouseClick;
-            miscSkillsButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
-            miscSkillsButton.Hotkey = DaggerfallShortcut.GetBinding(DaggerfallShortcut.Buttons.CharacterSheetMiscSkills);
+            // Exit button
+            Button exitButton = DaggerfallUI.AddButton(new Rect(142, 114, 36, 17), NativePanel);
+            exitButton.OnMouseClick += ExitButton_OnMouseClick;
+            exitButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
         }
 
-        private void PrimarySkillsButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        private void InspectChestButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             CloseWindow();
             chest.RecentInspectValues = LockedLootContainersMain.GetInspectionValues(chest);
@@ -143,21 +107,62 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
         }
 
-        private void MajorSkillsButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        private void AttemptLockpickButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
-            //ShowSkillsDialog(PlayerEntity.GetMajorSkills());
-            TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Lick my balls");
+            CloseWindow();
+            if (chest != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
+            {
+                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                ItemCollection closedChestLoot = chest.AttachedLoot;
+                Transform closedChestTransform = chest.transform;
+                Vector3 pos = chest.transform.position;
 
-            DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-            inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
-            inspectChestPopup.Show();
-            inspectChestPopup.ClickAnywhereToClose = true;
+                if (chest.IsLockJammed)
+                {
+                    DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
+                    if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                        dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
+                }
+                else if (Dice100.SuccessRoll(LockedLootContainersMain.LockPickChance(chest))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                {
+                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, chest.LoadID, null, false);
+                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+
+                    UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                    LockedLootContainersMain.ChestObjRef = null; // This may cause issues? But really no clue, just a note.
+
+                    // Show success and play unlock sound
+                    DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
+                    if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                }
+                else
+                {
+                    chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                    if (Dice100.SuccessRoll(LockedLootContainersMain.LockJamChance(chest)))
+                    {
+                        chest.IsLockJammed = true;
+                        DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
+                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                            dfAudioSource.PlayOneShot(SoundClips.ActivateGrind); // Will use custom sounds in the end most likely.
+                    }
+                    else
+                    {
+                        DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
+                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                            dfAudioSource.PlayOneShot(SoundClips.ActivateGears); // Will use custom sounds in the end most likely.
+                    }
+                }
+            }
+            else
+            {
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+            }
         }
 
-        private void MiscSkillsButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        private void ExitButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
-            //ShowSkillsDialog(PlayerEntity.GetMiscSkills(), true);
             CloseWindow();
         }
     }

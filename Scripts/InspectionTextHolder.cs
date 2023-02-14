@@ -353,16 +353,5 @@ namespace LockedLootContainers
             else if (jam >= 76 && jam <= 90) { return "Oiled" + " (" + jam.ToString() + ")"; }
             else { return "Effortless" + " (" + jam.ToString() + ")"; }
         }
-
-        public static void testerslser()
-        {
-            TextFile.Token[] choiceText;
-
-            choiceText = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-                "As you go to unlatch the pouch, you notice what looks like a magical rune inscribed onto the clasp. You can only imagine it's a magical trap of some sort",
-                "(likely as an attempt to discourage behavior such as this.) ",
-                "Do you attempt disarming it to get to the contents of the pouch, at risk of triggering the trap?", "",
-                "(Odds Determined By: Thaumaturgy, Destruction, Lockpicking, and of course, Luck)");
-        }
     }
 }

@@ -85,7 +85,7 @@ namespace LockedLootContainers
             if (!WepManager.ScreenWeapon.IsAttacking())
                 return;
 
-            if (WepManager.ScreenWeapon.GetCurrentFrame() == WepManager.ScreenWeapon.GetHitFrame())
+            if (WepManager.ScreenWeapon.GetCurrentFrame() == WepManager.ScreenWeapon.GetHitFrame()) // May be acting strange, will need to troubleshoot and bug fix next time.
             {
                 if (WepManager.ScreenWeapon.WeaponType == WeaponTypes.Bow) // Don't consider bashing for the bow, atleast not this part, do the actual projectile later for that.
                     return;
@@ -122,9 +122,7 @@ namespace LockedLootContainers
             try
             {
                 ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
-                ConsoleCommandsDatabase.RegisterCommand(ShowChestChoiceWindow.command, ShowChestChoiceWindow.description, ShowChestChoiceWindow.usage, ShowChestChoiceWindow.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
-                // Add a tele2qmarker type command that teleports you to a random chest in the current scene, for much easier chest testing and such.
             }
             catch (Exception e)
             {
@@ -165,23 +163,7 @@ namespace LockedLootContainers
             }
         }
 
-        private static class ShowChestChoiceWindow
-        {
-            public static readonly string command = "showchestchoicewindow";
-            public static readonly string description = "Shows the custom Locked Loot Containers Chest Choice Window.";
-            public static readonly string usage = "showchestchoicewindow";
-
-            public static string Execute(params string[] args)
-            {
-                ChestChoiceWindow chestChoiceWindow;
-
-                chestChoiceWindow = new ChestChoiceWindow(DaggerfallUI.UIManager);
-                DaggerfallUI.UIManager.PushWindow(chestChoiceWindow);
-                return "Complete";
-            }
-        }
-
-        private static class TeleportToRandomChest // Will need to test this next time I'm in the Unity Editor, absolutely no clue if these position values will work for the player or not.
+        private static class TeleportToRandomChest // Just did some testing, and besides sometimes being dropped into the void, appears to work perfectly fine for testing purposes.
         {
             public static readonly string command = "tele2chest";
             public static readonly string description = "Chooses random chest object from current scene and teleports player to its location.";
@@ -190,7 +172,7 @@ namespace LockedLootContainers
             public static string Execute(params string[] args)
             {
                 LLCObject[] chests = FindObjectsOfType<LLCObject>();
-                if (chests.Length <= 0)
+                if (chests.Length - 1 <= 0) // I think it's detecting the actual LLCObject that is the base of them all but not an actual chest? No big deal either way.
                     return "Error: No chests in scene.";
 
                 LLCObject chest = chests[UnityEngine.Random.Range(0, chests.Length)];
@@ -213,7 +195,7 @@ namespace LockedLootContainers
                 }
                 GameManager.Instance.PlayerMotor.FixStanding();
 
-                return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length - 1);
+                return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length);
             }
         }
 
@@ -232,31 +214,14 @@ namespace LockedLootContainers
 
             switch (CurrentMode)
             {
-                case PlayerActivateModes.Info: // Attempt To Inspect Chest
+                case PlayerActivateModes.Info: // Inspect Chest
                 case PlayerActivateModes.Talk:
                     if (ChestObjRef != null)
                     {
                         LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
-
                         chestData.RecentInspectValues = GetInspectionValues(chestData);
                         InspectionInfoWindow inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager, chestData);
                         DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
-
-                        TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-                        "CHEST",
-                        "This chest is made of: " + chestData.ChestMaterial.ToString(),
-                        "Chest sturdiness is: " + chestData.ChestSturdiness,
-                        "Chest magic resist is: " + chestData.ChestMagicResist,
-                        "Its lock is made of: " + chestData.LockMaterial.ToString(),
-                        "Lock sturdiness is: " + chestData.LockSturdiness,
-                        "Lock magic resist is: " + chestData.LockMagicResist,
-                        "Lock complexity is: " + chestData.LockComplexity,
-                        "Lock jam resist is: " + chestData.JamResist);
-
-                        DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                        inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
-                        inspectChestPopup.Show();
-                        inspectChestPopup.ClickAnywhereToClose = true;
                     }
                     else
                     {
@@ -315,116 +280,20 @@ namespace LockedLootContainers
                         DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
                     }
                     break;
-                case PlayerActivateModes.Grab: // Bring Up Pop-up Message With Buttons To Choose What To Do, Also Might Be How You Can Attempt Disarming Traps Maybe?
-                    DaggerfallMessageBox chestChoicePopUp = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    chestChoicePopUp.SetText("What do you want to do with this chest?");
-                    chestChoicePopUp.OnButtonClick += chestChoicePopUp_OnButtonClick;
-                    chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Copy); // Inspect
-                    chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Accept); // Pick-lock
-                    chestChoicePopUp.AddButton(DaggerfallMessageBox.MessageBoxButtons.Cancel); // Cancel
-                    chestChoicePopUp.Show(); // Will possibly have another button show if the chest has been inspected and confirmed to have traps that can be disarmed.
-                    break;
-                default:
-                    break;
-            }
-
-            // Where most of heavy lifting will happen, once locked chest object has been clicked. Will check for being locked, trapped, already unlocked, what to do when and such.
-        }
-
-        private static void chestChoicePopUp_OnButtonClick(DaggerfallMessageBox sender, DaggerfallMessageBox.MessageBoxButtons messageBoxButton)
-        {
-            if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Copy) // Inspect
-            {
-                sender.CloseWindow();
-
-                if (ChestObjRef != null)
-                {
-                    LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
-
-                    TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-                    "This chest is made of: " + chestData.ChestMaterial.ToString(),
-                    "Chest sturdiness is: " + chestData.ChestSturdiness,
-                    "Chest magic resist is: " + chestData.ChestMagicResist,
-                    "Its lock is made of: " + chestData.LockMaterial.ToString(),
-                    "Lock sturdiness is: " + chestData.LockSturdiness,
-                    "Lock magic resist is: " + chestData.LockMagicResist,
-                    "Lock complexity is: " + chestData.LockComplexity,
-                    "Lock jam resist is: " + chestData.JamResist);
-
-                    DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    inspectChestPopup.SetTextTokens(textToken); // Use a text-token here instead for the better debug stuff, better random encounters has good examples how, tomorrow.
-                    inspectChestPopup.Show();
-                    inspectChestPopup.ClickAnywhereToClose = true;
-                }
-                else
-                {
-                    DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
-                }
-            }
-            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Accept) // Pick-lock
-            {
-                sender.CloseWindow();
-
-                if (ChestObjRef != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
-                {
-                    LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
-                    DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
-                    ItemCollection closedChestLoot = closedChestData.AttachedLoot;
-                    Transform closedChestTransform = ChestObjRef.transform;
-                    Vector3 pos = ChestObjRef.transform.position;
-
-                    if (closedChestData.IsLockJammed)
+                case PlayerActivateModes.Grab: // Bring Up Custom Chest Choice Window With Buttons To Choose What To Do, Also Might Be How You Can Attempt Disarming Traps Eventually?
+                    if (ChestObjRef != null)
                     {
-                        DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
-                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
-                    }
-                    else if (Dice100.SuccessRoll(LockPickChance(closedChestData))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
-                    {
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-
-                        Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                        ChestObjRef = null;
-
-                        // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
-                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                        LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
+                        ChestChoiceWindow chestChoiceWindow = new ChestChoiceWindow(DaggerfallUI.UIManager, chestData);
+                        DaggerfallUI.UIManager.PushWindow(chestChoiceWindow);
                     }
                     else
                     {
-                        closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
-                        if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
-                        {
-                            closedChestData.IsLockJammed = true;
-                            DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
-                            if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                                dfAudioSource.PlayOneShot(SoundClips.ActivateGrind); // Will use custom sounds in the end most likely.
-                        }
-                        else
-                        {
-                            DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
-                            if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                                dfAudioSource.PlayOneShot(SoundClips.ActivateGears); // Will use custom sounds in the end most likely.
-                        }
+                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
                     }
-                }
-                else
-                {
-                    DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
-                }
-
-                /*DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                string[] message = { "You attempted picking the lock!" };
-                inspectChestPopup.SetText(message);
-                inspectChestPopup.Show();
-                inspectChestPopup.ClickAnywhereToClose = true;*/
-            }
-            else // Cancel
-            {
-                sender.CloseWindow();
+                    break;
+                default:
+                    break;
             }
         }
     }

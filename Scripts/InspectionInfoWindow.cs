@@ -53,14 +53,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         #endregion
 
-        #region UI Panels
-
-        Panel exitButPanel = new Panel();
-        Panel idenButPanel = new Panel();
-        Panel lPikButPanel = new Panel();
-
-        #endregion
-
         protected override void Setup()
         {
             base.Setup();
@@ -76,32 +68,29 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             NativePanel.BackgroundTexture = baseTexture;
 
             Panel chestPictureBox = DaggerfallUI.AddPanel(new Rect(113, 64, 30, 22), NativePanel);
-            chestPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+            //chestPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For testing purposes
             chestPictureBox.ToolTip = defaultToolTip;
             chestPictureBox.ToolTipText = "Chest Info";
 
             Panel lockPictureBox = DaggerfallUI.AddPanel(new Rect(176, 64, 30, 22), NativePanel);
-            lockPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+            //lockPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For testing purposes
             lockPictureBox.ToolTip = defaultToolTip;
             lockPictureBox.ToolTipText = "Lock Info";
 
             // Exit Button
             Button exitButton = DaggerfallUI.AddButton(new Rect(139, 122, 43, 15), NativePanel);
-            exitButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
+            //exitButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For testing purposes
             exitButton.OnMouseClick += ExitButton_OnMouseClick;
             exitButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
 
-            // Next I work on this, fill in info "buttons" with summary of what that info means. Then also make methods to determine info text color displayed, also make chest teleporting command, etc.
+            // Next I work on this, make methods to determine info text color displayed. Also want to fix seeming bashing weirdness, and for inspection values to not reroll everytime, also add time costs.
 
             SetupInfoTextAndButtons();
         }
 
         protected virtual void LoadTextures()
         {
-            Texture2D baseTex;
-
-            TextureReplacement.TryImportTexture(baseTextureName, true, out baseTex);
-
+            TextureReplacement.TryImportTexture(baseTextureName, true, out Texture2D baseTex);
             baseTexture = baseTex;
         }
 
@@ -109,7 +98,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         {
             // Setup Chest Info panels and text
             Button chestMatButton = DaggerfallUI.AddButton(new Rect(100, 90, 57, 5), NativePanel);
-            chestMatButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             chestMatButton.ToolTip = defaultToolTip;
             chestMatButton.ToolTipText = "Chest Material";
             chestMatButton.OnMouseClick += ChestMaterialInfo_OnMouseClick;
@@ -122,7 +110,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             chestMatText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
 
             Button chestStabButton = DaggerfallUI.AddButton(new Rect(100, 96, 57, 5), NativePanel);
-            chestStabButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             chestStabButton.ToolTip = defaultToolTip;
             chestStabButton.ToolTipText = "Chest Sturdiness";
             chestStabButton.OnMouseClick += ChestSturdinessInfo_OnMouseClick;
@@ -135,7 +122,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             chestStabText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
 
             Button chestMagResButton = DaggerfallUI.AddButton(new Rect(100, 102, 57, 5), NativePanel);
-            chestMagResButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             chestMagResButton.ToolTip = defaultToolTip;
             chestMagResButton.ToolTipText = "Chest Magic Resist";
             chestMagResButton.OnMouseClick += ChestMagicResistInfo_OnMouseClick;
@@ -149,7 +135,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
             // Setup Lock Info panels and text
             Button lockMatButton = DaggerfallUI.AddButton(new Rect(163, 90, 57, 5), NativePanel);
-            lockMatButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             lockMatButton.ToolTip = defaultToolTip;
             lockMatButton.ToolTipText = "Lock Material";
             lockMatButton.OnMouseClick += LockMaterialInfo_OnMouseClick;
@@ -162,7 +147,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             lockMatText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
 
             Button lockStabButton = DaggerfallUI.AddButton(new Rect(163, 96, 57, 5), NativePanel);
-            lockStabButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             lockStabButton.ToolTip = defaultToolTip;
             lockStabButton.ToolTipText = "Lock Sturdiness";
             lockStabButton.OnMouseClick += LockSturdinessInfo_OnMouseClick;
@@ -175,7 +159,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             lockStabText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
 
             Button lockMagResButton = DaggerfallUI.AddButton(new Rect(163, 102, 57, 5), NativePanel);
-            lockMagResButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             lockMagResButton.ToolTip = defaultToolTip;
             lockMagResButton.ToolTipText = "Lock Magic Resist";
             lockMagResButton.OnMouseClick += LockMagicResistInfo_OnMouseClick;
@@ -188,7 +171,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             lockMagResText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
 
             Button lockComplexButton = DaggerfallUI.AddButton(new Rect(163, 108, 57, 5), NativePanel);
-            lockComplexButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             lockComplexButton.ToolTip = defaultToolTip;
             lockComplexButton.ToolTipText = "Lock Complexity";
             lockComplexButton.OnMouseClick += LockComplexityInfo_OnMouseClick;
@@ -201,7 +183,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             lockComplexText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
 
             Button lockJamResButton = DaggerfallUI.AddButton(new Rect(163, 114, 57, 5), NativePanel);
-            lockJamResButton.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f);
             lockJamResButton.ToolTip = defaultToolTip;
             lockJamResButton.ToolTipText = "Lock Jam Resist";
             lockJamResButton.OnMouseClick += LockJamResistInfo_OnMouseClick;
@@ -222,7 +203,15 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void ChestMaterialInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Chest Material Info");
+            "Chest Material",
+            "-----------------------",
+            "What material the body of the chest is made of, different materials have different properties.",
+            "Such differences include, ability to survive physical trauma, and resistance to magic attacks.",
+            "The more rare and expensive the material a chest is comprised of, the more likely the odds",
+            "that something of value is contained within.",
+            "",
+            "There are several materials a chest can be made of, these include:",
+            "Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, and Daedric");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -233,7 +222,11 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void ChestSturdinessInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Chest Sturdiness Info");
+            "Chest Sturdiness",
+            "-----------------------",
+            "The higher this value, the more difficult it is to access a chest's contents through brute force.",
+            "",
+            "This value can be from 1 to 100");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -244,7 +237,14 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void ChestMagicResistInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Chest Magic Resist Info");
+            "Chest Magic Resistance",
+            "-----------------------",
+            "The higher this value, the more likely any magical assault will be outright ignored.",
+            "Forms of magical effects include those with:",
+            "'Damage Health', 'Continuous Damage Health', and 'Disintegrate'",
+            "(Cannot be touch based, only projectile based spells.)",
+            "",
+            "This value can be from 1 to 100");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -255,7 +255,16 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void LockMaterialInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Lock Material Info");
+            "Lock Material",
+            "-----------------------",
+            "What material the lock on the chest is made of, different materials have different properties.",
+            "Such differences include, ability to survive physical trauma, resistance to magical effects,",
+            "average range of lock mechanism complexity, and the average jam resistance of the lock.",
+            "The more rare and expensive the material a lock is comprised of, the more likely the odds",
+            "that something of value is contained within the chest its attached to.",
+            "",
+            "There are several materials a lock can be made of, these include:",
+            "Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, and Daedric");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -266,7 +275,11 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void LockSturdinessInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Lock Sturdiness Info");
+            "Lock Sturdiness",
+            "-----------------------",
+            "The higher this value, the more difficult it is to break off a lock through brute force.",
+            "",
+            "This value can be from 1 to 100");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -277,7 +290,11 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void LockMagicResistInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Lock Magic Resist Info");
+            "Lock Magic Resistance",
+            "-----------------------",
+            "The higher this value, the more likely magical 'Open' effects will fail against the lock.",
+            "",
+            "This value can be from 1 to 100");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -288,7 +305,14 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void LockComplexityInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Lock Complexity Info");
+            "Lock Complexity",
+            "-----------------------",
+            "The higher this value, the more difficult the lock will be to lock-pick successfully.",
+            "This added difficult applies to magical 'Open' effects as well, but to a lesser degree.",
+            "Locks can get jammed, rendering them inoperable, leaving brute force as the last resort.",
+            "Jamming becomes increasingly more likely the more failed attempts that have occured on a lock.",
+            "",
+            "This value can be from 1 to 100");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
@@ -299,7 +323,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void LockJamResistInfo_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             TextFile.Token[] textToken = DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter,
-            "Showing Lock Jam Resist Info");
+            "Lock Jam Resistance",
+            "-----------------------",
+            "The higher this value, the lower the odds are for a lock to be jammed from failed pick attempts.",
+            "Jamming becomes increasingly more likely the more failed attempts that have occured on a lock.",
+            "",
+            "This value can be from 1 to 100");
 
             DaggerfallMessageBox inspectChestPopup = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
             inspectChestPopup.SetTextTokens(textToken);
