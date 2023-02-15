@@ -26,6 +26,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             get { return (player != null) ? player : player = GameManager.Instance.PlayerEntity; }
         }
 
+        Color32 textShadowColor = new Color32(0, 0, 0, 255);
+        Vector2 textShadowPosition = new Vector2(0.60f, 0.60f);
+
         protected LLCObject chest = null;
 
         #region Testing Properties
@@ -83,7 +86,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             exitButton.OnMouseClick += ExitButton_OnMouseClick;
             exitButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
 
-            // Next I work on this, make methods to determine info text color displayed. Also want to fix seeming bashing weirdness, and for inspection values to not reroll everytime, also add time costs.
+            // Next I work on this, Fix apparent bashing weirdness, also add time costs and skill increases for doing actions like inspecting, lockpicking, etc.
 
             SetupInfoTextAndButtons();
         }
@@ -105,9 +108,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel chestMatText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, chestMatButton);
             chestMatText.HorizontalAlignment = HorizontalAlignment.Center;
             chestMatText.VerticalAlignment = VerticalAlignment.Middle;
+            chestMatText.ShadowColor = textShadowColor;
+            chestMatText.ShadowPosition = textShadowPosition;
             chestMatText.TextScale = 0.9f;
-            chestMatText.Text = LockedLootContainersMain.GetChestMaterialText(chest, chest.RecentInspectValues[0]);
-            chestMatText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetChestMaterialText(chest, chest.RecentInspectValues[0], out string cMatText, out Color32 cMatColor);
+            chestMatText.Text = cMatText;
+            chestMatText.TextColor = cMatColor;
 
             Button chestStabButton = DaggerfallUI.AddButton(new Rect(100, 96, 57, 5), NativePanel);
             chestStabButton.ToolTip = defaultToolTip;
@@ -117,9 +123,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel chestStabText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, chestStabButton);
             chestStabText.HorizontalAlignment = HorizontalAlignment.Center;
             chestStabText.VerticalAlignment = VerticalAlignment.Middle;
+            chestStabText.ShadowColor = textShadowColor;
+            chestStabText.ShadowPosition = textShadowPosition;
             chestStabText.TextScale = 0.9f;
-            chestStabText.Text = LockedLootContainersMain.GetChestSturdinessText(chest, chest.RecentInspectValues[1]);
-            chestStabText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetChestSturdinessText(chest, chest.RecentInspectValues[1], out string cStabText, out Color32 cStabColor);
+            chestStabText.Text = cStabText;
+            chestStabText.TextColor = cStabColor;
 
             Button chestMagResButton = DaggerfallUI.AddButton(new Rect(100, 102, 57, 5), NativePanel);
             chestMagResButton.ToolTip = defaultToolTip;
@@ -129,9 +138,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel chestMagResText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, chestMagResButton);
             chestMagResText.HorizontalAlignment = HorizontalAlignment.Center;
             chestMagResText.VerticalAlignment = VerticalAlignment.Middle;
+            chestMagResText.ShadowColor = textShadowColor;
+            chestMagResText.ShadowPosition = textShadowPosition;
             chestMagResText.TextScale = 0.9f;
-            chestMagResText.Text = LockedLootContainersMain.GetChestMagicResistText(chest, chest.RecentInspectValues[2]);
-            chestMagResText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetChestMagicResistText(chest, chest.RecentInspectValues[2], out string cMResText, out Color32 cMResColor);
+            chestMagResText.Text = cMResText;
+            chestMagResText.TextColor = cMResColor;
 
             // Setup Lock Info panels and text
             Button lockMatButton = DaggerfallUI.AddButton(new Rect(163, 90, 57, 5), NativePanel);
@@ -142,9 +154,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel lockMatText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, lockMatButton);
             lockMatText.HorizontalAlignment = HorizontalAlignment.Center;
             lockMatText.VerticalAlignment = VerticalAlignment.Middle;
+            lockMatText.ShadowColor = textShadowColor;
+            lockMatText.ShadowPosition = textShadowPosition;
             lockMatText.TextScale = 0.9f;
-            lockMatText.Text = LockedLootContainersMain.GetLockMaterialText(chest, chest.RecentInspectValues[3]);
-            lockMatText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetLockMaterialText(chest, chest.RecentInspectValues[3], out string lMatText, out Color32 lMatColor);
+            lockMatText.Text = lMatText;
+            lockMatText.TextColor = lMatColor;
 
             Button lockStabButton = DaggerfallUI.AddButton(new Rect(163, 96, 57, 5), NativePanel);
             lockStabButton.ToolTip = defaultToolTip;
@@ -154,9 +169,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel lockStabText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, lockStabButton);
             lockStabText.HorizontalAlignment = HorizontalAlignment.Center;
             lockStabText.VerticalAlignment = VerticalAlignment.Middle;
+            lockStabText.ShadowColor = textShadowColor;
+            lockStabText.ShadowPosition = textShadowPosition;
             lockStabText.TextScale = 0.9f;
-            lockStabText.Text = LockedLootContainersMain.GetLockSturdinessText(chest, chest.RecentInspectValues[4]);
-            lockStabText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetLockSturdinessText(chest, chest.RecentInspectValues[4], out string lStabText, out Color32 lStabColor);
+            lockStabText.Text = lStabText;
+            lockStabText.TextColor = lStabColor;
 
             Button lockMagResButton = DaggerfallUI.AddButton(new Rect(163, 102, 57, 5), NativePanel);
             lockMagResButton.ToolTip = defaultToolTip;
@@ -166,9 +184,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel lockMagResText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, lockMagResButton);
             lockMagResText.HorizontalAlignment = HorizontalAlignment.Center;
             lockMagResText.VerticalAlignment = VerticalAlignment.Middle;
+            lockMagResText.ShadowColor = textShadowColor;
+            lockMagResText.ShadowPosition = textShadowPosition;
             lockMagResText.TextScale = 0.9f;
-            lockMagResText.Text = LockedLootContainersMain.GetLockMagicResistText(chest, chest.RecentInspectValues[5]);
-            lockMagResText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetLockMagicResistText(chest, chest.RecentInspectValues[5], out string lMResText, out Color32 lMResColor);
+            lockMagResText.Text = lMResText;
+            lockMagResText.TextColor = lMResColor;
 
             Button lockComplexButton = DaggerfallUI.AddButton(new Rect(163, 108, 57, 5), NativePanel);
             lockComplexButton.ToolTip = defaultToolTip;
@@ -178,9 +199,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel lockComplexText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, lockComplexButton);
             lockComplexText.HorizontalAlignment = HorizontalAlignment.Center;
             lockComplexText.VerticalAlignment = VerticalAlignment.Middle;
+            lockComplexText.ShadowColor = textShadowColor;
+            lockComplexText.ShadowPosition = textShadowPosition;
             lockComplexText.TextScale = 0.9f;
-            lockComplexText.Text = LockedLootContainersMain.GetLockComplexityText(chest, chest.RecentInspectValues[6]);
-            lockComplexText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetLockComplexityText(chest, chest.RecentInspectValues[6], out string lCompText, out Color32 lCompColor);
+            lockComplexText.Text = lCompText;
+            lockComplexText.TextColor = lCompColor;
 
             Button lockJamResButton = DaggerfallUI.AddButton(new Rect(163, 114, 57, 5), NativePanel);
             lockJamResButton.ToolTip = defaultToolTip;
@@ -190,9 +214,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             TextLabel lockJamResText = DaggerfallUI.AddTextLabel(DaggerfallUI.DefaultFont, new Vector2(0, 0), string.Empty, lockJamResButton);
             lockJamResText.HorizontalAlignment = HorizontalAlignment.Center;
             lockJamResText.VerticalAlignment = VerticalAlignment.Middle;
+            lockJamResText.ShadowColor = textShadowColor;
+            lockJamResText.ShadowPosition = textShadowPosition;
             lockJamResText.TextScale = 0.9f;
-            lockJamResText.Text = LockedLootContainersMain.GetLockJamResistText(chest, chest.RecentInspectValues[7]);
-            lockJamResText.TextColor = new Color32(243, 239, 44, 255); // Make this a method to determine text-color
+            LockedLootContainersMain.GetLockJamResistText(chest, chest.RecentInspectValues[7], out string lJResText, out Color32 lJResColor);
+            lockJamResText.Text = lJResText;
+            lockJamResText.TextColor = lJResColor;
         }
 
         private void ExitButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)

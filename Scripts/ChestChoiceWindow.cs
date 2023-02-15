@@ -102,7 +102,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void InspectChestButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             CloseWindow();
-            chest.RecentInspectValues = LockedLootContainersMain.GetInspectionValues(chest);
+            if (chest.HasBeenInspected) { } // Do nothing, will likely change this eventually, so reinspection/rerolling for inspection results is possible at some cost or something.
+            else
+            {
+                chest.RecentInspectValues = LockedLootContainersMain.GetInspectionValues(chest);
+                chest.HasBeenInspected = true;
+            }
             InspectionInfoWindow inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager, chest);
             DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
         }

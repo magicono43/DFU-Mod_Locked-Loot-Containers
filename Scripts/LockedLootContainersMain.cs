@@ -219,7 +219,12 @@ namespace LockedLootContainers
                     if (ChestObjRef != null)
                     {
                         LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();
-                        chestData.RecentInspectValues = GetInspectionValues(chestData);
+                        if (chestData.HasBeenInspected) { } // Do nothing, will likely change this eventually, so reinspection/rerolling for inspection results is possible at some cost or something.
+                        else
+                        {
+                            chestData.RecentInspectValues = GetInspectionValues(chestData);
+                            chestData.HasBeenInspected = true;
+                        }
                         InspectionInfoWindow inspectionInfoWindow = new InspectionInfoWindow(DaggerfallUI.UIManager, chestData);
                         DaggerfallUI.UIManager.PushWindow(inspectionInfoWindow);
                     }

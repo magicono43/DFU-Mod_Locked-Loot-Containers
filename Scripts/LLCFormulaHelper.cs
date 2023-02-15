@@ -7,6 +7,51 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
+        // Various colors in Daggerfall's palette
+        public static Color32 Blank = new Color32(0, 0, 0, 0);
+        public static Color32 Black = new Color32(0, 0, 0, 255);
+        public static Color32 White = new Color32(255, 255, 255, 255);
+        public static Color32 Gainsboro = new Color32(220, 220, 220, 255);
+        public static Color32 BrownRed = new Color32(92, 33, 3, 255);
+        public static Color32 BrightRed = new Color32(154, 24, 8, 255);
+
+        public static Color32 Wood = new Color32(159, 99, 63, 255);
+        public static Color32 Iron = new Color32(110, 110, 110, 255);
+        public static Color32 Steel = new Color32(132, 132, 132, 255);
+        public static Color32 Orcish = new Color32(130, 162, 77, 255);
+        public static Color32 Mithril = new Color32(87, 137, 205, 255);
+        public static Color32 Dwarven = new Color32(212, 203, 0, 255);
+        public static Color32 Adamantium = new Color32(38, 51, 40, 255);
+        public static Color32 Daedric = new Color32(162, 36, 12, 255);
+
+        public static Color32 Brown1 = new Color32(139, 83, 43, 255);
+        public static Color32 Brown2 = new Color32(115, 67, 35, 255);
+        public static Color32 Gray1 = new Color32(147, 147, 147, 255);
+        public static Color32 Gray2 = new Color32(119, 119, 119, 255);
+        public static Color32 Blue1 = new Color32(123, 164, 230, 255);
+        public static Color32 Blue2 = new Color32(87, 137, 205, 255);
+
+        public static Color32 Pink1 = new Color32(220, 166, 188, 255);
+        public static Color32 Pink2 = new Color32(188, 127, 158, 255);
+        public static Color32 Pink3 = new Color32(155, 98, 130, 255);
+        public static Color32 Purple1 = new Color32(127, 77, 106, 255);
+        public static Color32 Purple2 = new Color32(101, 65, 96, 255);
+        public static Color32 Purple3 = new Color32(75, 52, 71, 255);
+
+        public static Color32 Yellow1 = new Color32(226, 220, 0, 255);
+        public static Color32 Yellow2 = new Color32(197, 185, 0, 255);
+        public static Color32 Yellow3 = new Color32(168, 150, 0, 255);
+        public static Color32 Yellow4 = new Color32(139, 115, 0, 255);
+        public static Color32 Yellow5 = new Color32(116, 97, 7, 255);
+        public static Color32 Yellow6 = new Color32(93, 78, 14, 255);
+
+        public static Color32 Teal1 = new Color32(109, 170, 170, 255);
+        public static Color32 Teal2 = new Color32(70, 135, 135, 255);
+        public static Color32 Teal3 = new Color32(54, 112, 112, 255);
+        public static Color32 Green1 = new Color32(68, 99, 67, 255);
+        public static Color32 Green2 = new Color32(52, 77, 44, 255);
+        public static Color32 Green3 = new Color32(39, 60, 39, 255);
+
         public static int Stren { get { return Player.Stats.LiveStrength - 50; } }
         public static int Intel { get { return Player.Stats.LiveIntelligence - 50; } }
         public static int Willp { get { return Player.Stats.LiveWillpower - 50; } }

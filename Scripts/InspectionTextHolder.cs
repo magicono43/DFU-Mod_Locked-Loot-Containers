@@ -6,352 +6,228 @@ using DaggerfallConnect;
 using DaggerfallWorkshop.Game.Player;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Utility;
+using UnityEngine;
 
 namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        public static string BuildName()
+        public static void GetChestMaterialText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            return GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.displayName;
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicMaterialText(chest.ChestMaterial, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid || vagueness == (int)InfoVagueness.Complete) { GetCompleteMaterialText(chest.ChestMaterial, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string CityName()
-        {   // %cn
-            PlayerGPS gps = GameManager.Instance.PlayerGPS;
-            if (gps.HasCurrentLocation)
-                return gps.CurrentLocation.Name;
-            else
-                return gps.CurrentRegion.Name;
-        }
-
-        private static string CurrentRegion()
-        {   // %crn going to use for %reg as well here
-            return GameManager.Instance.PlayerGPS.CurrentRegion.Name;
-        }
-
-        public static string RegentTitle()
-        {   // %rt %t
-            PlayerGPS gps = GameManager.Instance.PlayerGPS;
-            FactionFile.FactionData regionFaction;
-            GameManager.Instance.PlayerEntity.FactionData.FindFactionByTypeAndRegion((int)FactionFile.FactionTypes.Province, gps.CurrentRegionIndex, out regionFaction);
-            return GetRulerTitle(regionFaction.ruler);
-        }
-
-        private static string GetRulerTitle(int factionRuler)
+        public static void GetBasicMaterialText(ChestMaterials mat, out string text, out Color32 color)
         {
-            switch (factionRuler)
-            {
-                case 1:
-                    return TextManager.Instance.GetLocalizedText("King");
-                case 2:
-                    return TextManager.Instance.GetLocalizedText("Queen");
-                case 3:
-                    return TextManager.Instance.GetLocalizedText("Duke");
-                case 4:
-                    return TextManager.Instance.GetLocalizedText("Duchess");
-                case 5:
-                    return TextManager.Instance.GetLocalizedText("Marquis");
-                case 6:
-                    return TextManager.Instance.GetLocalizedText("Marquise");
-                case 7:
-                    return TextManager.Instance.GetLocalizedText("Count");
-                case 8:
-                    return TextManager.Instance.GetLocalizedText("Countess");
-                case 9:
-                    return TextManager.Instance.GetLocalizedText("Baron");
-                case 10:
-                    return TextManager.Instance.GetLocalizedText("Baroness");
-                case 11:
-                    return TextManager.Instance.GetLocalizedText("Lord");
-                case 12:
-                    return TextManager.Instance.GetLocalizedText("Lady");
-                default:
-                    return TextManager.Instance.GetLocalizedText("Lord");
-            }
+            if (mat == ChestMaterials.Wood || mat == ChestMaterials.Dwarven || mat == ChestMaterials.Adamantium) { text = "Soft"; color = Gainsboro; }
+            else if (mat == ChestMaterials.Iron || mat == ChestMaterials.Steel || mat == ChestMaterials.Orcish || mat == ChestMaterials.Mithril || mat == ChestMaterials.Daedric) { text = "Hard"; color = Steel; }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string RandomAlcohol() // Might want to add more "fantasy" sounding drinks to this at some point, but for now it should be alright hopefully.
+        public static void GetCompleteMaterialText(ChestMaterials mat, out string text, out Color32 color)
         {
-            DFLocation.ClimateBaseType climate = GameManager.Instance.PlayerGPS.ClimateSettings.ClimateType;
-            DaggerfallDateTime.Seasons season = DaggerfallUnity.Instance.WorldTime.Now.SeasonValue;
-
-            int variant = UnityEngine.Random.Range(0, 2);
-
-            switch (climate)
-            {
-                case DFLocation.ClimateBaseType.Desert:
-                    switch (season)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            return variant == 0 ? "Jalapeno tequila" : "Prickly pear margarita";
-                        case DaggerfallDateTime.Seasons.Spring:
-                        default:
-                            return variant == 0 ? "Coconut rum" : "Cucumber mojito";
-                        case DaggerfallDateTime.Seasons.Summer:
-                            return variant == 0 ? "Pineapple margarita" : "Cucumber mojito";
-                        case DaggerfallDateTime.Seasons.Winter:
-                            return variant == 0 ? "Cinnamon tequila" : "Spicy scorpion cocktail";
-                    }
-                case DFLocation.ClimateBaseType.Mountain:
-                    switch (season)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            return variant == 0 ? "Mulled cider" : "Cinnamon mead";
-                        case DaggerfallDateTime.Seasons.Spring:
-                        default:
-                            return variant == 0 ? "Elderberry cocktail" : "Juniper berry mead";
-                        case DaggerfallDateTime.Seasons.Summer:
-                            return variant == 0 ? "Barley wine" : "Golden ale";
-                        case DaggerfallDateTime.Seasons.Winter:
-                            return variant == 0 ? "Mulled wine" : "Wassail";
-                    }
-                case DFLocation.ClimateBaseType.Temperate:
-                default:
-                    switch (season)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            return variant == 0 ? "Cranberry wine" : "Pumpkin sangria";
-                        case DaggerfallDateTime.Seasons.Spring:
-                        default:
-                            return variant == 0 ? "Watermelon Mojito" : "Tequila sunrise";
-                        case DaggerfallDateTime.Seasons.Summer:
-                            return variant == 0 ? "Mint julep" : "Elderflower champagne";
-                        case DaggerfallDateTime.Seasons.Winter:
-                            return variant == 0 ? "Mulled wine" : "Anise Liqueur";
-                    }
-                case DFLocation.ClimateBaseType.Swamp:
-                    switch (season)
-                    {
-                        case DaggerfallDateTime.Seasons.Fall:
-                            return variant == 0 ? "Banana liqueur" : "Grapefruit mimosa";
-                        case DaggerfallDateTime.Seasons.Spring:
-                        default:
-                            return variant == 0 ? "Sake sour" : "Grapefruit daiquiri";
-                        case DaggerfallDateTime.Seasons.Summer:
-                            return variant == 0 ? "Pineapple sangria" : "Sake mojito";
-                        case DaggerfallDateTime.Seasons.Winter:
-                            return variant == 0 ? "Snakebite cocktail" : "Coconut rum";
-                    }
-            }
-        }
-        
-        public static string GetChestMaterialText(LLCObject chest, int vagueness)
-        {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMaterialText(chest.ChestMaterial); }
-            else if (vagueness == (int)InfoVagueness.Vivid || vagueness == (int)InfoVagueness.Complete) { return GetCompleteMaterialText(chest.ChestMaterial); }
-            else { return "ERROR"; }
+            if (mat == ChestMaterials.Wood) { text = "Wooden"; color = Wood; }
+            else if (mat == ChestMaterials.Iron) { text = "Iron"; color = Iron; }
+            else if (mat == ChestMaterials.Steel) { text = "Steel"; color = Steel; }
+            else if (mat == ChestMaterials.Orcish) { text = "Orcish"; color = Orcish; }
+            else if (mat == ChestMaterials.Mithril) { text = "Mithril"; color = Mithril; }
+            else if (mat == ChestMaterials.Dwarven) { text = "Dwarven"; color = Dwarven; }
+            else if (mat == ChestMaterials.Adamantium) { text = "Adamantium"; color = Adamantium; }
+            else if (mat == ChestMaterials.Daedric) { text = "Daedric"; color = Daedric; }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetBasicMaterialText(ChestMaterials mat)
+        public static void GetBasicMaterialText(LockMaterials mat, out string text, out Color32 color)
         {
-            if (mat == ChestMaterials.Wood || mat == ChestMaterials.Dwarven || mat == ChestMaterials.Adamantium) { return "Soft"; }
-            else if (mat == ChestMaterials.Iron || mat == ChestMaterials.Steel || mat == ChestMaterials.Orcish || mat == ChestMaterials.Mithril || mat == ChestMaterials.Daedric) { return "Hard"; }
-            else return "ERROR";
+            if (mat == LockMaterials.Wood || mat == LockMaterials.Dwarven || mat == LockMaterials.Adamantium) { text = "Soft"; color = Gainsboro; }
+            else if (mat == LockMaterials.Iron || mat == LockMaterials.Steel || mat == LockMaterials.Orcish || mat == LockMaterials.Mithril || mat == LockMaterials.Daedric) { text = "Hard"; color = Steel; }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetCompleteMaterialText(ChestMaterials mat)
+        public static void GetCompleteMaterialText(LockMaterials mat, out string text, out Color32 color)
         {
-            if (mat == ChestMaterials.Wood) { return "Wooden"; }
-            else if (mat == ChestMaterials.Iron) { return "Iron"; }
-            else if (mat == ChestMaterials.Steel) { return "Steel"; }
-            else if (mat == ChestMaterials.Orcish) { return "Orcish"; }
-            else if (mat == ChestMaterials.Mithril) { return "Mithril"; }
-            else if (mat == ChestMaterials.Dwarven) { return "Dwarven"; }
-            else if (mat == ChestMaterials.Adamantium) { return "Adamantium"; }
-            else if (mat == ChestMaterials.Daedric) { return "Daedric"; }
-            else { return "ERROR"; }
+            if (mat == LockMaterials.Wood) { text = "Wooden"; color = Wood; }
+            else if (mat == LockMaterials.Iron) { text = "Iron"; color = Iron; }
+            else if (mat == LockMaterials.Steel) { text = "Steel"; color = Steel; }
+            else if (mat == LockMaterials.Orcish) { text = "Orcish"; color = Orcish; }
+            else if (mat == LockMaterials.Mithril) { text = "Mithril"; color = Mithril; }
+            else if (mat == LockMaterials.Dwarven) { text = "Dwarven"; color = Dwarven; }
+            else if (mat == LockMaterials.Adamantium) { text = "Adamantium"; color = Adamantium; }
+            else if (mat == LockMaterials.Daedric) { text = "Daedric"; color = Daedric; }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetBasicMaterialText(LockMaterials mat)
+        public static void GetChestSturdinessText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (mat == LockMaterials.Wood || mat == LockMaterials.Dwarven || mat == LockMaterials.Adamantium) { return "Soft"; }
-            else if (mat == LockMaterials.Iron || mat == LockMaterials.Steel || mat == LockMaterials.Orcish || mat == LockMaterials.Mithril || mat == LockMaterials.Daedric) { return "Hard"; }
-            else return "ERROR";
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicSturdinessText(chest.ChestSturdiness, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { GetVividSturdinessText(chest.ChestSturdiness, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Complete) { GetCompleteSturdinessText(chest.ChestSturdiness, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetCompleteMaterialText(LockMaterials mat)
+        public static void GetBasicSturdinessText(int stab, out string text, out Color32 color)
         {
-            if (mat == LockMaterials.Wood) { return "Wooden"; }
-            else if (mat == LockMaterials.Iron) { return "Iron"; }
-            else if (mat == LockMaterials.Steel) { return "Steel"; }
-            else if (mat == LockMaterials.Orcish) { return "Orcish"; }
-            else if (mat == LockMaterials.Mithril) { return "Mithril"; }
-            else if (mat == LockMaterials.Dwarven) { return "Dwarven"; }
-            else if (mat == LockMaterials.Adamantium) { return "Adamantium"; }
-            else if (mat == LockMaterials.Daedric) { return "Daedric"; }
-            else { return "ERROR"; }
+            if (stab <= 35) { text = "Flimsy"; color = Brown1; }
+            else if (stab >= 36 && stab <= 75) { text = "Sturdy"; color = Gray1; }
+            else { text = "Fortified"; color = Blue2; }
         }
 
-        public static string GetChestSturdinessText(LLCObject chest, int vagueness)
+        public static void GetVividSturdinessText(int stab, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicSturdinessText(chest.ChestSturdiness); }
-            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividSturdinessText(chest.ChestSturdiness); }
-            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteSturdinessText(chest.ChestSturdiness); }
-            else { return "ERROR"; }
+            if (stab <= 16) { text = "Fragile"; color = Brown2; }
+            else if (stab >= 17 && stab <= 35) { text = "Flimsy"; color = Brown1; }
+            else if (stab >= 36 && stab <= 50) { text = "Stable"; color = Gray2; }
+            else if (stab >= 51 && stab <= 75) { text = "Sturdy"; color = Gray1; }
+            else if (stab >= 76 && stab <= 90) { text = "Fortified"; color = Blue2; }
+            else { text = "Impenetrable"; color = Blue1; }
         }
 
-        public static string GetBasicSturdinessText(int stab)
+        public static void GetCompleteSturdinessText(int stab, out string text, out Color32 color)
         {
-            if (stab <= 35) { return "Flimsy"; }
-            else if (stab >= 36 && stab <= 75) { return "Sturdy"; }
-            else { return "Fortified"; }
+            if (stab <= 16) { text = "Fragile" + " (" + stab.ToString() + ")"; color = Brown2; }
+            else if (stab >= 17 && stab <= 35) { text = "Flimsy" + " (" + stab.ToString() + ")"; color = Brown1; }
+            else if (stab >= 36 && stab <= 50) { text = "Stable" + " (" + stab.ToString() + ")"; color = Gray2; }
+            else if (stab >= 51 && stab <= 75) { text = "Sturdy" + " (" + stab.ToString() + ")"; color = Gray1; }
+            else if (stab >= 76 && stab <= 90) { text = "Fortified" + " (" + stab.ToString() + ")"; color = Blue2; }
+            else { text = "Impenetrable" + " (" + stab.ToString() + ")"; color = Blue1; }
         }
 
-        public static string GetVividSturdinessText(int stab)
+        public static void GetChestMagicResistText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (stab <= 16) { return "Fragile"; }
-            else if (stab >= 17 && stab <= 35) { return "Flimsy"; }
-            else if (stab >= 36 && stab <= 50) { return "Stable"; }
-            else if (stab >= 51 && stab <= 75) { return "Sturdy"; }
-            else if (stab >= 76 && stab <= 90) { return "Fortified"; }
-            else { return "Impenetrable"; }
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicMagicResistText(chest.ChestMagicResist, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { GetVividMagicResistText(chest.ChestMagicResist, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Complete) { GetCompleteMagicResistText(chest.ChestMagicResist, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetCompleteSturdinessText(int stab)
+        public static void GetBasicMagicResistText(int res, out string text, out Color32 color)
         {
-            if (stab <= 16) { return "Fragile" + " (" + stab.ToString() + ")"; }
-            else if (stab >= 17 && stab <= 35) { return "Flimsy" + " (" + stab.ToString() + ")"; }
-            else if (stab >= 36 && stab <= 50) { return "Stable" + " (" + stab.ToString() + ")"; }
-            else if (stab >= 51 && stab <= 75) { return "Sturdy" + " (" + stab.ToString() + ")"; }
-            else if (stab >= 76 && stab <= 90) { return "Fortified" + " (" + stab.ToString() + ")"; }
-            else { return "Impenetrable" + " (" + stab.ToString() + ")"; }
+            if (res <= 35) { text = "Defenseless"; color = Purple3; }
+            else if (res >= 36 && res <= 75) { text = "Resistant"; color = Purple1; }
+            else { text = "Immune"; color = Pink1; }
         }
 
-        public static string GetChestMagicResistText(LLCObject chest, int vagueness)
+        public static void GetVividMagicResistText(int res, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMagicResistText(chest.ChestMagicResist); }
-            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividMagicResistText(chest.ChestMagicResist); }
-            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteMagicResistText(chest.ChestMagicResist); }
-            else { return "ERROR"; }
+            if (res <= 16) { text = "Defenseless"; color = Purple3; }
+            else if (res >= 17 && res <= 35) { text = "Vulnerable"; color = Purple2; }
+            else if (res >= 36 && res <= 50) { text = "Resistant"; color = Purple1; }
+            else if (res >= 51 && res <= 75) { text = "Protected"; color = Pink3; }
+            else if (res >= 76 && res <= 90) { text = "Warded"; color = Pink2; }
+            else { text = "Immune"; color = Pink1; }
         }
 
-        public static string GetBasicMagicResistText(int res)
+        public static void GetCompleteMagicResistText(int res, out string text, out Color32 color)
         {
-            if (res <= 35) { return "Defenseless"; }
-            else if (res >= 36 && res <= 75) { return "Resistant"; }
-            else { return "Immune"; }
+            if (res <= 16) { text = "Defenseless" + " (" + res.ToString() + ")"; color = Purple3; }
+            else if (res >= 17 && res <= 35) { text = "Vulnerable" + " (" + res.ToString() + ")"; color = Purple2; }
+            else if (res >= 36 && res <= 50) { text = "Resistant" + " (" + res.ToString() + ")"; color = Purple1; }
+            else if (res >= 51 && res <= 75) { text = "Protected" + " (" + res.ToString() + ")"; color = Pink3; }
+            else if (res >= 76 && res <= 90) { text = "Warded" + " (" + res.ToString() + ")"; color = Pink2; }
+            else { text = "Immune" + " (" + res.ToString() + ")"; color = Pink1; }
         }
 
-        public static string GetVividMagicResistText(int res)
+        public static void GetLockMaterialText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (res <= 16) { return "Defenseless"; }
-            else if (res >= 17 && res <= 35) { return "Vulnerable"; }
-            else if (res >= 36 && res <= 50) { return "Resistant"; }
-            else if (res >= 51 && res <= 75) { return "Protected"; }
-            else if (res >= 76 && res <= 90) { return "Warded"; }
-            else { return "Immune"; }
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicMaterialText(chest.LockMaterial, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid || vagueness == (int)InfoVagueness.Complete) { GetCompleteMaterialText(chest.LockMaterial, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetCompleteMagicResistText(int res)
+        public static void GetLockSturdinessText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (res <= 16) { return "Defenseless" + " (" + res.ToString() + ")"; }
-            else if (res >= 17 && res <= 35) { return "Vulnerable" + " (" + res.ToString() + ")"; }
-            else if (res >= 36 && res <= 50) { return "Resistant" + " (" + res.ToString() + ")"; }
-            else if (res >= 51 && res <= 75) { return "Protected" + " (" + res.ToString() + ")"; }
-            else if (res >= 76 && res <= 90) { return "Warded" + " (" + res.ToString() + ")"; }
-            else { return "Immune" + " (" + res.ToString() + ")"; }
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicSturdinessText(chest.LockSturdiness, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { GetVividSturdinessText(chest.LockSturdiness, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Complete) { GetCompleteSturdinessText(chest.LockSturdiness, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetLockMaterialText(LLCObject chest, int vagueness)
+        public static void GetLockMagicResistText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMaterialText(chest.LockMaterial); }
-            else if (vagueness == (int)InfoVagueness.Vivid || vagueness == (int)InfoVagueness.Complete) { return GetCompleteMaterialText(chest.LockMaterial); }
-            else { return "ERROR"; }
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicMagicResistText(chest.LockMagicResist, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { GetVividMagicResistText(chest.LockMagicResist, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Complete) { GetCompleteMagicResistText(chest.LockMagicResist, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetLockSturdinessText(LLCObject chest, int vagueness)
+        public static void GetLockComplexityText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicSturdinessText(chest.LockSturdiness); }
-            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividSturdinessText(chest.LockSturdiness); }
-            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteSturdinessText(chest.LockSturdiness); }
-            else { return "ERROR"; }
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicComplexityText(chest.LockComplexity, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { GetVividComplexityText(chest.LockComplexity, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Complete) { GetCompleteComplexityText(chest.LockComplexity, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetLockMagicResistText(LLCObject chest, int vagueness)
+        public static void GetBasicComplexityText(int comp, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicMagicResistText(chest.LockMagicResist); }
-            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividMagicResistText(chest.LockMagicResist); }
-            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteMagicResistText(chest.LockMagicResist); }
-            else { return "ERROR"; }
+            if (comp <= 35) { text = "Simple"; color = Yellow5; }
+            else if (comp >= 36 && comp <= 75) { text = "Complex"; color = Yellow4; }
+            else { text = "Elaborate"; color = Yellow3; }
         }
 
-        public static string GetLockComplexityText(LLCObject chest, int vagueness)
+        public static void GetVividComplexityText(int comp, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicComplexityText(chest.LockComplexity); }
-            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividComplexityText(chest.LockComplexity); }
-            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteComplexityText(chest.LockComplexity); }
-            else { return "ERROR"; }
+            if (comp <= 16) { text = "Crude"; color = Yellow6; }
+            else if (comp >= 17 && comp <= 35) { text = "Simple"; color = Yellow5; }
+            else if (comp >= 36 && comp <= 50) { text = "Complex"; color = Yellow4; }
+            else if (comp >= 51 && comp <= 75) { text = "Elaborate"; color = Yellow3; }
+            else if (comp >= 76 && comp <= 90) { text = "Tricky"; color = Yellow2; }
+            else { text = "Devious"; color = Yellow1; }
         }
 
-        public static string GetBasicComplexityText(int comp)
+        public static void GetCompleteComplexityText(int comp, out string text, out Color32 color)
         {
-            if (comp <= 35) { return "Simple"; }
-            else if (comp >= 36 && comp <= 75) { return "Complex"; }
-            else { return "Elaborate"; }
+            if (comp <= 16) { text = "Crude" + " (" + comp.ToString() + ")"; color = Yellow6; }
+            else if (comp >= 17 && comp <= 35) { text = "Simple" + " (" + comp.ToString() + ")"; color = Yellow5; }
+            else if (comp >= 36 && comp <= 50) { text = "Complex" + " (" + comp.ToString() + ")"; color = Yellow4; }
+            else if (comp >= 51 && comp <= 75) { text = "Elaborate" + " (" + comp.ToString() + ")"; color = Yellow3; }
+            else if (comp >= 76 && comp <= 90) { text = "Tricky" + " (" + comp.ToString() + ")"; color = Yellow2; }
+            else { text = "Devious" + " (" + comp.ToString() + ")"; color = Yellow1; }
         }
 
-        public static string GetVividComplexityText(int comp)
+        public static void GetLockJamResistText(LLCObject chest, int vagueness, out string text, out Color32 color)
         {
-            if (comp <= 16) { return "Crude"; }
-            else if (comp >= 17 && comp <= 35) { return "Simple"; }
-            else if (comp >= 36 && comp <= 50) { return "Complex"; }
-            else if (comp >= 51 && comp <= 75) { return "Elaborate"; }
-            else if (comp >= 76 && comp <= 90) { return "Tricky"; }
-            else { return "Devious"; }
+            if (vagueness == (int)InfoVagueness.Unknown) { text = "Unknown"; color = BrownRed; }
+            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { GetBasicJamResistText(chest.JamResist, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Vivid) { GetVividJamResistText(chest.JamResist, out text, out color); }
+            else if (vagueness == (int)InfoVagueness.Complete) { GetCompleteJamResistText(chest.JamResist, out text, out color); }
+            else { text = "ERROR"; color = BrightRed; }
         }
 
-        public static string GetCompleteComplexityText(int comp)
+        public static void GetBasicJamResistText(int jam, out string text, out Color32 color)
         {
-            if (comp <= 16) { return "Crude" + " (" + comp.ToString() + ")"; }
-            else if (comp >= 17 && comp <= 35) { return "Simple" + " (" + comp.ToString() + ")"; }
-            else if (comp >= 36 && comp <= 50) { return "Complex" + " (" + comp.ToString() + ")"; }
-            else if (comp >= 51 && comp <= 75) { return "Elaborate" + " (" + comp.ToString() + ")"; }
-            else if (comp >= 76 && comp <= 90) { return "Tricky" + " (" + comp.ToString() + ")"; }
-            else { return "Devious" + " (" + comp.ToString() + ")"; }
+            if (jam <= 35) { text = "Eroded"; color = Green3; }
+            else if (jam >= 36 && jam <= 75) { text = "Springy"; color = Teal3; }
+            else { text = "Oiled"; color = Teal2; }
         }
 
-        public static string GetLockJamResistText(LLCObject chest, int vagueness)
+        public static void GetVividJamResistText(int jam, out string text, out Color32 color)
         {
-            if (vagueness == (int)InfoVagueness.Unknown) { return "Unknown"; }
-            else if (vagueness == (int)InfoVagueness.Bare || vagueness == (int)InfoVagueness.Simple) { return GetBasicJamResistText(chest.JamResist); }
-            else if (vagueness == (int)InfoVagueness.Vivid) { return GetVividJamResistText(chest.JamResist); }
-            else if (vagueness == (int)InfoVagueness.Complete) { return GetCompleteJamResistText(chest.JamResist); }
-            else { return "ERROR"; }
+            if (jam <= 16) { text = "Eroded"; color = Green3; }
+            else if (jam >= 17 && jam <= 35) { text = "Deteriorated"; color = Green2; }
+            else if (jam >= 36 && jam <= 50) { text = "Stiff"; color = Green1; }
+            else if (jam >= 51 && jam <= 75) { text = "Springy"; color = Teal3; }
+            else if (jam >= 76 && jam <= 90) { text = "Oiled"; color = Teal2; }
+            else { text = "Effortless"; color = Teal1; }
         }
 
-        public static string GetBasicJamResistText(int jam)
+        public static void GetCompleteJamResistText(int jam, out string text, out Color32 color)
         {
-            if (jam <= 35) { return "Eroded"; }
-            else if (jam >= 36 && jam <= 75) { return "Springy"; }
-            else { return "Oiled"; }
-        }
-
-        public static string GetVividJamResistText(int jam)
-        {
-            if (jam <= 16) { return "Eroded"; }
-            else if (jam >= 17 && jam <= 35) { return "Deteriorated"; }
-            else if (jam >= 36 && jam <= 50) { return "Stiff"; }
-            else if (jam >= 51 && jam <= 75) { return "Springy"; }
-            else if (jam >= 76 && jam <= 90) { return "Oiled"; }
-            else { return "Effortless"; }
-        }
-
-        public static string GetCompleteJamResistText(int jam)
-        {
-            if (jam <= 16) { return "Eroded" + " (" + jam.ToString() + ")"; }
-            else if (jam >= 17 && jam <= 35) { return "Deteriorated" + " (" + jam.ToString() + ")"; }
-            else if (jam >= 36 && jam <= 50) { return "Stiff" + " (" + jam.ToString() + ")"; }
-            else if (jam >= 51 && jam <= 75) { return "Springy" + " (" + jam.ToString() + ")"; }
-            else if (jam >= 76 && jam <= 90) { return "Oiled" + " (" + jam.ToString() + ")"; }
-            else { return "Effortless" + " (" + jam.ToString() + ")"; }
+            if (jam <= 16) { text = "Eroded" + " (" + jam.ToString() + ")"; color = Green3; }
+            else if (jam >= 17 && jam <= 35) { text = "Deteriorated" + " (" + jam.ToString() + ")"; color = Green2; }
+            else if (jam >= 36 && jam <= 50) { text = "Stiff" + " (" + jam.ToString() + ")"; color = Green1; }
+            else if (jam >= 51 && jam <= 75) { text = "Springy" + " (" + jam.ToString() + ")"; color = Teal3; }
+            else if (jam >= 76 && jam <= 90) { text = "Oiled" + " (" + jam.ToString() + ")"; color = Teal2; }
+            else { text = "Effortless" + " (" + jam.ToString() + ")"; color = Teal1; }
         }
     }
 }

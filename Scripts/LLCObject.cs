@@ -15,7 +15,6 @@ namespace LockedLootContainers
 
         ulong loadID = 0;
 
-        TextFile.Token[] onClickText;
         TextFile.Token[] regionManufacturedText;
         TextFile.Token[] companyManufacturedText;
         int[] recentInspectValues = { -1, -1, -1, -1, -1, -1, -1, -1 };
@@ -60,12 +59,6 @@ namespace LockedLootContainers
         {
             get { return loadID; }
             set { loadID = value; }
-        }
-
-        public TextFile.Token[] OnClickText
-        {
-            get { return onClickText; }
-            set { onClickText = value; }
         }
 
         public TextFile.Token[] RegionManufacturedText
