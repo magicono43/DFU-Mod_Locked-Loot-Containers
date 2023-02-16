@@ -222,6 +222,7 @@ namespace LockedLootContainers
                         if (chestData.HasBeenInspected) { } // Do nothing, will likely change this eventually, so reinspection/rerolling for inspection results is possible at some cost or something.
                         else
                         {
+                            ApplyInspectionCosts();
                             chestData.RecentInspectValues = GetInspectionValues(chestData);
                             chestData.HasBeenInspected = true;
                         }
@@ -248,8 +249,10 @@ namespace LockedLootContainers
                             if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                                 dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
                         }
-                        else if (Dice100.SuccessRoll(LockPickChance(closedChestData))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                        else if (LockPickChance(closedChestData)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                         {
+                            closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                            ApplyLockPickAttemptCosts();
                             DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
                             openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
                             openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
@@ -265,6 +268,7 @@ namespace LockedLootContainers
                         else
                         {
                             closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                            ApplyLockPickAttemptCosts();
                             if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
                             {
                                 closedChestData.IsLockJammed = true;

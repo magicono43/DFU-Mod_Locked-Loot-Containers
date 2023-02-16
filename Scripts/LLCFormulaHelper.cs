@@ -1,7 +1,10 @@
 using UnityEngine;
 using DaggerfallConnect;
+using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Items;
 using System.Collections.Generic;
+using DaggerfallWorkshop.Game.Utility;
+using DaggerfallWorkshop.Game.Entity;
 
 namespace LockedLootContainers
 {
@@ -66,39 +69,72 @@ namespace LockedLootContainers
         public static int Mysti { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Mysticism); } }
         public static int Thaum { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Thaumaturgy); } }
 
-        public static int LockPickChance(LLCObject chest) // Still not entirely happy with the current form here, but I think it's alot better than the first draft atleast, so fine for now, I think.
+        public static bool LockPickChance(LLCObject chest) // Still not entirely happy with the current form here, but I think it's alot better than the first draft atleast, so fine for now, I think.
         {
             int lockComp = chest.LockComplexity;
+            int attempts = chest.PicksAttempted - 1;
 
             if (lockComp >= 0 && lockComp <= 19)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.6f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .3f) + Mathf.Round(Agili * 1.1f) + Mathf.Round(Speed * .35f) + Mathf.Round(Luck * .30f);
-                return (int)Mathf.Round(Mathf.Clamp(successChance, 15f, 100f));
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 15f, 100f))))
+                {
+                    if (LockP >= 60) { } // Do nothing
+                    else { Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(2 - attempts, 0, 2)); }
+                    return true;
+                }
+                else
+                    return false;
             }
             else if (lockComp >= 20 && lockComp <= 39)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.7f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .4f) + Mathf.Round(Agili * 1f) + Mathf.Round(Speed * .30f) + Mathf.Round(Luck * .30f);
-                return (int)Mathf.Round(Mathf.Clamp(successChance, 10f, 100f));
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 10f, 100f))))
+                {
+                    if (LockP >= 80) { } // Do nothing
+                    else { Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(3 - attempts, 0, 3)); }
+                    return true;
+                }
+                else
+                    return false;
             }
             else if (lockComp >= 40 && lockComp <= 59)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.8f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .5f) + Mathf.Round(Agili * .9f) + Mathf.Round(Speed * .25f) + Mathf.Round(Luck * .30f);
-                return (int)Mathf.Round(Mathf.Clamp(successChance, 7f, 95f));
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 7f, 95f))))
+                {
+                    Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(4 - attempts, 0, 4));
+                    return true;
+                }
+                else
+                    return false;
             }
             else if (lockComp >= 60 && lockComp <= 79)
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.9f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .6f) + Mathf.Round(Agili * .8f) + Mathf.Round(Speed * .20f) + Mathf.Round(Luck * .30f);
-                return (int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f));
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f))))
+                {
+                    Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(5 - attempts, 0, 5));
+                    return true;
+                }
+                else
+                    return false;
             }
             else
             {
                 int lockP = (int)Mathf.Ceil(LockP * 2f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .7f) + Mathf.Round(Agili * .7f) + Mathf.Round(Speed * .15f) + Mathf.Round(Luck * .30f);
-                return (int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)); // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
+                {
+                    Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(6 - attempts, 0, 6));
+                    return true;
+                }
+                else
+                    return false;
             }
         }
 
@@ -555,7 +591,23 @@ namespace LockedLootContainers
                 return 1;
         }
 
-        public static int daggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.
+        public static void ApplyLockPickAttemptCosts()
+        {
+            Player.TallySkill(DFCareer.Skills.Lockpicking, 1);
+            int timePassed = 300 - (Speed * 3);
+            DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
+            Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
+        }
+
+        public static void ApplyInspectionCosts()
+        {
+            Player.TallySkill(DFCareer.Skills.Lockpicking, 1);
+            int timePassed = 1200 - (Speed * 12);
+            DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
+            Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
+        }
+
+        public static int DaggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.
         {
             switch ((WeaponMaterialTypes)nativeMaterialValue)
             {
@@ -580,7 +632,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static int chestMaterialToDaggerfallValue(ChestMaterials chestMat)
+        public static int ChestMaterialToDaggerfallValue(ChestMaterials chestMat)
         {
             switch (chestMat)
             {
@@ -604,7 +656,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static int lockMaterialToDaggerfallValue(LockMaterials lockMat)
+        public static int LockMaterialToDaggerfallValue(LockMaterials lockMat)
         {
             switch (lockMat)
             {

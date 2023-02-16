@@ -105,6 +105,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             if (chest.HasBeenInspected) { } // Do nothing, will likely change this eventually, so reinspection/rerolling for inspection results is possible at some cost or something.
             else
             {
+                LockedLootContainersMain.ApplyInspectionCosts();
                 chest.RecentInspectValues = LockedLootContainersMain.GetInspectionValues(chest);
                 chest.HasBeenInspected = true;
             }
@@ -128,8 +129,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
                 }
-                else if (Dice100.SuccessRoll(LockedLootContainersMain.LockPickChance(chest))) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                else if (LockedLootContainersMain.LockPickChance(chest)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                 {
+                    chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                    LockedLootContainersMain.ApplyLockPickAttemptCosts();
                     DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, chest.LoadID, null, false);
                     openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
                     openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
@@ -145,6 +148,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 else
                 {
                     chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                    LockedLootContainersMain.ApplyLockPickAttemptCosts();
                     if (Dice100.SuccessRoll(LockedLootContainersMain.LockJamChance(chest)))
                     {
                         chest.IsLockJammed = true;

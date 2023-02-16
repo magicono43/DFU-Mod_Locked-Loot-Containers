@@ -86,7 +86,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             exitButton.OnMouseClick += ExitButton_OnMouseClick;
             exitButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
 
-            // Next I work on this, Fix apparent bashing weirdness, also add time costs and skill increases for doing actions like inspecting, lockpicking, etc.
+            // Next I work on this, Fix apparent bashing weirdness. I might try to initially do this by adding in the "waste items" custom items so that error stops occuring atleast, will see.
 
             SetupInfoTextAndButtons();
         }

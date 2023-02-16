@@ -156,18 +156,22 @@ namespace LockedLootContainers
 
         public static bool BashLockRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if a bash attempt hit the lock or the chest body instead.
         {
-            int wepSkill = Player.Skills.GetLiveSkillValue((weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand); // Might add accuracy modifier for weapon type, but for now just keep it more simple.
+            short skillUsed = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
+            int wepSkill = Player.Skills.GetLiveSkillValue(skillUsed); // Might add accuracy modifier for weapon type, but for now just keep it more simple.
             float accuracyCheck = Mathf.Round(wepSkill / 4) + Mathf.Round(Willp * .2f) + Mathf.Round(Agili * .5f) + Mathf.Round(Speed * .1f) + Mathf.Round(Luck * .3f);
 
             if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(accuracyCheck, 5f, 70f))))
+            {
+                Player.TallySkill((DFCareer.Skills)skillUsed, 1);
                 return true;
+            }
             else
                 return false;
         }
 
         public static bool LockHardBashRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed lock was hit hard or lightly, I.E. Effectively or not very effectively.
         {
-            int lockMat = lockMaterialToDaggerfallValue(chest.LockMaterial);
+            int lockMat = LockMaterialToDaggerfallValue(chest.LockMaterial);
             int weapMat = (weapon != null) ? weapon.NativeMaterialValue : -1;
             int matDiff = weapMat - lockMat;
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
@@ -240,7 +244,7 @@ namespace LockedLootContainers
 
         public static bool BreakLockRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed lock breaks or not this attempt, granting full access to loot.
         {
-            int lockMat = lockMaterialToDaggerfallValue(chest.LockMaterial);
+            int lockMat = LockMaterialToDaggerfallValue(chest.LockMaterial);
             float bashResist = (float)chest.LockSturdiness / 100f;
             float stabilityMod = (bashResist - 1f) * -1f; // Modifier value might need some work, especially for the very sturdy lock materials, but will see with testing later, etc.
 
@@ -278,7 +282,7 @@ namespace LockedLootContainers
 
         public static bool ChestHardBashRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed chest body was hit hard or lightly, I.E. Effectively or not very effectively.
         {
-            int chestMat = chestMaterialToDaggerfallValue(chest.ChestMaterial);
+            int chestMat = ChestMaterialToDaggerfallValue(chest.ChestMaterial);
             int weapMat = (weapon != null) ? weapon.NativeMaterialValue : -1;
             int matDiff = weapMat - chestMat;
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
@@ -351,7 +355,7 @@ namespace LockedLootContainers
 
         public static bool SmashOpenChestRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed chest body breaks open or not this attempt, granting full access to loot.
         {
-            int chestMat = chestMaterialToDaggerfallValue(chest.ChestMaterial);
+            int chestMat = ChestMaterialToDaggerfallValue(chest.ChestMaterial);
             float bashResist = (float)chest.ChestSturdiness / 100f;
             float stabilityMod = (bashResist - 1f) * -1f; // Modifier value might need some work, especially for the very sturdy chest materials, but will see with testing later, etc.
 
@@ -394,7 +398,10 @@ namespace LockedLootContainers
             float chestSmashOpenChance = (int)Mathf.Round((chest.ChestBashedLightTimes * (int)Mathf.Round((Stren / 25f) + 3)) * stabilityMod) + (int)Mathf.Round(Luck / 10f);
 
             if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(chestSmashOpenChance, 0f, 75f))))
+            {
+                Player.TallySkill(DFCareer.Skills.Archery, 1);
                 return true;
+            }
             else
                 return false;
         }
