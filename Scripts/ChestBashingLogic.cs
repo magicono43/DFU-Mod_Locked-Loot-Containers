@@ -32,8 +32,8 @@ namespace LockedLootContainers
                     {
                         // Lock was hit with bash and is now broken, so chest loot is accessible.
                         BashingOpenChestDamagesLoot(chest, weapon, false);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 820, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(820, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
@@ -61,8 +61,8 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged greatly most likely.)
                         BashingOpenChestDamagesLoot(chest, weapon, true);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 820, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(820, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
@@ -112,8 +112,8 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged significantly.)
                         BashingOpenChestWithArrowsDamagesLoot(chest);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 812, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(812, 0);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 820, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(820, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         // Show success and play smash open sound

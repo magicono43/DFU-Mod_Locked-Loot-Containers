@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		2/13/2023, 12:45 AM
+// Last Edit:		2/17/2023, 12:00 AM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -65,7 +65,7 @@ namespace LockedLootContainers
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
 
             // Definitely consider making a custom activation for those silly 3D chest models that are in-game but never used for anything and add replace those with my custom chest objects, etc.
-            PlayerActivate.RegisterCustomActivation(mod, 810, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
+            PlayerActivate.RegisterCustomActivation(mod, 818, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
 
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
 
@@ -253,8 +253,8 @@ namespace LockedLootContainers
                         {
                             closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
                             ApplyLockPickAttemptCosts();
-                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, closedChestData.LoadID, null, false);
-                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 819, 0, closedChestData.LoadID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(819, 0);
                             openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                             Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.

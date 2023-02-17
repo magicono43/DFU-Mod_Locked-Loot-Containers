@@ -133,8 +133,8 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 811, 0, chest.LoadID, null, false);
-                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(811, 0);
+                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 819, 0, chest.LoadID, null, false);
+                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(819, 0);
                     openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                     UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.

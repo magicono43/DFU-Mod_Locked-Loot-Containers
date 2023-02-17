@@ -349,7 +349,7 @@ namespace LockedLootContainers
                 Vector3 pos = lootPile.transform.position;
                 ulong oldLoadID = lootPile.LoadID;
 
-                GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(810, 0, oldLootPileTransform.parent.parent);
+                GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(818, 0, oldLootPileTransform.parent.parent);
 
                 LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
                 llcObj.Oldloot = oldPileLoot;
