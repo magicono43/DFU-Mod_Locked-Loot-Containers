@@ -4,187 +4,17 @@ using DaggerfallWorkshop.Game;
 
 namespace LockedLootContainers
 {
-    public class ItemThingy : DaggerfallUnityItem
+    public class ItemMatScraps : DaggerfallUnityItem
     {
-        public const int templateIndex = 4700;
-        public const string baseName = "Thingy";
+        public const int templateIndex = 806;
 
-        public static int ringType = -1;
-
-        public ItemThingy() : base(ItemGroups.Jewellery, templateIndex)
+        public ItemMatScraps() : base(ItemGroups.UselessItems1, templateIndex)
         {
-            if (ringType >= 0)
-                message = ringType;
-            else
-                message = 1;
-                //message = JewelryAdditionsMain.GetRandomVariantType(true, true, 24);
-                //message = Random.Range(1, 25);
+        }
 
-            ringType = -1;
-
-            switch (message)
-            {
-                case 1:
-                    shortName = "Silver Ring";
-                    value = 20;
-					maxCondition = 250;
-					enchantmentPoints = 600;
-                    break;
-                case 2:
-                    shortName = "Gold Ring";
-                    value = 80;
-					maxCondition = 1000;
-					enchantmentPoints = 300;
-                    break;
-                case 3:
-                    shortName = "Silver Ruby Ring";
-                    value = 235;
-					maxCondition = 1000;
-					enchantmentPoints = 2100;
-                    break;
-                case 4:
-                    shortName = "Gold Ruby Ring";
-                    value = 295;
-					maxCondition = 2500;
-					enchantmentPoints = 1050;
-                    break;
-                case 5:
-                    shortName = "Silver Emerald Ring";
-                    value = 320;
-					maxCondition = 1315;
-					enchantmentPoints = 3300;
-                    break;
-                case 6:
-                    shortName = "Gold Emerald Ring";
-                    value = 380;
-					maxCondition = 3125;
-					enchantmentPoints = 1650;
-                    break;
-                case 7:
-                    shortName = "Silver Sapphire Ring";
-                    value = 270;
-					maxCondition = 1135;
-					enchantmentPoints = 2550;
-                    break;
-                case 8:
-                    shortName = "Gold Sapphire Ring";
-                    value = 330;
-					maxCondition = 2775;
-					enchantmentPoints = 1275;
-                    break;
-                case 9:
-                    shortName = "Silver Diamond Ring";
-                    value = 420;
-					maxCondition = 1750;
-					enchantmentPoints = 4300;
-                    break;
-                case 10:
-                    shortName = "Gold Diamond Ring";
-                    value = 480;
-					maxCondition = 4000;
-					enchantmentPoints = 2150;
-                    break;
-                case 11:
-                    shortName = "Silver Amethyst Ring";
-                    value = 95;
-					maxCondition = 515;
-					enchantmentPoints = 1050;
-                    break;
-                case 12:
-                    shortName = "Gold Amethyst Ring";
-                    value = 155;
-					maxCondition = 1525;
-					enchantmentPoints = 525;
-                    break;
-                case 13:
-                    shortName = "Silver Apatite Ring";
-                    value = 45;
-					maxCondition = 340;
-					enchantmentPoints = 750;
-                    break;
-                case 14:
-                    shortName = "Gold Apatite Ring";
-                    value = 105;
-					maxCondition = 1175;
-					enchantmentPoints = 375;
-                    break;
-                case 15:
-                    shortName = "Silver Aquamarine Ring";
-                    value = 145;
-					maxCondition = 690;
-					enchantmentPoints = 1350;
-                    break;
-                case 16:
-                    shortName = "Gold Aquamarine Ring";
-                    value = 205;
-					maxCondition = 1875;
-					enchantmentPoints = 675;
-                    break;
-                case 17:
-                    shortName = "Silver Garnet Ring";
-                    value = 70;
-					maxCondition = 425;
-					enchantmentPoints = 900;
-                    break;
-                case 18:
-                    shortName = "Gold Garnet Ring";
-                    value = 130;
-					maxCondition = 1350;
-					enchantmentPoints = 450;
-                    break;
-                case 19:
-                    shortName = "Silver Topaz Ring";
-                    value = 120;
-					maxCondition = 600;
-					enchantmentPoints = 1200;
-                    break;
-                case 20:
-                    shortName = "Gold Topaz Ring";
-                    value = 180;
-					maxCondition = 1700;
-					enchantmentPoints = 600;
-                    break;
-                case 21:
-                    shortName = "Silver Zircon Ring";
-                    value = 195;
-					maxCondition = 865;
-					enchantmentPoints = 1650;
-                    break;
-                case 22:
-                    shortName = "Gold Zircon Ring";
-                    value = 255;
-					maxCondition = 2225;
-					enchantmentPoints = 825;
-                    break;
-                case 23:
-                    shortName = "Silver Spinel Ring";
-                    value = 170;
-					maxCondition = 775;
-					enchantmentPoints = 1500;
-                    break;
-                case 24:
-                    shortName = "Gold Spinel Ring";
-                    value = 230;
-					maxCondition = 2050;
-					enchantmentPoints = 750;
-                    break;
-                default:
-                    shortName = "Broken Ring";
-                    value = 1;
-					maxCondition = 100;
-					enchantmentPoints = 1;
-                    break;
-            }
-
-            if (message % 2 == 0)
-                weightInKg += 0.02f; // Gold
-
-            if (message > 2)
-                weightInKg += 0.01f; // Add 0.01 weight if jewelry item has a gemstone.
-
-            currentCondition = maxCondition;
-
-            CurrentVariant = message - 1;
+        public override bool IsStackable()
+        {
+            return true;
         }
 
         public override int InventoryTextureArchive
@@ -202,36 +32,386 @@ namespace LockedLootContainers
             get { return shortName; }
         }
 
-        /*private static string GetJewelryName(int message)
+        public override ItemData_v1 GetSaveData()
         {
-            string material = "";
-            string gemstone = "";
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemMatScraps).ToString();
+            return data;
+        }
+    }
 
-            if (message % 2 == 0)
-                material = "Gold ";
-            else
-                material = "Silver ";
+    public class ItemBrokenArrow : DaggerfallUnityItem
+    {
+        public const int templateIndex = 807;
 
-            gemstone = JewelryAdditionsMain.DetermineGemstone((int)Mathf.Floor(message / 2));
-
-            return material + gemstone + baseName;
-        }*/
-
-        public override EquipSlots GetEquipSlot()
+        public ItemBrokenArrow() : base(ItemGroups.UselessItems1, templateIndex)
         {
-            return GameManager.Instance.PlayerEntity.ItemEquipTable.GetFirstSlot(EquipSlots.Ring0, EquipSlots.Ring1);
         }
 
-        public override int GetEnchantmentPower()
+        public override bool IsStackable()
         {
-            return enchantmentPoints;
+            return true;
         }
 
         public override ItemData_v1 GetSaveData()
         {
             ItemData_v1 data = base.GetSaveData();
-            data.className = typeof(ItemThingy).ToString();
+            data.className = typeof(ItemBrokenArrow).ToString();
             return data;
+        }
+    }
+
+    public class ItemTatteredCloth : DaggerfallUnityItem
+    {
+        public const int templateIndex = 808;
+
+        public ItemTatteredCloth() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemTatteredCloth).ToString();
+            return data;
+        }
+    }
+
+    public class ItemGlassFragments : DaggerfallUnityItem
+    {
+        public const int templateIndex = 809;
+
+        public ItemGlassFragments() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemGlassFragments).ToString();
+            return data;
+        }
+    }
+
+    public class ItemPaperShreds : DaggerfallUnityItem
+    {
+        public const int templateIndex = 810;
+
+        public ItemPaperShreds() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemPaperShreds).ToString();
+            return data;
+        }
+    }
+
+    public class ItemShinyRubble : DaggerfallUnityItem
+    {
+        public const int templateIndex = 811;
+
+        public ItemShinyRubble() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemShinyRubble).ToString();
+            return data;
+        }
+    }
+
+    public class ItemIvoryFragments : DaggerfallUnityItem
+    {
+        public const int templateIndex = 812;
+
+        public ItemIvoryFragments() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemIvoryFragments).ToString();
+            return data;
+        }
+    }
+
+    public class ItemDestroyedJewelry : DaggerfallUnityItem
+    {
+        public const int templateIndex = 813;
+
+        public ItemDestroyedJewelry() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemDestroyedJewelry).ToString();
+            return data;
+        }
+    }
+
+    public class ItemRuinedCoin : DaggerfallUnityItem
+    {
+        public const int templateIndex = 814;
+
+        public ItemRuinedCoin() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemRuinedCoin).ToString();
+            return data;
+        }
+    }
+
+    public class ItemClumpofPlantMatter : DaggerfallUnityItem
+    {
+        public const int templateIndex = 815;
+
+        public ItemClumpofPlantMatter() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemClumpofPlantMatter).ToString();
+            return data;
+        }
+    }
+
+    public class ItemGlobofGore : DaggerfallUnityItem
+    {
+        public const int templateIndex = 816;
+
+        public ItemGlobofGore() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemGlobofGore).ToString();
+            return data;
+        }
+    }
+
+    public class ItemUselessRefuse : DaggerfallUnityItem
+    {
+        public const int templateIndex = 817;
+
+        public ItemUselessRefuse() : base(ItemGroups.UselessItems1, templateIndex)
+        {
+        }
+
+        public override bool IsStackable()
+        {
+            return true;
+        }
+
+        public override ItemData_v1 GetSaveData()
+        {
+            ItemData_v1 data = base.GetSaveData();
+            data.className = typeof(ItemUselessRefuse).ToString();
+            return data;
+        }
+    }
+
+    public static class LLCItemBuilder
+    {
+        public static DaggerfallUnityItem CreateScrapMaterial(WeaponMaterialTypes wepMat = WeaponMaterialTypes.None, ArmorMaterialTypes armMat = ArmorMaterialTypes.None)
+        {
+            int scrapMat = 0;
+
+            if (wepMat != WeaponMaterialTypes.None)
+            {
+                switch (wepMat)
+                {
+                    default:
+                    case WeaponMaterialTypes.Iron:
+                        scrapMat = 1; break;
+                    case WeaponMaterialTypes.Steel:
+                        scrapMat = 2; break;
+                    case WeaponMaterialTypes.Silver:
+                        scrapMat = 3; break;
+                    case WeaponMaterialTypes.Elven:
+                        scrapMat = 4; break;
+                    case WeaponMaterialTypes.Dwarven:
+                        scrapMat = 5; break;
+                    case WeaponMaterialTypes.Mithril:
+                        scrapMat = 6; break;
+                    case WeaponMaterialTypes.Adamantium:
+                        scrapMat = 7; break;
+                    case WeaponMaterialTypes.Ebony:
+                        scrapMat = 8; break;
+                    case WeaponMaterialTypes.Orcish:
+                        scrapMat = 9; break;
+                    case WeaponMaterialTypes.Daedric:
+                        scrapMat = 10; break;
+                }
+            }
+            else if (armMat != ArmorMaterialTypes.None)
+            {
+                switch (armMat)
+                {
+                    default:
+                    case ArmorMaterialTypes.Leather:
+                        scrapMat = 0; break;
+                    case ArmorMaterialTypes.Chain:
+                    case ArmorMaterialTypes.Chain2:
+                    case ArmorMaterialTypes.Iron:
+                        scrapMat = 1; break;
+                    case ArmorMaterialTypes.Steel:
+                        scrapMat = 2; break;
+                    case ArmorMaterialTypes.Silver:
+                        scrapMat = 3; break;
+                    case ArmorMaterialTypes.Elven:
+                        scrapMat = 4; break;
+                    case ArmorMaterialTypes.Dwarven:
+                        scrapMat = 5; break;
+                    case ArmorMaterialTypes.Mithril:
+                        scrapMat = 6; break;
+                    case ArmorMaterialTypes.Adamantium:
+                        scrapMat = 7; break;
+                    case ArmorMaterialTypes.Ebony:
+                        scrapMat = 8; break;
+                    case ArmorMaterialTypes.Orcish:
+                        scrapMat = 9; break;
+                    case ArmorMaterialTypes.Daedric:
+                        scrapMat = 10; break;
+                }
+            }
+
+            DaggerfallUnityItem item = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemMatScraps.templateIndex);
+            switch (scrapMat)
+            {
+                default:
+                case 0:
+                    item.shortName = "Leather Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Leather;
+                    item.weightInKg = 0.1f;
+                    item.value = 1;
+                    item.CurrentVariant = 0; break;
+                case 1:
+                    item.shortName = "Iron Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Iron;
+                    item.weightInKg = 0.2f;
+                    item.value = 3;
+                    item.CurrentVariant = 1; break;
+                case 2:
+                    item.shortName = "Steel Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Steel;
+                    item.weightInKg = 0.25f;
+                    item.value = 6;
+                    item.CurrentVariant = 2; break;
+                case 3:
+                    item.shortName = "Silver Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Silver;
+                    item.weightInKg = 0.2f;
+                    item.value = 12;
+                    item.CurrentVariant = 3; break;
+                case 4:
+                    item.shortName = "Elven Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Elven;
+                    item.weightInKg = 0.2f;
+                    item.value = 24;
+                    item.CurrentVariant = 4; break;
+                case 5:
+                    item.shortName = "Dwarven Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Dwarven;
+                    item.weightInKg = 0.15f;
+                    item.value = 48;
+                    item.CurrentVariant = 5; break;
+                case 6:
+                    item.shortName = "Mithril Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Mithril;
+                    item.weightInKg = 0.2f;
+                    item.value = 96;
+                    item.CurrentVariant = 6; break;
+                case 7:
+                    item.shortName = "Adamantium Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Adamantium;
+                    item.weightInKg = 0.2f;
+                    item.value = 192;
+                    item.CurrentVariant = 7; break;
+                case 8:
+                    item.shortName = "Ebony Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Ebony;
+                    item.weightInKg = 0.1f;
+                    item.value = 384;
+                    item.CurrentVariant = 8; break;
+                case 9:
+                    item.shortName = "Orcish Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Orcish;
+                    item.weightInKg = 0.2f;
+                    item.value = 768;
+                    item.CurrentVariant = 9; break;
+                case 10:
+                    item.shortName = "Daedric Scrap";
+                    item.nativeMaterialValue = (int)ArmorMaterialTypes.Daedric;
+                    item.weightInKg = 0.25f;
+                    item.value = 1536;
+                    item.CurrentVariant = 10; break;
+            }
+            item.maxCondition = 100;
+            item.message = scrapMat;
+            item.currentCondition = item.maxCondition;
+
+            return item;
         }
     }
 }

@@ -445,7 +445,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static void DetermineDestroyedLootRefuseType(DaggerfallUnityItem item, out DaggerfallUnityItem wasteItem, out int wasteAmount) // Obviously need to add these custom "Junk Items" in at some point.
+        public static void DetermineDestroyedLootRefuseType(DaggerfallUnityItem item, out DaggerfallUnityItem wasteItem, out int wasteAmount)
         {
             wasteAmount = 1;
 
@@ -454,57 +454,57 @@ namespace LockedLootContainers
                 switch (item.ItemGroup)
                 {
                     case ItemGroups.UselessItems1:
-                        if (item.IsPotion) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); return; } // "Glass Fragments" custom item
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; }
+                        if (item.IsPotion) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
                     case ItemGroups.Armor:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); wasteAmount = GetWasteAmount(item); return; // "(Material) Scraps" custom item
+                        wasteItem = LLCItemBuilder.CreateScrapMaterial(WeaponMaterialTypes.None, (ArmorMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return;
                     case ItemGroups.Weapons:
-                        if (item.TemplateIndex == (int)Weapons.Arrow) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42329); return; } // "Broken Arrow" custom item
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11119); wasteAmount = GetWasteAmount(item); return; }
+                        if (item.TemplateIndex == (int)Weapons.Arrow) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemBrokenArrow.templateIndex); return; }
+                        else { wasteItem = LLCItemBuilder.CreateScrapMaterial((WeaponMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return; }
                     case ItemGroups.MensClothing:
                     case ItemGroups.WomensClothing:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); return; // "Tattered Cloth" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemTatteredCloth.templateIndex); return;
                     case ItemGroups.Books:
                     case ItemGroups.Maps:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); wasteAmount = GetWasteAmount(item); return; // "Paper Shreds" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); wasteAmount = GetWasteAmount(item); return;
                     case ItemGroups.UselessItems2:
-                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); return; }
-                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11113); return; }
-                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; }
+                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
+                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemTatteredCloth.templateIndex); return; }
+                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
                     case ItemGroups.Gems:
                     case ItemGroups.MiscellaneousIngredients2:
                     case ItemGroups.MetalIngredients:
-                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); return; } // "Ivory Fragments" custom item
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); return; } // "Shiny Rubble" custom item
+                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemIvoryFragments.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
                     case ItemGroups.Drugs:
                     case ItemGroups.PlantIngredients1:
                     case ItemGroups.PlantIngredients2:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42424); return; // "Clump of Plant Matter" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemClumpofPlantMatter.templateIndex); return;
                     case ItemGroups.MiscellaneousIngredients1:
-                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 31111); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); return; }
+                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemIvoryFragments.templateIndex); return; }
                     case ItemGroups.CreatureIngredients1:
                     case ItemGroups.CreatureIngredients2:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); return; // "Glob of Gore" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlobofGore.templateIndex); return;
                     case ItemGroups.CreatureIngredients3:
-                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 11117); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 71111); return; }
+                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlobofGore.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemIvoryFragments.templateIndex); return; }
                     case ItemGroups.Jewellery:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 24242); return; // "Destroyed Jewelry" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemDestroyedJewelry.templateIndex); return;
                     case ItemGroups.MiscItems:
-                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 32323); return; }
-                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 33333); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; }
+                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
+                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
                     case ItemGroups.Currency:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91191); return; // "Ruined Coins" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemRuinedCoin.templateIndex); return;
                     default:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; // "Useless Refuse" custom item
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return;
                 }
             }
             else // Modded Item Templates
             {
-                wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 91111); return; // "Useless Refuse" custom item?
+                wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return;
             }
         }
 

@@ -64,6 +64,19 @@ namespace LockedLootContainers
             MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
 
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemMatScraps.templateIndex, ItemGroups.UselessItems1, typeof(ItemMatScraps));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemBrokenArrow.templateIndex, ItemGroups.UselessItems1, typeof(ItemBrokenArrow));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemTatteredCloth.templateIndex, ItemGroups.UselessItems1, typeof(ItemTatteredCloth));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemGlassFragments.templateIndex, ItemGroups.UselessItems1, typeof(ItemGlassFragments));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemPaperShreds.templateIndex, ItemGroups.UselessItems1, typeof(ItemPaperShreds));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemShinyRubble.templateIndex, ItemGroups.UselessItems1, typeof(ItemShinyRubble));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemIvoryFragments.templateIndex, ItemGroups.UselessItems1, typeof(ItemIvoryFragments));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemDestroyedJewelry.templateIndex, ItemGroups.UselessItems1, typeof(ItemDestroyedJewelry));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemRuinedCoin.templateIndex, ItemGroups.UselessItems1, typeof(ItemRuinedCoin));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemClumpofPlantMatter.templateIndex, ItemGroups.UselessItems1, typeof(ItemClumpofPlantMatter));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemGlobofGore.templateIndex, ItemGroups.UselessItems1, typeof(ItemGlobofGore));
+            DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemUselessRefuse.templateIndex, ItemGroups.UselessItems1, typeof(ItemUselessRefuse));
+
             // Definitely consider making a custom activation for those silly 3D chest models that are in-game but never used for anything and add replace those with my custom chest objects, etc.
             PlayerActivate.RegisterCustomActivation(mod, 818, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
 
