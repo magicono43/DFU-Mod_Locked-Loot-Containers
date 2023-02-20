@@ -6,7 +6,7 @@ namespace LockedLootContainers
 {
     public class ItemMatScraps : DaggerfallUnityItem
     {
-        public const int templateIndex = 806;
+        public const int templateIndex = 4721;
 
         public ItemMatScraps() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -17,9 +17,9 @@ namespace LockedLootContainers
             return true;
         }
 
-        public override int InventoryTextureArchive
+        public override int InventoryTextureRecord
         {
-            get { return templateIndex; }
+            get { return CurrentVariant; } // This is here, because otherwise items in group "UselessItems1" by default have their texture record set to 0 basically.
         }
 
         public override string ItemName
@@ -42,7 +42,7 @@ namespace LockedLootContainers
 
     public class ItemBrokenArrow : DaggerfallUnityItem
     {
-        public const int templateIndex = 807;
+        public const int templateIndex = 4722;
 
         public ItemBrokenArrow() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -63,7 +63,7 @@ namespace LockedLootContainers
 
     public class ItemTatteredCloth : DaggerfallUnityItem
     {
-        public const int templateIndex = 808;
+        public const int templateIndex = 4723;
 
         public ItemTatteredCloth() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -84,7 +84,7 @@ namespace LockedLootContainers
 
     public class ItemGlassFragments : DaggerfallUnityItem
     {
-        public const int templateIndex = 809;
+        public const int templateIndex = 4724;
 
         public ItemGlassFragments() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -105,7 +105,7 @@ namespace LockedLootContainers
 
     public class ItemPaperShreds : DaggerfallUnityItem
     {
-        public const int templateIndex = 810;
+        public const int templateIndex = 4725;
 
         public ItemPaperShreds() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -126,7 +126,7 @@ namespace LockedLootContainers
 
     public class ItemShinyRubble : DaggerfallUnityItem
     {
-        public const int templateIndex = 811;
+        public const int templateIndex = 4726;
 
         public ItemShinyRubble() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -147,7 +147,7 @@ namespace LockedLootContainers
 
     public class ItemIvoryFragments : DaggerfallUnityItem
     {
-        public const int templateIndex = 812;
+        public const int templateIndex = 4727;
 
         public ItemIvoryFragments() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -168,7 +168,7 @@ namespace LockedLootContainers
 
     public class ItemDestroyedJewelry : DaggerfallUnityItem
     {
-        public const int templateIndex = 813;
+        public const int templateIndex = 4728;
 
         public ItemDestroyedJewelry() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -189,7 +189,7 @@ namespace LockedLootContainers
 
     public class ItemRuinedCoin : DaggerfallUnityItem
     {
-        public const int templateIndex = 814;
+        public const int templateIndex = 4729;
 
         public ItemRuinedCoin() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -210,7 +210,7 @@ namespace LockedLootContainers
 
     public class ItemClumpofPlantMatter : DaggerfallUnityItem
     {
-        public const int templateIndex = 815;
+        public const int templateIndex = 4730;
 
         public ItemClumpofPlantMatter() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -231,7 +231,7 @@ namespace LockedLootContainers
 
     public class ItemGlobofGore : DaggerfallUnityItem
     {
-        public const int templateIndex = 816;
+        public const int templateIndex = 4731;
 
         public ItemGlobofGore() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -252,7 +252,7 @@ namespace LockedLootContainers
 
     public class ItemUselessRefuse : DaggerfallUnityItem
     {
-        public const int templateIndex = 817;
+        public const int templateIndex = 4732;
 
         public ItemUselessRefuse() : base(ItemGroups.UselessItems1, templateIndex)
         {
@@ -407,9 +407,7 @@ namespace LockedLootContainers
                     item.value = 1536;
                     item.CurrentVariant = 10; break;
             }
-            item.maxCondition = 100;
             item.message = scrapMat;
-            item.currentCondition = item.maxCondition;
 
             return item;
         }

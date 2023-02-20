@@ -405,6 +405,9 @@ namespace LockedLootContainers
 
         public static LootItemSturdiness DetermineLootItemSturdiness(DaggerfallUnityItem item)
         {
+            if (item == null)
+                return LootItemSturdiness.Unbreakable;
+
             if (item.TemplateIndex >= 0 && item.TemplateIndex <= 511) // Vanilla Item Templates
             {
                 switch (item.ItemGroup)

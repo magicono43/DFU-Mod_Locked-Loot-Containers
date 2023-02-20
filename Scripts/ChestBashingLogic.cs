@@ -32,8 +32,8 @@ namespace LockedLootContainers
                     {
                         // Lock was hit with bash and is now broken, so chest loot is accessible.
                         BashingOpenChestDamagesLoot(chest, weapon, false);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 820, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(820, 0);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
@@ -61,8 +61,8 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged greatly most likely.)
                         BashingOpenChestDamagesLoot(chest, weapon, true);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 820, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(820, 0);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
@@ -102,7 +102,7 @@ namespace LockedLootContainers
 
                 DaggerfallUnityItem bowUsed = GameManager.Instance.WeaponManager.LastBowUsed;
                 if (bowUsed != null)
-                    bowUsed.LowerCondition(1, Player, Player.Items);
+                    bowUsed.LowerCondition(1, Player);
 
                 if (chest.ChestMaterial == ChestMaterials.Wood)
                 {
@@ -112,8 +112,8 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged significantly.)
                         BashingOpenChestWithArrowsDamagesLoot(chest);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 820, 0, chest.LoadID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(820, 0);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, chest.LoadID, null, false);
+                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         // Show success and play smash open sound
@@ -486,7 +486,7 @@ namespace LockedLootContainers
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
-                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
                 else // Hitting either metal lock or chest body with a blunt type weapon
                 {
@@ -496,7 +496,7 @@ namespace LockedLootContainers
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
-                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
             }
             else if (weapon != null) // If player is bashing chest with any other types of weapons (in this case all the bladed ones)
@@ -510,7 +510,7 @@ namespace LockedLootContainers
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
-                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
                 else // Hitting either metal lock or chest body with a bladed type weapon
                 {
@@ -521,7 +521,7 @@ namespace LockedLootContainers
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, true); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
-                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player, Player.Items);
+                    weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
             }
             else
@@ -543,6 +543,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -566,6 +569,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -594,6 +600,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -620,6 +629,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -644,6 +656,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -667,6 +682,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -695,6 +713,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -729,6 +750,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -749,6 +773,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -772,6 +799,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -800,6 +830,9 @@ namespace LockedLootContainers
                         for (int i = 0; i < initialItemCount; i++)
                         {
                             DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
                             LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                             if (!item.IsQuestItem)
@@ -843,6 +876,9 @@ namespace LockedLootContainers
                     for (int i = 0; i < initialItemCount; i++)
                     {
                         DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                        if (item == null)
+                            continue;
+
                         LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                         if (!item.IsQuestItem)
@@ -871,6 +907,9 @@ namespace LockedLootContainers
                     for (int i = 0; i < initialItemCount; i++)
                     {
                         DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                        if (item == null)
+                            continue;
+
                         LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                         if (!item.IsQuestItem)
@@ -899,6 +938,9 @@ namespace LockedLootContainers
                     for (int i = 0; i < initialItemCount; i++)
                     {
                         DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                        if (item == null)
+                            continue;
+
                         LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                         if (!item.IsQuestItem)
@@ -934,6 +976,9 @@ namespace LockedLootContainers
                     for (int i = 0; i < initialItemCount; i++)
                     {
                         DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                        if (item == null)
+                            continue;
+
                         LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                         if (!item.IsQuestItem)
@@ -962,6 +1007,9 @@ namespace LockedLootContainers
                     for (int i = 0; i < initialItemCount; i++)
                     {
                         DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                        if (item == null)
+                            continue;
+
                         LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                         if (!item.IsQuestItem)
@@ -990,6 +1038,9 @@ namespace LockedLootContainers
                     for (int i = 0; i < initialItemCount; i++)
                     {
                         DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                        if (item == null)
+                            continue;
+
                         LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                         if (!item.IsQuestItem)
@@ -1027,6 +1078,9 @@ namespace LockedLootContainers
             for (int i = 0; i < initialItemCount; i++)
             {
                 DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                if (item == null)
+                    continue;
+
                 LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                 if (!item.IsQuestItem)

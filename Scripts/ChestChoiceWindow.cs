@@ -50,7 +50,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         #region UI Textures
 
         Texture2D baseTexture;
-        const string baseTextureName = "Chest_Choice_Menu_1";
 
         #endregion
 
@@ -73,8 +72,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         protected virtual void LoadTextures()
         {
-            TextureReplacement.TryImportTexture(baseTextureName, true, out Texture2D baseTex);
-            baseTexture = baseTex;
+            baseTexture = LockedLootContainersMain.Instance.ChestChoiceMenuTexture;
         }
 
         protected void SetupChestChoiceButtons()
@@ -133,8 +131,8 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 819, 0, chest.LoadID, null, false);
-                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(819, 0);
+                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, chest.LoadID, null, false);
+                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
                     openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                     UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.

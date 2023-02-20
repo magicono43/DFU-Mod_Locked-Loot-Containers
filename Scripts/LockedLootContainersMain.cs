@@ -28,12 +28,7 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain : MonoBehaviour
     {
-        static LockedLootContainersMain instance;
-
-        public static LockedLootContainersMain Instance
-        {
-            get { return instance ?? (instance = FindObjectOfType<LockedLootContainersMain>()); }
-        }
+        public static LockedLootContainersMain Instance;
 
         static Mod mod;
 
@@ -45,12 +40,18 @@ namespace LockedLootContainers
         public static PlayerActivateModes CurrentMode { get { return GameManager.Instance.PlayerActivate.CurrentMode; } }
         public static WeaponManager WepManager { get { return GameManager.Instance.WeaponManager; } }
 
+        bool isBashReady = true;
+
+        // Mod Textures
+        public Texture2D ChestChoiceMenuTexture;
+        public Texture2D InspectionInfoGUITexture;
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
             mod = initParams.Mod;
             var go = new GameObject(mod.Title);
-            instance = go.AddComponent<LockedLootContainersMain>(); // Add script to the scene.
+            go.AddComponent<LockedLootContainersMain>(); // Add script to the scene.
 
             go.AddComponent<LLCObject>();
 
@@ -60,6 +61,8 @@ namespace LockedLootContainers
         private void Start()
         {
             Debug.Log("Begin mod init: Locked Loot Containers");
+
+            Instance = this;
 
             MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
@@ -78,9 +81,13 @@ namespace LockedLootContainers
             DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemUselessRefuse.templateIndex, ItemGroups.UselessItems1, typeof(ItemUselessRefuse));
 
             // Definitely consider making a custom activation for those silly 3D chest models that are in-game but never used for anything and add replace those with my custom chest objects, etc.
-            PlayerActivate.RegisterCustomActivation(mod, 818, 0, ChestActivation); // Needs our custom texture/billboard flat ID value, 500 is placeholder.
+            PlayerActivate.RegisterCustomActivation(mod, 4733, 0, ChestActivation);
 
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
+
+            // Load Resources
+            LoadTextures();
+            LoadAudio();
 
             RegisterLLCCommands(); // For testing custom windows
 
@@ -96,9 +103,12 @@ namespace LockedLootContainers
                 return;
 
             if (!WepManager.ScreenWeapon.IsAttacking())
+            {
+                isBashReady = true; // This basically resets the "attack cooldown" so you don't get spammed hits during the entire attack animation.
                 return;
+            }
 
-            if (WepManager.ScreenWeapon.GetCurrentFrame() == WepManager.ScreenWeapon.GetHitFrame()) // May be acting strange, will need to troubleshoot and bug fix next time.
+            if (isBashReady && WepManager.ScreenWeapon.GetCurrentFrame() == WepManager.ScreenWeapon.GetHitFrame())
             {
                 if (WepManager.ScreenWeapon.WeaponType == WeaponTypes.Bow) // Don't consider bashing for the bow, atleast not this part, do the actual projectile later for that.
                     return;
@@ -111,7 +121,7 @@ namespace LockedLootContainers
                 Ray ray = new Ray(MainCamera.transform.position, MainCamera.transform.forward);
                 if (Physics.Raycast(ray, out hit, WepManager.ScreenWeapon.Reach, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
                 {
-                    DaggerfallUnityItem currentRightHandWeapon = Player.ItemEquipTable.GetItem(EquipSlots.RightHand); // Will have to see if these work for the player or not, might just be enemies?
+                    DaggerfallUnityItem currentRightHandWeapon = Player.ItemEquipTable.GetItem(EquipSlots.RightHand);
                     DaggerfallUnityItem currentLeftHandWeapon = Player.ItemEquipTable.GetItem(EquipSlots.LeftHand);
                     DaggerfallUnityItem strikingWeapon = WepManager.UsingRightHand ? currentRightHandWeapon : currentLeftHandWeapon;
 
@@ -120,6 +130,7 @@ namespace LockedLootContainers
                     if (hitChest)
                         AttemptMeleeChestBash(hitChest, strikingWeapon);
                 }
+                isBashReady = false;
             }
 
             // So the fact I got basically everything to work so far with the projectile/collision detection stuff is pretty crazy to me.
@@ -127,19 +138,85 @@ namespace LockedLootContainers
             // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal all other successes considered.
         }
 
+        private void LoadAudio() // Example taken from Penwick Papers Mod
+        {
+            ModManager modManager = ModManager.Instance;
+            bool success = true;
+
+            /*
+            success &= modManager.TryGetAsset("WarpIn", false, out WarpIn);
+            success &= modManager.TryGetAsset("ReanimateWarp", false, out ReanimateWarp);
+            success &= modManager.TryGetAsset("MaleOi", false, out MaleOi);
+            success &= modManager.TryGetAsset("FemaleLaugh", false, out FemaleLaugh);
+            success &= modManager.TryGetAsset("MaleBreath", false, out MaleBreath);
+            success &= modManager.TryGetAsset("FemaleBreath", false, out FemaleBreath);
+            success &= modManager.TryGetAsset("Creak1", false, out Creak1);
+            success &= modManager.TryGetAsset("Creak2", false, out Creak2);
+            success &= modManager.TryGetAsset("WindNoise", false, out WindNoise);
+            */
+
+            if (!success)
+                throw new Exception("Missing sound asset");
+        }
+
+        private void LoadTextures() // Example taken from Penwick Papers Mod
+        {
+            ModManager modManager = ModManager.Instance;
+            bool success = true;
+
+            success &= modManager.TryGetAsset("Chest_Choice_Menu", false, out ChestChoiceMenuTexture);
+            success &= modManager.TryGetAsset("Inspection_Info_GUI", false, out InspectionInfoGUITexture);
+
+            if (!success)
+                throw new Exception("LockedLootContainers: Missing texture asset");
+        }
+
         // For Testing Custom Windows
 
         public static void RegisterLLCCommands()
         {
-            Debug.Log("[LockLootContainers] Trying to register console commands.");
+            Debug.Log("[LockedLootContainers] Trying to register console commands.");
             try
             {
                 ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
             }
             catch (Exception e)
             {
                 Debug.LogError(string.Format("Error Registering LockLootContainers Console commands: {0}", e.Message));
+            }
+        }
+
+        private static class MakeJunkItems
+        {
+            public static readonly string command = "addjunk";
+            public static readonly string description = "Spawns LLC Junk Items.";
+            public static readonly string usage = "addjunk";
+
+            public static string Execute(params string[] args)
+            {
+                for (int i = 0; i < 11; i++)
+                {
+                    if (i == 0)
+                    {
+                        DaggerfallUnityItem item = LLCItemBuilder.CreateScrapMaterial(WeaponMaterialTypes.None, ArmorMaterialTypes.Leather);
+                        Player.Items.AddItem(item);
+                    }
+                    else
+                    {
+                        DaggerfallUnityItem item = LLCItemBuilder.CreateScrapMaterial((WeaponMaterialTypes)(i - 1));
+                        Player.Items.AddItem(item);
+                    }
+                }
+
+                for (int i = 0; i < 11; i++)
+                {
+                    DaggerfallUnityItem item = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 4722 + i);
+                    Player.Items.AddItem(item);
+                }
+
+                return "Gave you ALL the junk items.";
             }
         }
 
@@ -266,8 +343,8 @@ namespace LockedLootContainers
                         {
                             closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
                             ApplyLockPickAttemptCosts();
-                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 819, 0, closedChestData.LoadID, null, false);
-                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(819, 0);
+                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, closedChestData.LoadID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
                             openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                             Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.

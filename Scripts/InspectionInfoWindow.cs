@@ -52,7 +52,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         #region UI Textures
 
         Texture2D baseTexture;
-        const string baseTextureName = "Inspection_Info_GUI_1";
 
         #endregion
 
@@ -86,15 +85,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             exitButton.OnMouseClick += ExitButton_OnMouseClick;
             exitButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
 
-            // Next I work on this, Fix apparent bashing weirdness. I might try to initially do this by adding in the "waste items" custom items so that error stops occuring atleast, will see.
-
             SetupInfoTextAndButtons();
         }
 
         protected virtual void LoadTextures()
         {
-            TextureReplacement.TryImportTexture(baseTextureName, true, out Texture2D baseTex);
-            baseTexture = baseTex;
+            baseTexture = LockedLootContainersMain.Instance.InspectionInfoGUITexture;
         }
 
         protected void SetupInfoTextAndButtons()
