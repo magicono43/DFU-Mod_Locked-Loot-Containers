@@ -17,7 +17,7 @@ namespace LockedLootContainers
                 ItemCollection closedChestLoot = chest.AttachedLoot;
                 Transform closedChestTransform = chest.gameObject.transform; // Not sure if the explicit "gameObject" reference is necessary, will test eventually and determine if so or not.
                 Vector3 pos = chest.gameObject.transform.position;
-                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
 
                 chest.HasBeenBashed = true;
 
@@ -36,18 +36,18 @@ namespace LockedLootContainers
                         openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
-                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.Parry1); // Will use custom sounds in the end most likely.
+                            dfAudioSource.PlayClipAtPoint(SoundClips.Parry1, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+
+                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
                     else
                     {
                         // Lock was hit with bash, but is still intact.
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                            dfAudioSource.PlayClipAtPoint(SoundClips.Parry5, chest.gameObject.transform.position); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
                     }
                 }
                 else
@@ -65,18 +65,18 @@ namespace LockedLootContainers
                         openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
-                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.StormLightningThunder); // Will use custom sounds in the end most likely.
+                            dfAudioSource.PlayClipAtPoint(SoundClips.StormLightningThunder, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+
+                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
                     else
                     {
                         // Chest body was hit with bash, but is still intact.
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayOneShot(SoundClips.PlayerDoorBash); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                            dfAudioSource.PlayClipAtPoint(SoundClips.PlayerDoorBash, chest.gameObject.transform.position); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
                     }
                 }
             }
@@ -93,12 +93,12 @@ namespace LockedLootContainers
                 ItemCollection closedChestLoot = chest.AttachedLoot;
                 Transform closedChestTransform = chest.gameObject.transform; // Not sure if the explicit "gameObject" reference is necessary, will test eventually and determine if so or not.
                 Vector3 pos = chest.gameObject.transform.position;
-                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
 
                 chest.HasBeenBashed = true;
 
                 // Would be interesting when an arrow "pings" off a metal chest it would actually leave a physical object nearby that could be clicked instead of adding to chest inventory, but eh.
-                chest.AttachedLoot.AddItem(ItemBuilder.CreateItem(ItemGroups.UselessItems1, 42329)); // "Broken Arrow" custom item
+                chest.AttachedLoot.AddItem(ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemBrokenArrow.templateIndex));
 
                 DaggerfallUnityItem bowUsed = GameManager.Instance.WeaponManager.LastBowUsed;
                 if (bowUsed != null)

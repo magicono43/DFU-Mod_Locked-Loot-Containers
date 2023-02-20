@@ -22,7 +22,7 @@ namespace LockedLootContainers
             if (ChestObjRef != null)
             {
                 LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
-                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                DaggerfallAudioSource dfAudioSource = closedChestData.GetComponent<DaggerfallAudioSource>();
                 ItemCollection closedChestLoot = closedChestData.AttachedLoot;
                 Transform closedChestTransform = ChestObjRef.transform;
                 Vector3 pos = ChestObjRef.transform.position;
@@ -31,7 +31,7 @@ namespace LockedLootContainers
                 {
                     DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
+                        dfAudioSource.PlayClipAtPoint(SoundClips.ActivateRatchet, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
                 }
                 else if (OpenEffectChance(closedChestData)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                 {
@@ -39,13 +39,13 @@ namespace LockedLootContainers
                     openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
                     openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
-                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                    ChestObjRef = null;
-
                     // Show success and play unlock sound
                     DaggerfallUI.AddHUDText("The lock effortlessly unlatches through use of magic...", 4f);
-                    if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                    if (dfAudioSource != null)
+                        dfAudioSource.PlayClipAtPoint(SoundClips.ActivateLockUnlock, closedChestData.gameObject.transform.position); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+
+                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                    ChestObjRef = null;
                 }
                 else
                 {
@@ -54,14 +54,14 @@ namespace LockedLootContainers
                     {
                         closedChestData.IsLockJammed = true;
                         DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
-                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateGrind); // Will use custom sounds in the end most likely.
+                        if (dfAudioSource != null)
+                            dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGrind, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
                     }
                     else
                     {
                         DaggerfallUI.AddHUDText("The unlock attempt failed...", 4f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateGears); // Will use custom sounds in the end most likely.
+                            dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGears, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
                     }
                 }
             }
@@ -145,7 +145,7 @@ namespace LockedLootContainers
                 ItemCollection closedChestLoot = chest.AttachedLoot;
                 Transform closedChestTransform = chest.gameObject.transform; // Not sure if the explicit "gameObject" reference is necessary, will test eventually and determine if so or not.
                 Vector3 pos = chest.gameObject.transform.position;
-                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
 
                 EntityEffectBundle payload = missile.Payload;
                 bool hasDamageHealth = false;
@@ -231,8 +231,11 @@ namespace LockedLootContainers
                     }
                 }
                 // Destruction spell impact was attempted, but chest is still intact.
-                if (dfAudioSource != null)
-                    dfAudioSource.PlayOneShot(SoundClips.Parry5); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                if (dfAudioSource)
+                {
+                    if (dfAudioSource != null && !dfAudioSource.IsPlaying())
+                        dfAudioSource.PlayClipAtPoint(SoundClips.Parry5, chest.gameObject.transform.position); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                }
             }
             else
             {
@@ -275,6 +278,9 @@ namespace LockedLootContainers
                 for (int i = 0; i < initialItemCount; i++)
                 {
                     DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                    if (item == null)
+                        continue;
+
                     LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                     if (!item.IsQuestItem)
@@ -303,6 +309,9 @@ namespace LockedLootContainers
                 for (int i = 0; i < initialItemCount; i++)
                 {
                     DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                    if (item == null)
+                        continue;
+
                     LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
 
                     if (!item.IsQuestItem)

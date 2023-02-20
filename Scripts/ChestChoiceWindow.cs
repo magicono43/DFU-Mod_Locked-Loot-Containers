@@ -116,7 +116,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             CloseWindow();
             if (chest != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
             {
-                DaggerfallAudioSource dfAudioSource = GameManager.Instance.PlayerActivate.GetComponent<DaggerfallAudioSource>();
+                DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
                 ItemCollection closedChestLoot = chest.AttachedLoot;
                 Transform closedChestTransform = chest.transform;
                 Vector3 pos = chest.transform.position;
@@ -125,7 +125,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateRatchet); // Will use custom sounds in the end most likely.
+                        dfAudioSource.PlayClipAtPoint(SoundClips.ActivateRatchet, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
                 }
                 else if (LockedLootContainersMain.LockPickChance(chest)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                 {
@@ -135,13 +135,13 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
                     openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
-                    UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                    LockedLootContainersMain.ChestObjRef = null; // This may cause issues? But really no clue, just a note.
-
                     // Show success and play unlock sound
                     DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
-                    if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        dfAudioSource.PlayOneShot(SoundClips.ActivateLockUnlock); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                    if (dfAudioSource != null)
+                        dfAudioSource.PlayClipAtPoint(SoundClips.ActivateLockUnlock, chest.gameObject.transform.position); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+
+                    UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                    LockedLootContainersMain.ChestObjRef = null; // This may cause issues? But really no clue, just a note.
                 }
                 else
                 {
@@ -151,14 +151,14 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     {
                         chest.IsLockJammed = true;
                         DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
-                        if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateGrind); // Will use custom sounds in the end most likely.
+                        if (dfAudioSource != null)
+                            dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGrind, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
                     }
                     else
                     {
                         DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayOneShot(SoundClips.ActivateGears); // Will use custom sounds in the end most likely.
+                            dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGears, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
                     }
                 }
             }
