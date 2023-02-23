@@ -683,6 +683,105 @@ namespace LockedLootContainers
             }
         }
 
+        public static AudioClip GetChestBashAudioClip(LLCObject chest, DaggerfallUnityItem weapon, bool isHardBash)
+        {
+            short skillUsed = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
+            int wepSkill = Player.Skills.GetLiveSkillValue(skillUsed);
+            AudioClip clip = Instance.UnarmedHitWood1;
+            int randChoice = UnityEngine.Random.Range(0, 3 + 1);
+
+            // Just for testing right now.
+            if (randChoice == 0)
+                clip = Instance.UnarmedHitWood1;
+            else if (randChoice == 1)
+                clip = Instance.UnarmedHitWood2;
+            else if (randChoice == 2)
+                clip = Instance.UnarmedHitWood3;
+            else
+                clip = Instance.UnarmedHitWood4;
+
+            return clip;
+
+            /*
+            if (wepSkill == (int)Skills.HandToHand)
+            {
+                if (chest.ChestMaterial == ChestMaterials.Wood)
+                {
+                    if (isHardBash)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (isHardBash)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+            else if (wepSkill == (int)Skills.BluntWeapon)
+            {
+                if (chest.ChestMaterial == ChestMaterials.Wood)
+                {
+                    if (isHardBash)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (isHardBash)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+            else // Bladed weapons
+            {
+                if (chest.ChestMaterial == ChestMaterials.Wood)
+                {
+                    if (isHardBash)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (isHardBash)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+            return clip;
+            */
+        }
+
         public static T[] FillArray<T>(List<T> list, int start, int count, T value)
         {
             for (var i = start; i < start + count; i++)

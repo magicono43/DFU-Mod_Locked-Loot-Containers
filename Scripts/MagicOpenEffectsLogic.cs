@@ -19,6 +19,9 @@ namespace LockedLootContainers
             if (openEffect == null)
                 return false;
 
+            if (openEffect.RoundsRemaining <= 0) // Will hopefully prevent the "spam clicking" exploit issue.
+                return false;
+
             if (ChestObjRef != null)
             {
                 LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();

@@ -48,7 +48,11 @@
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/4733_0-0.PNG",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/4721_8-0.png",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/4721_6-0.png",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/Chest_Choice_Menu.png"
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Textures/Chest_Choice_Menu.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Audio/WoW_UnarmedHitWoodShield_8.wav",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Audio/WoW_UnarmedHitWoodShield_6.wav",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Audio/WoW_UnarmedHitWoodShield_3.wav",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Audio/WoW_UnarmedHitWoodShield_7.wav"
     ],
     "Dependencies": []
 }

@@ -19,12 +19,16 @@ namespace LockedLootContainers
                 Vector3 pos = chest.gameObject.transform.position;
                 DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
 
+                bool isHardBash = false;
                 chest.HasBeenBashed = true;
 
                 if (BashLockRoll(chest, weapon))
                 {
                     if (LockHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
+                    {
                         chest.LockBashedHardTimes++;
+                        isHardBash = true;
+                    }
                     else
                         chest.LockBashedLightTimes++;
 
@@ -53,7 +57,10 @@ namespace LockedLootContainers
                 else
                 {
                     if (ChestHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
+                    {
                         chest.ChestBashedHardTimes++;
+                        isHardBash = true;
+                    }
                     else
                         chest.ChestBashedLightTimes++;
 
@@ -68,7 +75,7 @@ namespace LockedLootContainers
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayClipAtPoint(SoundClips.StormLightningThunder, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, isHardBash), chest.gameObject.transform.position, DaggerfallUnity.Settings.SoundVolume);
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
@@ -76,7 +83,7 @@ namespace LockedLootContainers
                     {
                         // Chest body was hit with bash, but is still intact.
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayClipAtPoint(SoundClips.PlayerDoorBash, chest.gameObject.transform.position); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, isHardBash), chest.gameObject.transform.position, DaggerfallUnity.Settings.SoundVolume);
                     }
                 }
             }

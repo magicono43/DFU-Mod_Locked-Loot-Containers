@@ -46,6 +46,12 @@ namespace LockedLootContainers
         public Texture2D ChestChoiceMenuTexture;
         public Texture2D InspectionInfoGUITexture;
 
+        // Mod Sounds
+        public AudioClip UnarmedHitWood1;
+        public AudioClip UnarmedHitWood2;
+        public AudioClip UnarmedHitWood3;
+        public AudioClip UnarmedHitWood4;
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
@@ -143,20 +149,13 @@ namespace LockedLootContainers
             ModManager modManager = ModManager.Instance;
             bool success = true;
 
-            /*
-            success &= modManager.TryGetAsset("WarpIn", false, out WarpIn);
-            success &= modManager.TryGetAsset("ReanimateWarp", false, out ReanimateWarp);
-            success &= modManager.TryGetAsset("MaleOi", false, out MaleOi);
-            success &= modManager.TryGetAsset("FemaleLaugh", false, out FemaleLaugh);
-            success &= modManager.TryGetAsset("MaleBreath", false, out MaleBreath);
-            success &= modManager.TryGetAsset("FemaleBreath", false, out FemaleBreath);
-            success &= modManager.TryGetAsset("Creak1", false, out Creak1);
-            success &= modManager.TryGetAsset("Creak2", false, out Creak2);
-            success &= modManager.TryGetAsset("WindNoise", false, out WindNoise);
-            */
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_3", false, out UnarmedHitWood1);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_6", false, out UnarmedHitWood2);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_7", false, out UnarmedHitWood3);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_8", false, out UnarmedHitWood4);
 
             if (!success)
-                throw new Exception("Missing sound asset");
+                throw new Exception("LockedLootContainers: Missing sound asset");
         }
 
         private void LoadTextures() // Example taken from Penwick Papers Mod
@@ -325,7 +324,7 @@ namespace LockedLootContainers
                     }
                     break;
                 case PlayerActivateModes.Steal: // Attempt To Lock-pick Chest
-                    if (ChestObjRef != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
+                    if (ChestObjRef != null)
                     {
                         LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
                         DaggerfallAudioSource dfAudioSource = closedChestData.GetComponent<DaggerfallAudioSource>();
@@ -339,9 +338,9 @@ namespace LockedLootContainers
                             if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                                 dfAudioSource.PlayClipAtPoint(SoundClips.ActivateRatchet, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
                         }
-                        else if (LockPickChance(closedChestData)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                        else if (LockPickChance(closedChestData))
                         {
-                            closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                            closedChestData.PicksAttempted++;
                             ApplyLockPickAttemptCosts();
                             DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, closedChestData.LoadID, null, false);
                             openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
@@ -357,7 +356,7 @@ namespace LockedLootContainers
                         }
                         else
                         {
-                            closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                            closedChestData.PicksAttempted++;
                             ApplyLockPickAttemptCosts();
                             if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
                             {

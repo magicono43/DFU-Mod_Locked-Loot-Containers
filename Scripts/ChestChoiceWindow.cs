@@ -129,7 +129,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 }
                 else if (LockedLootContainersMain.LockPickChance(chest)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                 {
-                    chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
+                    chest.PicksAttempted++;
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
                     DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, chest.LoadID, null, false);
                     openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
