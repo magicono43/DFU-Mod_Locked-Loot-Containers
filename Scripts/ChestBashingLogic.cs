@@ -75,7 +75,7 @@ namespace LockedLootContainers
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, isHardBash), chest.gameObject.transform.position, DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, isHardBash), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
@@ -83,7 +83,7 @@ namespace LockedLootContainers
                     {
                         // Chest body was hit with bash, but is still intact.
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, isHardBash), chest.gameObject.transform.position, DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, isHardBash), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                 }
             }

@@ -36,6 +36,7 @@ namespace LockedLootContainers
         public static GameObject ChestObjRef { get; set; }
         public static GameObject MainCamera { get; set; }
         public static int PlayerLayerMask { get; set; }
+        public static AudioClip LastSoundPlayed { get { return lastSoundPlayed; } set { lastSoundPlayed = value; } }
         public static PlayerEntity Player { get { return GameManager.Instance.PlayerEntity; } }
         public static PlayerActivateModes CurrentMode { get { return GameManager.Instance.PlayerActivate.CurrentMode; } }
         public static WeaponManager WepManager { get { return GameManager.Instance.WeaponManager; } }
@@ -47,10 +48,18 @@ namespace LockedLootContainers
         public Texture2D InspectionInfoGUITexture;
 
         // Mod Sounds
-        public AudioClip UnarmedHitWood1;
-        public AudioClip UnarmedHitWood2;
-        public AudioClip UnarmedHitWood3;
-        public AudioClip UnarmedHitWood4;
+        private static AudioClip lastSoundPlayed = null;
+        public static AudioClip[] UnarmedHitWoodLightClips = { null, null, null, null };
+        public static AudioClip[] UnarmedHitWoodHardClips = { null, null, null };
+        public static AudioClip[] BluntHitWoodLightClips = { null, null, null, null };
+        public static AudioClip[] BluntHitWoodHardClips = { null, null, null, null };
+        public static AudioClip[] BladeHitWoodLightClips = { null, null, null, null };
+        public static AudioClip[] BladeHitWoodHardClips = { null, null, null };
+        public static AudioClip[] UnarmedHitMetalClips = { null, null, null };
+        public static AudioClip[] BluntHitMetalLightClips = { null, null, null, null };
+        public static AudioClip[] BluntHitMetalHardClips = { null, null, null, null };
+        public static AudioClip[] BladeHitMetalLightClips = { null, null, null, null };
+        public static AudioClip[] BladeHitMetalHardClips = { null, null, null, null };
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -149,10 +158,57 @@ namespace LockedLootContainers
             ModManager modManager = ModManager.Instance;
             bool success = true;
 
-            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_3", false, out UnarmedHitWood1);
-            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_6", false, out UnarmedHitWood2);
-            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_7", false, out UnarmedHitWood3);
-            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_8", false, out UnarmedHitWood4);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_3", false, out UnarmedHitWoodLightClips[0]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_6", false, out UnarmedHitWoodLightClips[1]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_7", false, out UnarmedHitWoodLightClips[2]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_8", false, out UnarmedHitWoodLightClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_1", false, out UnarmedHitWoodHardClips[0]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_2", false, out UnarmedHitWoodHardClips[1]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_5", false, out UnarmedHitWoodHardClips[2]);
+
+            success &= modManager.TryGetAsset("WoW_2hMaceHitWoodShield_1", false, out BluntHitWoodLightClips[0]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitWoodShield_2", false, out BluntHitWoodLightClips[1]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitWoodShield_3", false, out BluntHitWoodLightClips[2]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitWoodShield_4", false, out BluntHitWoodLightClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_WoodenShieldBlock_1", false, out BluntHitWoodHardClips[0]);
+            success &= modManager.TryGetAsset("WoW_WoodenShieldBlock_2", false, out BluntHitWoodHardClips[1]);
+            success &= modManager.TryGetAsset("WoW_WoodenShieldBlock_3", false, out BluntHitWoodHardClips[2]);
+            success &= modManager.TryGetAsset("WoW_WoodenShieldBlock_4", false, out BluntHitWoodHardClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_1", false, out BladeHitWoodLightClips[0]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_2", false, out BladeHitWoodLightClips[1]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_3", false, out BladeHitWoodLightClips[2]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_4", false, out BladeHitWoodLightClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_5", false, out BladeHitWoodHardClips[0]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_6", false, out BladeHitWoodHardClips[1]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitWood_7", false, out BladeHitWoodHardClips[2]);
+
+            success &= modManager.TryGetAsset("WoW_UnarmedHitMetalShield_1", false, out UnarmedHitMetalClips[0]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitMetalShield_2", false, out UnarmedHitMetalClips[1]);
+            success &= modManager.TryGetAsset("WoW_UnarmedHitMetalShield_3", false, out UnarmedHitMetalClips[2]);
+
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_1", false, out BluntHitMetalLightClips[0]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_2", false, out BluntHitMetalLightClips[1]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_3", false, out BluntHitMetalLightClips[2]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_4", false, out BluntHitMetalLightClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_5", false, out BluntHitMetalHardClips[0]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_6", false, out BluntHitMetalHardClips[1]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_7", false, out BluntHitMetalHardClips[2]);
+            success &= modManager.TryGetAsset("WoW_2hMaceHitMetalShield_8", false, out BluntHitMetalHardClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_1HDaggerHitMetalShield_1", false, out BladeHitMetalLightClips[0]);
+            success &= modManager.TryGetAsset("WoW_1HDaggerHitMetalShield_2", false, out BladeHitMetalLightClips[1]);
+            success &= modManager.TryGetAsset("WoW_1HDaggerHitMetalShield_3", false, out BladeHitMetalLightClips[2]);
+            success &= modManager.TryGetAsset("WoW_1HDaggerHitMetalShield_4", false, out BladeHitMetalLightClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_1", false, out BladeHitMetalHardClips[0]);
+            success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_2", false, out BladeHitMetalHardClips[1]);
+            success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_3", false, out BladeHitMetalHardClips[2]);
+            success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_4", false, out BladeHitMetalHardClips[3]);
 
             if (!success)
                 throw new Exception("LockedLootContainers: Missing sound asset");

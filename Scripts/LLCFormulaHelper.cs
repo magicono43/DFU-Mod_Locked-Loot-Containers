@@ -683,22 +683,33 @@ namespace LockedLootContainers
             }
         }
 
+        public static AudioClip RollRandomAudioClip(AudioClip[] clips)
+        {
+            int randChoice = UnityEngine.Random.Range(0, clips.Length);
+            AudioClip clip = clips[randChoice];
+
+            if (clip == LastSoundPlayed)
+            {
+                if (randChoice == 0)
+                    randChoice++;
+                else if (randChoice == clips.Length - 1)
+                    randChoice--;
+                else
+                    randChoice = CoinFlip() ? randChoice + 1 : randChoice - 1;
+
+                clip = clips[randChoice];
+            }
+            LastSoundPlayed = clip;
+            return clip;
+        }
+
         public static AudioClip GetChestBashAudioClip(LLCObject chest, DaggerfallUnityItem weapon, bool isHardBash)
         {
             short skillUsed = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
             int wepSkill = Player.Skills.GetLiveSkillValue(skillUsed);
-            AudioClip clip = Instance.UnarmedHitWood1;
-            int randChoice = UnityEngine.Random.Range(0, 3 + 1);
+            AudioClip clip;
 
-            // Just for testing right now.
-            if (randChoice == 0)
-                clip = Instance.UnarmedHitWood1;
-            else if (randChoice == 1)
-                clip = Instance.UnarmedHitWood2;
-            else if (randChoice == 2)
-                clip = Instance.UnarmedHitWood3;
-            else
-                clip = Instance.UnarmedHitWood4;
+            clip = RollRandomAudioClip(UnarmedHitWoodLightClips);
 
             return clip;
 
@@ -780,6 +791,14 @@ namespace LockedLootContainers
             }
             return clip;
             */
+        }
+
+        public static bool CoinFlip()
+        {
+            if (UnityEngine.Random.Range(0, 1 + 1) == 0)
+                return false;
+            else
+                return true;
         }
 
         public static T[] FillArray<T>(List<T> list, int start, int count, T value)
