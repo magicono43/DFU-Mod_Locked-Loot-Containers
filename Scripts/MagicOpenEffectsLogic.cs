@@ -203,7 +203,7 @@ namespace LockedLootContainers
                             if (dfAudioSource)
                             {
                                 if (dfAudioSource != null)
-                                    dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                    AudioSource.PlayClipAtPoint(GetSpellImpactChestAudioClip(chest, true, true), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                             return true;
                         }
@@ -226,7 +226,7 @@ namespace LockedLootContainers
                                 if (dfAudioSource)
                                 {
                                     if (dfAudioSource != null)
-                                        dfAudioSource.PlayClipAtPoint(SoundClips.EnemyDaedraLordBark, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                        AudioSource.PlayClipAtPoint(GetSpellImpactChestAudioClip(chest, true, false), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                                 }
                                 return true;
                             }
@@ -237,7 +237,7 @@ namespace LockedLootContainers
                 if (dfAudioSource)
                 {
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        dfAudioSource.PlayClipAtPoint(SoundClips.Parry5, chest.gameObject.transform.position); // Might change this later to emit sound from chest audiosource itself instead of player's? Will use custom sounds later on.
+                        AudioSource.PlayClipAtPoint(GetSpellImpactChestAudioClip(chest, false, false), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                 }
             }
             else

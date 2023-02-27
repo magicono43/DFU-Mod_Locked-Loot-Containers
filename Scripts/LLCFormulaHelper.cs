@@ -703,39 +703,42 @@ namespace LockedLootContainers
             return clip;
         }
 
-        public static AudioClip GetChestBashAudioClip(LLCObject chest, DaggerfallUnityItem weapon, bool isHardBash)
+        public static AudioClip GetChestBashAudioClip(LLCObject chest, DaggerfallUnityItem weapon, bool bashedOpen, bool isHardBash)
         {
             short skillUsed = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
             int wepSkill = Player.Skills.GetLiveSkillValue(skillUsed);
-            AudioClip clip;
+            AudioClip clip = null;
 
-            clip = RollRandomAudioClip(UnarmedHitWoodLightClips);
-
-            return clip;
-
-            /*
             if (wepSkill == (int)Skills.HandToHand)
             {
                 if (chest.ChestMaterial == ChestMaterials.Wood)
                 {
-                    if (isHardBash)
+                    if (bashedOpen)
                     {
-
+                        clip = RollRandomAudioClip(BashOpenWoodChestClips);
+                    }
+                    else if (isHardBash)
+                    {
+                        clip = RollRandomAudioClip(UnarmedHitWoodHardClips);
                     }
                     else
                     {
-
+                        clip = RollRandomAudioClip(UnarmedHitWoodLightClips);
                     }
                 }
                 else
                 {
-                    if (isHardBash)
+                    if (bashedOpen)
                     {
-
+                        clip = RollRandomAudioClip(BashOpenMetalChestClips);
+                    }
+                    else if (isHardBash)
+                    {
+                        clip = RollRandomAudioClip(UnarmedHitMetalClips);
                     }
                     else
                     {
-
+                        clip = RollRandomAudioClip(UnarmedHitMetalClips);
                     }
                 }
             }
@@ -743,24 +746,32 @@ namespace LockedLootContainers
             {
                 if (chest.ChestMaterial == ChestMaterials.Wood)
                 {
-                    if (isHardBash)
+                    if (bashedOpen)
                     {
-
+                        clip = RollRandomAudioClip(BashOpenWoodChestClips);
+                    }
+                    else if (isHardBash)
+                    {
+                        clip = RollRandomAudioClip(BluntHitWoodHardClips);
                     }
                     else
                     {
-
+                        clip = RollRandomAudioClip(BluntHitWoodLightClips);
                     }
                 }
                 else
                 {
-                    if (isHardBash)
+                    if (bashedOpen)
                     {
-
+                        clip = RollRandomAudioClip(BashOpenMetalChestClips);
+                    }
+                    else if (isHardBash)
+                    {
+                        clip = RollRandomAudioClip(BluntHitMetalHardClips);
                     }
                     else
                     {
-
+                        clip = RollRandomAudioClip(BluntHitMetalLightClips);
                     }
                 }
             }
@@ -768,29 +779,126 @@ namespace LockedLootContainers
             {
                 if (chest.ChestMaterial == ChestMaterials.Wood)
                 {
-                    if (isHardBash)
+                    if (bashedOpen)
                     {
-
+                        clip = RollRandomAudioClip(BashOpenWoodChestClips);
+                    }
+                    else if (isHardBash)
+                    {
+                        clip = RollRandomAudioClip(BladeHitWoodHardClips);
                     }
                     else
                     {
-
+                        clip = RollRandomAudioClip(BladeHitWoodLightClips);
                     }
                 }
                 else
                 {
-                    if (isHardBash)
+                    if (bashedOpen)
                     {
-
+                        clip = RollRandomAudioClip(BashOpenMetalChestClips);
+                    }
+                    else if (isHardBash)
+                    {
+                        clip = RollRandomAudioClip(BladeHitMetalHardClips);
                     }
                     else
                     {
-
+                        clip = RollRandomAudioClip(BladeHitMetalLightClips);
                     }
                 }
             }
+
+            if (clip == null)
+                clip = UnarmedHitWoodLightClips[0];
+
             return clip;
-            */
+        }
+
+        public static AudioClip GetLockBashAudioClip(LLCObject chest, bool bashedOff)
+        {
+            AudioClip clip = null;
+
+            if (chest.LockMaterial == LockMaterials.Wood)
+            {
+                if (bashedOff)
+                {
+                    clip = RollRandomAudioClip(BashOffLockClips);
+                }
+                else
+                {
+                    AudioClip[] hitWoodLockClips = { HitMetalLockClips[2], BladeHitWoodLightClips[2], BladeHitWoodHardClips[0] };
+                    clip = RollRandomAudioClip(hitWoodLockClips);
+                }
+            }
+            else
+            {
+                if (bashedOff)
+                {
+                    clip = RollRandomAudioClip(BashOffLockClips);
+                }
+                else
+                {
+                    clip = RollRandomAudioClip(HitMetalLockClips);
+                }
+            }
+
+            if (clip == null)
+                clip = HitMetalLockClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetArrowHitChestAudioClip(LLCObject chest, bool bashedOpen)
+        {
+            AudioClip clip = null;
+
+            if (chest.ChestMaterial == ChestMaterials.Wood)
+            {
+                if (bashedOpen)
+                {
+                    clip = BashOpenWoodChestClips[3];
+                }
+                else
+                {
+                    clip = RollRandomAudioClip(ArrowHitWoodClips);
+                }
+            }
+            else
+            {
+                clip = RollRandomAudioClip(ArrowHitMetalClips);
+            }
+
+            if (clip == null)
+                clip = ArrowHitMetalClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetSpellImpactChestAudioClip(LLCObject chest, bool blownOpen, bool disintegrated)
+        {
+            AudioClip clip = null;
+
+            if (blownOpen)
+            {
+                if (disintegrated)
+                {
+                    clip = RollRandomAudioClip(ChestDisintegratedSpellClips);
+                }
+                else
+                {
+                    clip = RollRandomAudioClip(ChestBlownOpenSpellClips);
+                }
+            }
+            else
+            {
+                clip = RollRandomAudioClip(ChestResistedSpellClips);
+            }
+
+            if (clip == null)
+                clip = HitMetalLockClips[0];
+
+            return clip;
         }
 
         public static bool CoinFlip()

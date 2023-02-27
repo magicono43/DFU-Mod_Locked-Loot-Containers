@@ -60,6 +60,16 @@ namespace LockedLootContainers
         public static AudioClip[] BluntHitMetalHardClips = { null, null, null, null };
         public static AudioClip[] BladeHitMetalLightClips = { null, null, null, null };
         public static AudioClip[] BladeHitMetalHardClips = { null, null, null, null };
+        public static AudioClip[] ArrowHitWoodClips = { null, null, null, null };
+        public static AudioClip[] ArrowHitMetalClips = { null, null, null };
+        public static AudioClip[] HitMetalLockClips = { null, null, null, null, null, null };
+        public static AudioClip[] BashOpenWoodChestClips = { null, null, null, null };
+        public static AudioClip[] BashOpenMetalChestClips = { null, null, null };
+        public static AudioClip[] BashOffLockClips = { null, null, null, null };
+
+        public static AudioClip[] ChestResistedSpellClips = { null, null, null, null, null };
+        public static AudioClip[] ChestBlownOpenSpellClips = { null, null, null, null, null, null };
+        public static AudioClip[] ChestDisintegratedSpellClips = { null, null, null };
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -158,6 +168,7 @@ namespace LockedLootContainers
             ModManager modManager = ModManager.Instance;
             bool success = true;
 
+            // Bashing
             success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_3", false, out UnarmedHitWoodLightClips[0]);
             success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_6", false, out UnarmedHitWoodLightClips[1]);
             success &= modManager.TryGetAsset("WoW_UnarmedHitWoodShield_7", false, out UnarmedHitWoodLightClips[2]);
@@ -209,6 +220,56 @@ namespace LockedLootContainers
             success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_2", false, out BladeHitMetalHardClips[1]);
             success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_3", false, out BladeHitMetalHardClips[2]);
             success &= modManager.TryGetAsset("WoW_2hAxeHitMetalShield_4", false, out BladeHitMetalHardClips[3]);
+
+            success &= modManager.TryGetAsset("WoW_ArrowImpactsShieldBlock_1", false, out ArrowHitWoodClips[0]);
+            success &= modManager.TryGetAsset("WoW_ArrowImpactsShieldBlock_2", false, out ArrowHitWoodClips[1]);
+            success &= modManager.TryGetAsset("WoW_ArrowImpactsShieldBlock_3", false, out ArrowHitWoodClips[2]);
+            success &= modManager.TryGetAsset("WoW_ArrowImpactsShieldBlock_4", false, out ArrowHitWoodClips[3]);
+
+            success &= modManager.TryGetAsset("ArrowPingsOffMetal_1", false, out ArrowHitMetalClips[0]);
+            success &= modManager.TryGetAsset("ArrowPingsOffMetal_2", false, out ArrowHitMetalClips[1]);
+            success &= modManager.TryGetAsset("ArrowPingsOffMetal_3", false, out ArrowHitMetalClips[2]);
+
+            success &= modManager.TryGetAsset("WoW_1HMaceNPCHitShieldMetal_10", false, out HitMetalLockClips[0]);
+            success &= modManager.TryGetAsset("WoW_EquippingPlateSound_1", false, out HitMetalLockClips[1]);
+            success &= modManager.TryGetAsset("WoW_HittingChainSound_2", false, out HitMetalLockClips[2]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitChain_1", false, out HitMetalLockClips[3]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitChain_2", false, out HitMetalLockClips[4]);
+            success &= modManager.TryGetAsset("WoW_1HAxeHitChain_3", false, out HitMetalLockClips[5]);
+
+            success &= modManager.TryGetAsset("WoW_Bomb_Explode_Pumpkin_1", false, out BashOpenWoodChestClips[0]);
+            success &= modManager.TryGetAsset("WoW_Bomb_Explode_Pumpkin_2", false, out BashOpenWoodChestClips[1]);
+            success &= modManager.TryGetAsset("WoW_Bomb_Explode_Pumpkin_3", false, out BashOpenWoodChestClips[2]);
+            success &= modManager.TryGetAsset("WoW_WoodenShieldBlock_1", false, out BashOpenWoodChestClips[3]);
+
+            success &= modManager.TryGetAsset("Rocky_Smash_Sound_1", false, out BashOpenMetalChestClips[0]);
+            success &= modManager.TryGetAsset("Rocky_Smash_Sound_2", false, out BashOpenMetalChestClips[1]);
+            success &= modManager.TryGetAsset("Rocky_Smash_Sound_3", false, out BashOpenMetalChestClips[2]);
+
+            success &= modManager.TryGetAsset("WoW_HittingChainSound_1", false, out BashOffLockClips[0]);
+            success &= modManager.TryGetAsset("WoW_HittingChainSound_3", false, out BashOffLockClips[1]);
+            success &= modManager.TryGetAsset("WoW_HittingChainSound_5", false, out BashOffLockClips[2]);
+            success &= modManager.TryGetAsset("WoW_Warrior_ShieldBreak_1", false, out BashOffLockClips[3]);
+
+            // Spell Impacts
+            success &= modManager.TryGetAsset("WoW_ShadowSpellFizzleSound_1", false, out ChestResistedSpellClips[0]);
+            success &= modManager.TryGetAsset("WoW_FireSpellFizzleSound_1", false, out ChestResistedSpellClips[1]);
+            success &= modManager.TryGetAsset("WoW_HolySpellFizzleSound_1", false, out ChestResistedSpellClips[2]);
+            success &= modManager.TryGetAsset("WoW_SlightlyMagicalWooshSound_1", false, out ChestResistedSpellClips[3]);
+            success &= modManager.TryGetAsset("WoW_SlightlyMagicalWooshSound_2", false, out ChestResistedSpellClips[4]);
+
+            success &= modManager.TryGetAsset("WoW_DynamiteExplodes_1", false, out ChestBlownOpenSpellClips[0]);
+            success &= modManager.TryGetAsset("WoW_DynamiteExplodes_2", false, out ChestBlownOpenSpellClips[1]);
+            success &= modManager.TryGetAsset("WoW_DynamiteExplodes_3", false, out ChestBlownOpenSpellClips[2]);
+            success &= modManager.TryGetAsset("WoW_DynamiteExplodes_4", false, out ChestBlownOpenSpellClips[3]);
+            success &= modManager.TryGetAsset("WoW_DynamiteExplodes_5", false, out ChestBlownOpenSpellClips[4]);
+            success &= modManager.TryGetAsset("WoW_DynamiteExplodes_6", false, out ChestBlownOpenSpellClips[5]);
+
+            success &= modManager.TryGetAsset("Disintegration_1", false, out ChestDisintegratedSpellClips[0]);
+            success &= modManager.TryGetAsset("Disintegration_2", false, out ChestDisintegratedSpellClips[1]);
+            success &= modManager.TryGetAsset("Disintegration_3", false, out ChestDisintegratedSpellClips[2]);
+
+            // Lockpicking
 
             if (!success)
                 throw new Exception("LockedLootContainers: Missing sound asset");
