@@ -71,6 +71,9 @@ namespace LockedLootContainers
         public static AudioClip[] ChestBlownOpenSpellClips = { null, null, null, null, null, null };
         public static AudioClip[] ChestDisintegratedSpellClips = { null, null, null };
 
+        public static AudioClip[] LockpickAttemptClips = { null, null, null, null, null };
+        public static AudioClip[] LockpickJammedClips = { null, null, null, null };
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
@@ -270,6 +273,16 @@ namespace LockedLootContainers
             success &= modManager.TryGetAsset("Disintegration_3", false, out ChestDisintegratedSpellClips[2]);
 
             // Lockpicking
+            success &= modManager.TryGetAsset("Lockpick_Attempt_1", false, out LockpickAttemptClips[0]);
+            success &= modManager.TryGetAsset("Lockpick_Attempt_2", false, out LockpickAttemptClips[1]);
+            success &= modManager.TryGetAsset("Lockpick_Attempt_3", false, out LockpickAttemptClips[2]);
+            success &= modManager.TryGetAsset("Lockpick_Attempt_4", false, out LockpickAttemptClips[3]);
+            success &= modManager.TryGetAsset("Lockpick_Attempt_5", false, out LockpickAttemptClips[4]);
+
+            success &= modManager.TryGetAsset("Lockpick_Jammed_Lock_1", false, out LockpickJammedClips[0]);
+            success &= modManager.TryGetAsset("Lockpick_Jammed_Lock_2", false, out LockpickJammedClips[1]);
+            success &= modManager.TryGetAsset("Lockpick_Jammed_Lock_3", false, out LockpickJammedClips[2]);
+            success &= modManager.TryGetAsset("Lockpick_Jammed_Lock_4", false, out LockpickJammedClips[3]);
 
             if (!success)
                 throw new Exception("LockedLootContainers: Missing sound asset");
@@ -480,13 +493,13 @@ namespace LockedLootContainers
                                 closedChestData.IsLockJammed = true;
                                 DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                                 if (dfAudioSource != null)
-                                    dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGrind, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                    AudioSource.PlayClipAtPoint(GetLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                             else
                             {
                                 DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
                                 if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                                    dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGears, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                    AudioSource.PlayClipAtPoint(GetLockpickAttemptClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                         }
                     }

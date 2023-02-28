@@ -152,13 +152,13 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                         chest.IsLockJammed = true;
                         DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                         if (dfAudioSource != null)
-                            dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGrind, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                            AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickJammedClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                     else
                     {
                         DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            dfAudioSource.PlayClipAtPoint(SoundClips.ActivateGears, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                            AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickAttemptClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                 }
             }

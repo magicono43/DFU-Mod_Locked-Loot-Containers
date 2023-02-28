@@ -896,7 +896,31 @@ namespace LockedLootContainers
             }
 
             if (clip == null)
-                clip = HitMetalLockClips[0];
+                clip = ChestResistedSpellClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetLockpickAttemptClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(LockpickAttemptClips);
+
+            if (clip == null)
+                clip = LockpickAttemptClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetLockpickJammedClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(LockpickJammedClips);
+
+            if (clip == null)
+                clip = LockpickJammedClips[0];
 
             return clip;
         }
