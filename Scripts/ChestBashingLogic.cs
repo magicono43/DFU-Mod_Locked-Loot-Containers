@@ -43,7 +43,7 @@ namespace LockedLootContainers
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetLockBashAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetLockBashAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
@@ -75,7 +75,7 @@ namespace LockedLootContainers
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, isHardBash), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, isHardBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
@@ -128,7 +128,7 @@ namespace LockedLootContainers
                         if (dfAudioSource)
                         {
                             if (dfAudioSource != null)
-                                AudioSource.PlayClipAtPoint(GetArrowHitChestAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                                AudioSource.PlayClipAtPoint(GetArrowHitChestAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(1.5f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
                         }
                         return true;
                     }
@@ -138,7 +138,7 @@ namespace LockedLootContainers
                         if (dfAudioSource)
                         {
                             if (dfAudioSource != null)
-                                AudioSource.PlayClipAtPoint(GetArrowHitChestAudioClip(chest, false), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                                AudioSource.PlayClipAtPoint(GetArrowHitChestAudioClip(chest, false), chest.gameObject.transform.position, UnityEngine.Random.Range(2.8f, 3.52f) * DaggerfallUnity.Settings.SoundVolume);
                         }
                         return false;
                     }
@@ -149,7 +149,7 @@ namespace LockedLootContainers
                     if (dfAudioSource)
                     {
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetArrowHitChestAudioClip(chest, false), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetArrowHitChestAudioClip(chest, false), chest.gameObject.transform.position, UnityEngine.Random.Range(2.8f, 3.52f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                     return false;
                 }

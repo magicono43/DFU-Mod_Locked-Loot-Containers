@@ -125,7 +125,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockAlreadyJammedClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                        dfAudioSource.AudioSource.PlayOneShot(LockedLootContainersMain.GetLockAlreadyJammedClip(), UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                 }
                 else if (LockedLootContainersMain.LockPickChance(chest)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                 {
@@ -138,7 +138,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     // Show success and play unlock sound
                     DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
                     if (dfAudioSource != null)
-                        AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickSuccessClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                        AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickSuccessClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(1.5f, 2.31f) * DaggerfallUnity.Settings.SoundVolume);
 
                     UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     LockedLootContainersMain.ChestObjRef = null; // This may cause issues? But really no clue, just a note.
@@ -152,13 +152,13 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                         chest.IsLockJammed = true;
                         DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickJammedClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickJammedClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                     else
                     {
                         DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                            AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickAttemptClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                            dfAudioSource.AudioSource.PlayOneShot(LockedLootContainersMain.GetLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                 }
             }

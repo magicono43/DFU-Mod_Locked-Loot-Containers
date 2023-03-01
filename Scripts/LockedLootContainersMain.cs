@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		2/17/2023, 12:00 AM
+// Last Edit:		2/28/2023, 11:45 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -47,6 +47,8 @@ namespace LockedLootContainers
         public Texture2D ChestChoiceMenuTexture;
         public Texture2D InspectionInfoGUITexture;
 
+        #region Mod Sound Variables
+
         // Mod Sounds
         private static AudioClip lastSoundPlayed = null;
         public static AudioClip[] UnarmedHitWoodLightClips = { null, null, null, null };
@@ -81,6 +83,8 @@ namespace LockedLootContainers
         public static AudioClip[] MagicLockAlreadyJammedClips = { null, null, null };
         public static AudioClip[] MagicLockpickSuccessfulClips = { null, null, null, null, null, null };
 
+        #endregion
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
@@ -95,7 +99,7 @@ namespace LockedLootContainers
 
         private void Start()
         {
-            Debug.Log("Begin mod init: Locked Loot Containers");
+            Debug.Log("Begin mod init: Locked Loot Containers"); // Still have alot of things to work on, but getting closer and closer to public release. Maybe work on save-data stuff next?
 
             Instance = this;
 
@@ -172,6 +176,8 @@ namespace LockedLootContainers
             // However, looking at the DaggerfallMissile.cs code under the "DoAreaOfEffect" method, I have a feeling without a PR, I won't be able to do a clean/easy
             // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal all other successes considered.
         }
+
+        #region Load Audio Clips
 
         private void LoadAudio() // Example taken from Penwick Papers Mod
         {
@@ -328,6 +334,8 @@ namespace LockedLootContainers
             if (!success)
                 throw new Exception("LockedLootContainers: Missing sound asset");
         }
+
+        #endregion
 
         private void LoadTextures() // Example taken from Penwick Papers Mod
         {
@@ -507,7 +515,7 @@ namespace LockedLootContainers
                         {
                             DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
                             if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                                AudioSource.PlayClipAtPoint(GetLockAlreadyJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                                dfAudioSource.AudioSource.PlayOneShot(GetLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                         }
                         else if (LockPickChance(closedChestData))
                         {
@@ -520,7 +528,7 @@ namespace LockedLootContainers
                             // Show success and play unlock sound
                             DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
                             if (dfAudioSource != null)
-                                AudioSource.PlayClipAtPoint(GetLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                                AudioSource.PlayClipAtPoint(GetLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
                             Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                             ChestObjRef = null;
@@ -534,13 +542,13 @@ namespace LockedLootContainers
                                 closedChestData.IsLockJammed = true;
                                 DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                                 if (dfAudioSource != null)
-                                    AudioSource.PlayClipAtPoint(GetLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                                    AudioSource.PlayClipAtPoint(GetLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                             else
                             {
                                 DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
                                 if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                                    AudioSource.PlayClipAtPoint(GetLockpickAttemptClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                                    dfAudioSource.AudioSource.PlayOneShot(GetLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                         }
                     }
