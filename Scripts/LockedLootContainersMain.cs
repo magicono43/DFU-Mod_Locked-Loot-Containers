@@ -73,6 +73,13 @@ namespace LockedLootContainers
 
         public static AudioClip[] LockpickAttemptClips = { null, null, null, null, null };
         public static AudioClip[] LockpickJammedClips = { null, null, null, null };
+        public static AudioClip[] LockAlreadyJammedClips = { null, null, null };
+        public static AudioClip[] LockpickSuccessfulClips = { null, null, null, null, null, null };
+
+        public static AudioClip[] MagicLockpickAttemptClips = { null, null, null, null, null };
+        public static AudioClip[] MagicLockpickJammedClips = { null, null, null, null };
+        public static AudioClip[] MagicLockAlreadyJammedClips = { null, null, null };
+        public static AudioClip[] MagicLockpickSuccessfulClips = { null, null, null, null, null, null };
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -284,6 +291,40 @@ namespace LockedLootContainers
             success &= modManager.TryGetAsset("Lockpick_Jammed_Lock_3", false, out LockpickJammedClips[2]);
             success &= modManager.TryGetAsset("Lockpick_Jammed_Lock_4", false, out LockpickJammedClips[3]);
 
+            success &= modManager.TryGetAsset("Lock_Already_Jammed_1", false, out LockAlreadyJammedClips[0]);
+            success &= modManager.TryGetAsset("Lock_Already_Jammed_2", false, out LockAlreadyJammedClips[1]);
+            success &= modManager.TryGetAsset("Lock_Already_Jammed_3", false, out LockAlreadyJammedClips[2]);
+
+            success &= modManager.TryGetAsset("Lockpick_Successful_1", false, out LockpickSuccessfulClips[0]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_2", false, out LockpickSuccessfulClips[1]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_3", false, out LockpickSuccessfulClips[2]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_4", false, out LockpickSuccessfulClips[3]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_5", false, out LockpickSuccessfulClips[4]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_6", false, out LockpickSuccessfulClips[5]);
+
+            // Magic Lockpicking / Open Effect
+            success &= modManager.TryGetAsset("Magic_Lockpick_Attempt_Failed_1", false, out MagicLockpickAttemptClips[0]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Attempt_Failed_2", false, out MagicLockpickAttemptClips[1]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Attempt_Failed_3", false, out MagicLockpickAttemptClips[2]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Attempt_Failed_4", false, out MagicLockpickAttemptClips[3]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Attempt_Failed_5", false, out MagicLockpickAttemptClips[4]);
+
+            success &= modManager.TryGetAsset("Magic_Lockpick_Jammed_Lock_1", false, out MagicLockpickJammedClips[0]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Jammed_Lock_2", false, out MagicLockpickJammedClips[1]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Jammed_Lock_3", false, out MagicLockpickJammedClips[2]);
+            success &= modManager.TryGetAsset("Magic_Lockpick_Jammed_Lock_4", false, out MagicLockpickJammedClips[3]);
+
+            success &= modManager.TryGetAsset("Magic_Lock_Already_Jammed_1", false, out MagicLockAlreadyJammedClips[0]);
+            success &= modManager.TryGetAsset("Magic_Lock_Already_Jammed_2", false, out MagicLockAlreadyJammedClips[1]);
+            success &= modManager.TryGetAsset("Magic_Lock_Already_Jammed_3", false, out MagicLockAlreadyJammedClips[2]);
+
+            success &= modManager.TryGetAsset("Lockpick_Successful_Magic_1", false, out MagicLockpickSuccessfulClips[0]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_Magic_2", false, out MagicLockpickSuccessfulClips[1]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_Magic_3", false, out MagicLockpickSuccessfulClips[2]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_Magic_4", false, out MagicLockpickSuccessfulClips[3]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_Magic_5", false, out MagicLockpickSuccessfulClips[4]);
+            success &= modManager.TryGetAsset("Lockpick_Successful_Magic_6", false, out MagicLockpickSuccessfulClips[5]);
+
             if (!success)
                 throw new Exception("LockedLootContainers: Missing sound asset");
         }
@@ -466,7 +507,7 @@ namespace LockedLootContainers
                         {
                             DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
                             if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                                dfAudioSource.PlayClipAtPoint(SoundClips.ActivateRatchet, closedChestData.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                                AudioSource.PlayClipAtPoint(GetLockAlreadyJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                         }
                         else if (LockPickChance(closedChestData))
                         {
@@ -479,7 +520,7 @@ namespace LockedLootContainers
                             // Show success and play unlock sound
                             DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
                             if (dfAudioSource != null)
-                                dfAudioSource.PlayClipAtPoint(SoundClips.ActivateLockUnlock, closedChestData.gameObject.transform.position); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                                AudioSource.PlayClipAtPoint(GetLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
 
                             Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                             ChestObjRef = null;

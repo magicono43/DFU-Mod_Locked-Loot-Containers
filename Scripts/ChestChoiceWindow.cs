@@ -125,7 +125,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
-                        dfAudioSource.PlayClipAtPoint(SoundClips.ActivateRatchet, chest.gameObject.transform.position); // Will use custom sounds in the end most likely.
+                        AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockAlreadyJammedClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                 }
                 else if (LockedLootContainersMain.LockPickChance(chest)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
                 {
@@ -138,7 +138,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     // Show success and play unlock sound
                     DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
                     if (dfAudioSource != null)
-                        dfAudioSource.PlayClipAtPoint(SoundClips.ActivateLockUnlock, chest.gameObject.transform.position); // Might use custom sound here, or atleast varied pitches of the same sound, etc.
+                        AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickSuccessClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
 
                     UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     LockedLootContainersMain.ChestObjRef = null; // This may cause issues? But really no clue, just a note.

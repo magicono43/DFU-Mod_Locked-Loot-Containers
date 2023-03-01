@@ -925,6 +925,78 @@ namespace LockedLootContainers
             return clip;
         }
 
+        public static AudioClip GetLockAlreadyJammedClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(LockAlreadyJammedClips);
+
+            if (clip == null)
+                clip = LockAlreadyJammedClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetLockpickSuccessClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(LockpickSuccessfulClips);
+
+            if (clip == null)
+                clip = LockpickSuccessfulClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetMagicLockpickAttemptClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(MagicLockpickAttemptClips);
+
+            if (clip == null)
+                clip = MagicLockpickAttemptClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetMagicLockpickJammedClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(MagicLockpickJammedClips);
+
+            if (clip == null)
+                clip = MagicLockpickJammedClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetMagicLockAlreadyJammedClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(MagicLockAlreadyJammedClips);
+
+            if (clip == null)
+                clip = MagicLockAlreadyJammedClips[0];
+
+            return clip;
+        }
+
+        public static AudioClip GetMagicLockpickSuccessClip()
+        {
+            AudioClip clip = null;
+
+            clip = RollRandomAudioClip(MagicLockpickSuccessfulClips);
+
+            if (clip == null)
+                clip = MagicLockpickSuccessfulClips[0];
+
+            return clip;
+        }
+
         public static bool CoinFlip()
         {
             if (UnityEngine.Random.Range(0, 1 + 1) == 0)
