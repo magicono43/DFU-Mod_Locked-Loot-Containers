@@ -29,6 +29,7 @@ namespace LockedLootContainers
     public partial class LockedLootContainersMain : MonoBehaviour
     {
         public static LockedLootContainersMain Instance;
+        public static LLCSaveData ModSaveData = new LLCSaveData();
 
         static Mod mod;
 
@@ -102,6 +103,8 @@ namespace LockedLootContainers
             Debug.Log("Begin mod init: Locked Loot Containers"); // Still have alot of things to work on, but getting closer and closer to public release. Maybe work on save-data stuff next?
 
             Instance = this;
+
+            mod.SaveDataInterface = ModSaveData;
 
             MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
