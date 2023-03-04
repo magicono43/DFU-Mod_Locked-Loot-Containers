@@ -15,9 +15,18 @@ using DaggerfallWorkshop.Game.Serialization;
 namespace LockedLootContainers
 {
     [FullSerializer.fsObject("v1")]
-    public class ChestData_v1
+    public class ChestsSaveData_v1
+    {
+        public Dictionary<ulong, ChestData> Chests;
+    }
+
+    public class ChestData
     {
         public ulong loadID;
+        public Vector3 currentPosition;
+        public Vector3 localPosition;
+        public Quaternion localRotation;
+        public Vector3 localScale;
         public int[] recentInspectValues;
         public bool isLockJammed;
         public bool hasBeenBashed;
@@ -35,72 +44,87 @@ namespace LockedLootContainers
         public int lockBashedHardTimes;
         public int chestBashedLightTimes;
         public int chestBashedHardTimes;
-        public Vector3 currentPosition;
-        public Vector3 localPosition;
         public ItemData_v1[] attachedLoot;
-    }
-
-    [FullSerializer.fsObject("v1")]
-    public struct ChestsSaveData_v1
-    {
-        public ChestData_v1[] chests;
     }
 
     public class LLCSaveData : IHasModSaveData
     {
-        public Dictionary<string, List<LandmarkLocation>> Towns; // Continue work on this tomorrow, this time likely using mostly example from Kab's "Location Loader" mod for WoD and such.
-        public List<LandmarkLocation> DungeonLocations;
-
-        public LLCSaveData()
-        {
-            Towns = new Dictionary<string, List<LandmarkLocation>>();
-            DungeonLocations = new List<LandmarkLocation>();
-        }
-
-
         public Type SaveDataType
         {
-            get { return typeof(LLCSaveData); }
+            get { return typeof(ChestsSaveData_v1); }
         }
 
         public object NewSaveData()
         {
-            return new LLCSaveData();
+            ChestsSaveData_v1 emptyData = new ChestsSaveData_v1();
+            emptyData.Chests = new Dictionary<ulong, ChestData>();
+            return emptyData;
         }
 
         public object GetSaveData()
         {
-            return this;
-        }
+            Dictionary<ulong, ChestData> chestEntries = new Dictionary<ulong, ChestData>();
+            LLCObject[] chests = GameObject.FindObjectsOfType<LLCObject>();
 
-        public void RestoreSaveData(object obj)
-        {
-            LLCSaveData other = (LLCSaveData)obj;
-
-            Towns = other.Towns;
-            DungeonLocations = other.DungeonLocations;
-        }
-
-
-        public class LandmarkLocation : IComparable<LandmarkLocation>
-        {
-            public string Name;
-            public Vector3 Position;
-
-            public LandmarkLocation(string name, Vector3 position)
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
             {
-                Name = name;
-                Position = position;
+                for (int i = 0; i < chests.Length; i++)
+                {
+                    if (chests[i].LoadID <= 0)
+                        continue;
+
+                    ChestData chest = new ChestData
+                    {
+                        loadID = chests[i].LoadID,
+                        currentPosition = chests[i].transform.position,
+                        localPosition = chests[i].transform.localPosition,
+                        localRotation = chests[i].transform.localRotation,
+                        localScale = chests[i].transform.localScale,
+                        recentInspectValues = chests[i].RecentInspectValues,
+                        isLockJammed = chests[i].IsLockJammed,
+                        hasBeenBashed = chests[i].HasBeenBashed,
+                        hasBeenInspected = chests[i].HasBeenInspected,
+                        chestMaterial = chests[i].ChestMaterial,
+                        chestSturdiness = chests[i].ChestSturdiness,
+                        chestMagicResist = chests[i].ChestMagicResist,
+                        lockMaterial = chests[i].LockMaterial,
+                        lockSturdiness = chests[i].LockSturdiness,
+                        lockMagicResist = chests[i].LockMagicResist,
+                        lockComplexity = chests[i].LockComplexity,
+                        jamResist = chests[i].JamResist,
+                        picksAttempted = chests[i].PicksAttempted,
+                        lockBashedLightTimes = chests[i].LockBashedLightTimes,
+                        lockBashedHardTimes = chests[i].LockBashedHardTimes,
+                        chestBashedLightTimes = chests[i].ChestBashedLightTimes,
+                        chestBashedHardTimes = chests[i].ChestBashedHardTimes,
+                        attachedLoot = chests[i].AttachedLoot.SerializeItems()
+                    };
+
+                    if (chest != null)
+                        chestEntries.Add(chest.loadID, chest);
+                }
             }
 
-            public int CompareTo(LandmarkLocation other)
-            {
-                if (other == null)
-                    return 1;
-                else
-                    return Name.CompareTo(other.Name);
-            }
+            ChestsSaveData_v1 data = new ChestsSaveData_v1();
+            data.Chests = chestEntries;
+            return data;
+        }
 
+        public void RestoreSaveData(object dataIn)
+        {
+            ChestsSaveData_v1 data = (ChestsSaveData_v1)dataIn;
+            Dictionary<ulong, ChestData> chests = data.Chests;
+
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
+            {
+                foreach (KeyValuePair<ulong, ChestData> chest in chests)
+                {
+                    if (chest.Value.loadID <= 0)
+                        continue;
+
+                    // Continue working on this next time. It feels like I made good progress on this, better than expected atleast. Attempt to recreate chests when save is loaded here, then test, etc.
+                }
+            }
         }
     }
 }
