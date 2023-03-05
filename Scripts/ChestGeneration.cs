@@ -12,6 +12,7 @@ using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Collections.Generic;
 using System;
 using DaggerfallWorkshop.Game.Utility;
+using DaggerfallWorkshop.Game.Serialization;
 
 namespace LockedLootContainers
 {
@@ -27,6 +28,9 @@ namespace LockedLootContainers
 
         public void AddChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
         {
+            if (SaveLoadManager.Instance.LoadInProgress) // Hopefully this will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
+                return;
+
             DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
             DaggerfallLoot[] lootPiles;
 
@@ -421,6 +425,15 @@ namespace LockedLootContainers
                 // Will have to change some stuff around in the actual chest "replacement" part to instead use the "new" loot collection rather than just the old one like for testing so far.
                 PopulateChestLoot(llcObj, totalRoomValueMod, miscGroupOdds, itemGroupOdds);
             }
+        }
+
+        public static void AddChestToSceneFromSave(GameObject go)
+        {
+            Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
+            chestBillboard.SetMaterial(4733, 0);
+            chestBillboard.transform.position = go.transform.position;
+            //chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0); // May not need to ground align part? Will see from testing I guess.
+            //GameObjectHelper.AlignBillboardToGround(go, chestBillboard.Summary.Size);
         }
 
         public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)

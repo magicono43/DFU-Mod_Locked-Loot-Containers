@@ -14,12 +14,6 @@ using DaggerfallWorkshop.Game.Serialization;
 
 namespace LockedLootContainers
 {
-    [FullSerializer.fsObject("v1")]
-    public class ChestsSaveData_v1
-    {
-        public Dictionary<ulong, ChestData> Chests;
-    }
-
     public class ChestData
     {
         public ulong loadID;
@@ -47,16 +41,19 @@ namespace LockedLootContainers
         public ItemData_v1[] attachedLoot;
     }
 
+    [FullSerializer.fsObject("v1")]
     public class LLCSaveData : IHasModSaveData
     {
+        public Dictionary<ulong, ChestData> Chests;
+
         public Type SaveDataType
         {
-            get { return typeof(ChestsSaveData_v1); }
+            get { return typeof(LLCSaveData); }
         }
 
         public object NewSaveData()
         {
-            ChestsSaveData_v1 emptyData = new ChestsSaveData_v1();
+            LLCSaveData emptyData = new LLCSaveData();
             emptyData.Chests = new Dictionary<ulong, ChestData>();
             return emptyData;
         }
@@ -105,14 +102,14 @@ namespace LockedLootContainers
                 }
             }
 
-            ChestsSaveData_v1 data = new ChestsSaveData_v1();
+            LLCSaveData data = new LLCSaveData();
             data.Chests = chestEntries;
             return data;
         }
 
         public void RestoreSaveData(object dataIn)
         {
-            ChestsSaveData_v1 data = (ChestsSaveData_v1)dataIn;
+            LLCSaveData data = (LLCSaveData)dataIn;
             Dictionary<ulong, ChestData> chests = data.Chests;
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
@@ -122,9 +119,52 @@ namespace LockedLootContainers
                     if (chest.Value.loadID <= 0)
                         continue;
 
-                    // Continue working on this next time. It feels like I made good progress on this, better than expected atleast. Attempt to recreate chests when save is loaded here, then test, etc.
+                    GameObject obj = RecreateChestFromSaveData(chest.Value);
+
+                    if (obj == null)
+                        continue;
+
+                    LockedLootContainersMain.AddChestToSceneFromSave(obj);
                 }
             }
+        }
+
+        public static GameObject RecreateChestFromSaveData(ChestData data)
+        {
+            if (data.loadID <= 0)
+                return null;
+
+            GameObject go = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, GameObjectHelper.GetBestParent());
+            LLCObject chest = go.AddComponent<LLCObject>();
+
+            ItemCollection loot = new ItemCollection();
+            loot.DeserializeItems(data.attachedLoot);
+
+            chest.LoadID = data.loadID;
+            chest.RecentInspectValues = data.recentInspectValues;
+            chest.IsLockJammed = data.isLockJammed;
+            chest.HasBeenBashed = data.hasBeenBashed;
+            chest.HasBeenInspected = data.hasBeenInspected;
+            chest.ChestMaterial = data.chestMaterial;
+            chest.ChestSturdiness = data.chestSturdiness;
+            chest.ChestMagicResist = data.chestMagicResist;
+            chest.LockMaterial = data.lockMaterial;
+            chest.LockSturdiness = data.lockSturdiness;
+            chest.LockMagicResist = data.lockMagicResist;
+            chest.LockComplexity = data.lockComplexity;
+            chest.JamResist = data.jamResist;
+            chest.PicksAttempted = data.picksAttempted;
+            chest.LockBashedLightTimes = data.lockBashedLightTimes;
+            chest.LockBashedHardTimes = data.lockBashedHardTimes;
+            chest.ChestBashedLightTimes = data.chestBashedLightTimes;
+            chest.ChestBashedHardTimes = data.chestBashedHardTimes;
+            chest.AttachedLoot = loot;
+            go.transform.position = data.currentPosition;
+            go.transform.localPosition = data.localPosition;
+            go.transform.localRotation = data.localRotation;
+            go.transform.localScale = data.localScale;
+
+            return go;
         }
     }
 }
