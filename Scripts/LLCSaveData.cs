@@ -18,9 +18,6 @@ namespace LockedLootContainers
     {
         public ulong loadID;
         public Vector3 currentPosition;
-        public Vector3 localPosition;
-        public Quaternion localRotation;
-        public Vector3 localScale;
         public int[] recentInspectValues;
         public bool isLockJammed;
         public bool hasBeenBashed;
@@ -74,9 +71,6 @@ namespace LockedLootContainers
                     {
                         loadID = chests[i].LoadID,
                         currentPosition = chests[i].transform.position,
-                        localPosition = chests[i].transform.localPosition,
-                        localRotation = chests[i].transform.localRotation,
-                        localScale = chests[i].transform.localScale,
                         recentInspectValues = chests[i].RecentInspectValues,
                         isLockJammed = chests[i].IsLockJammed,
                         hasBeenBashed = chests[i].HasBeenBashed,
@@ -114,12 +108,24 @@ namespace LockedLootContainers
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
             {
+                DaggerfallLoot[] allLoot = UnityEngine.Resources.FindObjectsOfTypeAll<DaggerfallLoot>();
+                List<DaggerfallLoot> pileList = new List<DaggerfallLoot>();
+
+                for (int i = 0; i < allLoot.Length; i++)
+                {
+                    if (allLoot[i].ContainerType == LootContainerTypes.RandomTreasure)
+                    {
+                        pileList.Add(allLoot[i]);
+                    }
+                }
+                DaggerfallLoot[] lootPiles = pileList.ToArray();
+
                 foreach (KeyValuePair<ulong, ChestData> chest in chests)
                 {
                     if (chest.Value.loadID <= 0)
                         continue;
 
-                    GameObject obj = RecreateChestFromSaveData(chest.Value);
+                    GameObject obj = RecreateChestFromSaveData(chest.Value, lootPiles);
 
                     if (obj == null)
                         continue;
@@ -129,12 +135,22 @@ namespace LockedLootContainers
             }
         }
 
-        public static GameObject RecreateChestFromSaveData(ChestData data)
+        public static GameObject RecreateChestFromSaveData(ChestData data, DaggerfallLoot[] lootPiles)
         {
             if (data.loadID <= 0)
                 return null;
 
-            GameObject go = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, GameObjectHelper.GetBestParent());
+            DaggerfallLoot parentPile = null;
+            for (int i = 0; i < lootPiles.Length; i++)
+            {
+                if (data.loadID == lootPiles[i].LoadID)
+                {
+                    parentPile = lootPiles[i];
+                    break;
+                }
+            }
+
+            GameObject go = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, (parentPile != null) ? parentPile.transform.parent.parent : GameObjectHelper.GetBestParent());
             LLCObject chest = go.AddComponent<LLCObject>();
 
             ItemCollection loot = new ItemCollection();
@@ -159,10 +175,11 @@ namespace LockedLootContainers
             chest.ChestBashedLightTimes = data.chestBashedLightTimes;
             chest.ChestBashedHardTimes = data.chestBashedHardTimes;
             chest.AttachedLoot = loot;
-            go.transform.position = data.currentPosition;
-            go.transform.localPosition = data.localPosition;
-            go.transform.localRotation = data.localRotation;
-            go.transform.localScale = data.localScale;
+
+            if (parentPile != null)
+                go.transform.position = parentPile.transform.position;
+            else
+                go.transform.position = data.currentPosition;
 
             return go;
         }

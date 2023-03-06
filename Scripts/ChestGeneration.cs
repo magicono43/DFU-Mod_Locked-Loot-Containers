@@ -348,7 +348,8 @@ namespace LockedLootContainers
 
             if (Dice100.SuccessRoll(chestOdds)) // If roll is successful, start process of replacing loot-pile with chest object as well as what properties the chest should have.
             {
-                ItemCollection oldPileLoot = lootPile.Items;
+                ItemCollection oldPileLoot = new ItemCollection();
+                oldPileLoot.TransferAll(lootPile.Items);
                 Transform oldLootPileTransform = lootPile.transform;
                 Vector3 pos = lootPile.transform.position;
                 ulong oldLoadID = lootPile.LoadID;
@@ -417,7 +418,8 @@ namespace LockedLootContainers
 
                 Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
-                Destroy(lootPile.gameObject); // Removed old loot-pile from scene, but saved its characteristics we care about.
+                lootPile.Items.Clear(); // Likely not necessary, but doing it just in case.
+                lootPile.gameObject.SetActive(false); // Instead of destroying, set to inactive, otherwise when loading a save inside a dungeon the loot-piles get recreated by DFU code.
 
                 // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
 
@@ -432,8 +434,8 @@ namespace LockedLootContainers
             Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
             chestBillboard.SetMaterial(4733, 0);
             chestBillboard.transform.position = go.transform.position;
-            //chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0); // May not need to ground align part? Will see from testing I guess.
-            //GameObjectHelper.AlignBillboardToGround(go, chestBillboard.Summary.Size);
+            chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0); // May not need to ground align part? Will see from testing I guess.
+            GameObjectHelper.AlignBillboardToGround(go, chestBillboard.Summary.Size);
         }
 
         public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
