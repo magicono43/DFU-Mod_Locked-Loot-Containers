@@ -352,14 +352,14 @@ namespace LockedLootContainers
                 oldPileLoot.TransferAll(lootPile.Items);
                 Transform oldLootPileTransform = lootPile.transform;
                 Vector3 pos = lootPile.transform.position;
-                ulong oldLoadID = lootPile.LoadID;
+                ulong newLoadID = DaggerfallUnity.NextUID;
 
                 GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldLootPileTransform.parent.parent);
 
                 LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
                 llcObj.Oldloot = oldPileLoot;
                 llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
-                llcObj.LoadID = oldLoadID;
+                llcObj.LoadID = newLoadID;
 
                 // Creates random seed for determining chest material value
                 string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();

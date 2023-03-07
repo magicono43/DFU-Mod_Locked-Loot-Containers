@@ -36,8 +36,9 @@ namespace LockedLootContainers
                     {
                         // Lock was hit with bash and is now broken, so chest loot is accessible.
                         BashingOpenChestDamagesLoot(chest, weapon, false);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, chest.LoadID, null, false);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.CorpseMarker, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, DaggerfallUnity.NextUID, null, false);
                         openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
+                        openChestLoot.customDrop = true;
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         // Show success and play unlock sound
@@ -68,8 +69,9 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged greatly most likely.)
                         BashingOpenChestDamagesLoot(chest, weapon, true);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, chest.LoadID, null, false);
+                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.CorpseMarker, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, DaggerfallUnity.NextUID, null, false);
                         openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
+                        openChestLoot.customDrop = true;
                         openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
 
                         // Show success and play unlock sound

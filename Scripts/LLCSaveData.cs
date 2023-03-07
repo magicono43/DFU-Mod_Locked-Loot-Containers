@@ -14,7 +14,7 @@ using DaggerfallWorkshop.Game.Serialization;
 
 namespace LockedLootContainers
 {
-    public class ChestData
+    public class ClosedChestData
     {
         public ulong loadID;
         public Vector3 currentPosition;
@@ -38,10 +38,20 @@ namespace LockedLootContainers
         public ItemData_v1[] attachedLoot;
     }
 
+    public class OpenChestData
+    {
+        public ulong loadID;
+        public Vector3 currentPosition;
+        public int textureArchive;
+        public int textureRecord;
+        public ItemData_v1[] items;
+    }
+
     [FullSerializer.fsObject("v1")]
     public class LLCSaveData : IHasModSaveData
     {
-        public Dictionary<ulong, ChestData> Chests;
+        public Dictionary<ulong, ClosedChestData> ClosedChests;
+        public Dictionary<ulong, OpenChestData> OpenChests; // Continue work on this tomorrow, adding the custom loot-pile save-data and save-loading logic stuff, also more bug-fixing with saves, etc.
 
         public Type SaveDataType
         {
@@ -51,13 +61,13 @@ namespace LockedLootContainers
         public object NewSaveData()
         {
             LLCSaveData emptyData = new LLCSaveData();
-            emptyData.Chests = new Dictionary<ulong, ChestData>();
+            emptyData.ClosedChests = new Dictionary<ulong, ClosedChestData>();
             return emptyData;
         }
 
         public object GetSaveData()
         {
-            Dictionary<ulong, ChestData> chestEntries = new Dictionary<ulong, ChestData>();
+            Dictionary<ulong, ClosedChestData> chestEntries = new Dictionary<ulong, ClosedChestData>();
             LLCObject[] chests = GameObject.FindObjectsOfType<LLCObject>();
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
@@ -67,7 +77,7 @@ namespace LockedLootContainers
                     if (chests[i].LoadID <= 0)
                         continue;
 
-                    ChestData chest = new ChestData
+                    ClosedChestData chest = new ClosedChestData
                     {
                         loadID = chests[i].LoadID,
                         currentPosition = chests[i].transform.position,
@@ -97,14 +107,14 @@ namespace LockedLootContainers
             }
 
             LLCSaveData data = new LLCSaveData();
-            data.Chests = chestEntries;
+            data.ClosedChests = chestEntries;
             return data;
         }
 
         public void RestoreSaveData(object dataIn)
         {
             LLCSaveData data = (LLCSaveData)dataIn;
-            Dictionary<ulong, ChestData> chests = data.Chests;
+            Dictionary<ulong, ClosedChestData> chests = data.ClosedChests;
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
             {
@@ -120,7 +130,7 @@ namespace LockedLootContainers
                 }
                 DaggerfallLoot[] lootPiles = pileList.ToArray();
 
-                foreach (KeyValuePair<ulong, ChestData> chest in chests)
+                foreach (KeyValuePair<ulong, ClosedChestData> chest in chests)
                 {
                     if (chest.Value.loadID <= 0)
                         continue;
@@ -135,7 +145,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static GameObject RecreateChestFromSaveData(ChestData data, DaggerfallLoot[] lootPiles)
+        public static GameObject RecreateChestFromSaveData(ClosedChestData data, DaggerfallLoot[] lootPiles)
         {
             if (data.loadID <= 0)
                 return null;
