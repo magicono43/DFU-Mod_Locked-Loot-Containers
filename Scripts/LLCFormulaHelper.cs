@@ -1005,6 +1005,15 @@ namespace LockedLootContainers
                 return true;
         }
 
+        public static bool WithinMarginOfErrorPos(Vector3 value1, Vector3 value2, float xAcceptDif, float yAcceptDif, float zAcceptDif)
+        {
+            bool xEqual = Mathf.Abs(value1.x - value2.x) <= xAcceptDif;
+            bool yEqual = Mathf.Abs(value1.y - value2.y) <= yAcceptDif;
+            bool zEqual = Mathf.Abs(value1.z - value2.z) <= zAcceptDif;
+
+            return xEqual && yEqual && zEqual;
+        }
+
         public static T[] FillArray<T>(List<T> list, int start, int count, T value)
         {
             for (var i = start; i < start + count; i++)

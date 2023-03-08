@@ -183,13 +183,13 @@ namespace LockedLootContainers
 
                             foreach (KeyValuePair<ulong, ClosedChestData> chest in closedChests)
                             {
-                                if (chest.Value.currentPosition == pilePos)
+                                if (LockedLootContainersMain.WithinMarginOfErrorPos(chest.Value.currentPosition, pilePos, 0.2f, 2.0f, 0.2f))
                                     deleteQue.Add(pileBoard.gameObject);
                             }
 
                             foreach (KeyValuePair<ulong, OpenChestData> chest in openChests)
                             {
-                                if (chest.Value.currentPosition == pilePos)
+                                if (LockedLootContainersMain.WithinMarginOfErrorPos(chest.Value.currentPosition, pilePos, 0.2f, 2.0f, 0.2f))
                                     deleteQue.Add(pileBoard.gameObject);
                             }
                         }
