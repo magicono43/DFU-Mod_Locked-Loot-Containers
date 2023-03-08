@@ -51,7 +51,7 @@ namespace LockedLootContainers
     public class LLCSaveData : IHasModSaveData
     {
         public Dictionary<ulong, ClosedChestData> ClosedChests;
-        public Dictionary<ulong, OpenChestData> OpenChests; // Continue work on this tomorrow, adding the custom loot-pile save-data and save-loading logic stuff, also more bug-fixing with saves, etc.
+        public Dictionary<ulong, OpenChestData> OpenChests;
 
         public Type SaveDataType
         {
@@ -62,107 +62,156 @@ namespace LockedLootContainers
         {
             LLCSaveData emptyData = new LLCSaveData();
             emptyData.ClosedChests = new Dictionary<ulong, ClosedChestData>();
+            emptyData.OpenChests = new Dictionary<ulong, OpenChestData>();
             return emptyData;
         }
 
         public object GetSaveData()
         {
-            Dictionary<ulong, ClosedChestData> chestEntries = new Dictionary<ulong, ClosedChestData>();
-            LLCObject[] chests = GameObject.FindObjectsOfType<LLCObject>();
+            Dictionary<ulong, ClosedChestData> closedChestEntries = new Dictionary<ulong, ClosedChestData>();
+            Dictionary<ulong, OpenChestData> openChestEntries = new Dictionary<ulong, OpenChestData>();
+            LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
             {
-                for (int i = 0; i < chests.Length; i++)
+                for (int i = 0; i < closedChests.Length; i++)
                 {
-                    if (chests[i].LoadID <= 0)
+                    if (closedChests[i].LoadID <= 0)
                         continue;
 
                     ClosedChestData chest = new ClosedChestData
                     {
-                        loadID = chests[i].LoadID,
-                        currentPosition = chests[i].transform.position,
-                        recentInspectValues = chests[i].RecentInspectValues,
-                        isLockJammed = chests[i].IsLockJammed,
-                        hasBeenBashed = chests[i].HasBeenBashed,
-                        hasBeenInspected = chests[i].HasBeenInspected,
-                        chestMaterial = chests[i].ChestMaterial,
-                        chestSturdiness = chests[i].ChestSturdiness,
-                        chestMagicResist = chests[i].ChestMagicResist,
-                        lockMaterial = chests[i].LockMaterial,
-                        lockSturdiness = chests[i].LockSturdiness,
-                        lockMagicResist = chests[i].LockMagicResist,
-                        lockComplexity = chests[i].LockComplexity,
-                        jamResist = chests[i].JamResist,
-                        picksAttempted = chests[i].PicksAttempted,
-                        lockBashedLightTimes = chests[i].LockBashedLightTimes,
-                        lockBashedHardTimes = chests[i].LockBashedHardTimes,
-                        chestBashedLightTimes = chests[i].ChestBashedLightTimes,
-                        chestBashedHardTimes = chests[i].ChestBashedHardTimes,
-                        attachedLoot = chests[i].AttachedLoot.SerializeItems()
+                        loadID = closedChests[i].LoadID,
+                        currentPosition = closedChests[i].transform.position,
+                        recentInspectValues = closedChests[i].RecentInspectValues,
+                        isLockJammed = closedChests[i].IsLockJammed,
+                        hasBeenBashed = closedChests[i].HasBeenBashed,
+                        hasBeenInspected = closedChests[i].HasBeenInspected,
+                        chestMaterial = closedChests[i].ChestMaterial,
+                        chestSturdiness = closedChests[i].ChestSturdiness,
+                        chestMagicResist = closedChests[i].ChestMagicResist,
+                        lockMaterial = closedChests[i].LockMaterial,
+                        lockSturdiness = closedChests[i].LockSturdiness,
+                        lockMagicResist = closedChests[i].LockMagicResist,
+                        lockComplexity = closedChests[i].LockComplexity,
+                        jamResist = closedChests[i].JamResist,
+                        picksAttempted = closedChests[i].PicksAttempted,
+                        lockBashedLightTimes = closedChests[i].LockBashedLightTimes,
+                        lockBashedHardTimes = closedChests[i].LockBashedHardTimes,
+                        chestBashedLightTimes = closedChests[i].ChestBashedLightTimes,
+                        chestBashedHardTimes = closedChests[i].ChestBashedHardTimes,
+                        attachedLoot = closedChests[i].AttachedLoot.SerializeItems()
                     };
 
                     if (chest != null)
-                        chestEntries.Add(chest.loadID, chest);
+                        closedChestEntries.Add(chest.loadID, chest);
+                }
+
+                DaggerfallLoot[] allLoot = GameObject.FindObjectsOfType<DaggerfallLoot>();
+                List<DaggerfallLoot> openChestList = new List<DaggerfallLoot>();
+                for (int i = 0; i < allLoot.Length; i++)
+                {
+                    if (allLoot[i].ContainerType == LootContainerTypes.Nothing && allLoot[i].ContainerImage == InventoryContainerImages.Chest && allLoot[i].customDrop == false)
+                    {
+                        openChestList.Add(allLoot[i]);
+                    }
+                }
+
+                for (int i = 0; i < openChestList.Count; i++)
+                {
+                    if (openChestList[i].LoadID <= 0)
+                        continue;
+
+                    OpenChestData chest = new OpenChestData
+                    {
+                        loadID = openChestList[i].LoadID,
+                        currentPosition = openChestList[i].transform.position,
+                        textureArchive = openChestList[i].TextureArchive,
+                        textureRecord = openChestList[i].TextureRecord,
+                        items = openChestList[i].Items.SerializeItems()
+                    };
+
+                    if (chest != null)
+                        openChestEntries.Add(chest.loadID, chest);
                 }
             }
 
             LLCSaveData data = new LLCSaveData();
-            data.ClosedChests = chestEntries;
+            data.ClosedChests = closedChestEntries;
+            data.OpenChests = openChestEntries;
             return data;
         }
 
-        public void RestoreSaveData(object dataIn)
+        public void RestoreSaveData(object dataIn) // Tomorrow, test all the changes I made to the save/loading stuff and make sure it all works fine (hopefully.)
         {
             LLCSaveData data = (LLCSaveData)dataIn;
-            Dictionary<ulong, ClosedChestData> chests = data.ClosedChests;
+            Dictionary<ulong, ClosedChestData> closedChests = data.ClosedChests;
+            Dictionary<ulong, OpenChestData> openChests = data.OpenChests;
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
             {
-                DaggerfallLoot[] allLoot = UnityEngine.Resources.FindObjectsOfTypeAll<DaggerfallLoot>();
-                List<DaggerfallLoot> pileList = new List<DaggerfallLoot>();
-
-                for (int i = 0; i < allLoot.Length; i++)
-                {
-                    if (allLoot[i].ContainerType == LootContainerTypes.RandomTreasure)
-                    {
-                        pileList.Add(allLoot[i]);
-                    }
-                }
-                DaggerfallLoot[] lootPiles = pileList.ToArray();
-
-                foreach (KeyValuePair<ulong, ClosedChestData> chest in chests)
+                foreach (KeyValuePair<ulong, ClosedChestData> chest in closedChests)
                 {
                     if (chest.Value.loadID <= 0)
                         continue;
 
-                    GameObject obj = RecreateChestFromSaveData(chest.Value, lootPiles);
+                    AddClosedChestToSceneFromSave(chest.Value);
+                }
 
-                    if (obj == null)
+                foreach (KeyValuePair<ulong, OpenChestData> chest in openChests)
+                {
+                    if (chest.Value.loadID <= 0)
                         continue;
 
-                    LockedLootContainersMain.AddChestToSceneFromSave(obj);
+                    AddOpenChestToSceneFromSave(chest.Value);
+                }
+
+                if (closedChests.Count > 0 || openChests.Count > 0) // This is here to try and prevent the random static loot-piles from respawning when loading saves for whatever reason, needs testing.
+                {
+                    DaggerfallLoot[] lootPiles = GameObject.FindObjectsOfType<DaggerfallLoot>();
+                    List<GameObject> deleteQue = new List<GameObject>();
+
+                    for (int i = 0; i < lootPiles.Length; i++)
+                    {
+                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
+                        {
+                            DaggerfallBillboard pileBoard = lootPiles[i].GetComponent<DaggerfallBillboard>();
+                            if (!pileBoard)
+                                continue;
+
+                            Vector3 pilePos = pileBoard.transform.position;
+
+                            foreach (KeyValuePair<ulong, ClosedChestData> chest in closedChests)
+                            {
+                                if (chest.Value.currentPosition == pilePos)
+                                    deleteQue.Add(pileBoard.gameObject);
+                            }
+
+                            foreach (KeyValuePair<ulong, OpenChestData> chest in openChests)
+                            {
+                                if (chest.Value.currentPosition == pilePos)
+                                    deleteQue.Add(pileBoard.gameObject);
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < deleteQue.Count; i++)
+                    {
+                        GameObject.Destroy(deleteQue[i]);
+                    }
                 }
             }
         }
 
-        public static GameObject RecreateChestFromSaveData(ClosedChestData data, DaggerfallLoot[] lootPiles)
+        public static void AddClosedChestToSceneFromSave(ClosedChestData data)
         {
             if (data.loadID <= 0)
-                return null;
+                return;
 
-            DaggerfallLoot parentPile = null;
-            for (int i = 0; i < lootPiles.Length; i++)
-            {
-                if (data.loadID == lootPiles[i].LoadID)
-                {
-                    parentPile = lootPiles[i];
-                    break;
-                }
-            }
-
-            GameObject go = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, (parentPile != null) ? parentPile.transform.parent.parent : GameObjectHelper.GetBestParent());
+            GameObject go = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, GameObjectHelper.GetBestParent());
             LLCObject chest = go.AddComponent<LLCObject>();
 
+            go.transform.position = data.currentPosition;
             ItemCollection loot = new ItemCollection();
             loot.DeserializeItems(data.attachedLoot);
 
@@ -186,12 +235,22 @@ namespace LockedLootContainers
             chest.ChestBashedHardTimes = data.chestBashedHardTimes;
             chest.AttachedLoot = loot;
 
-            if (parentPile != null)
-                go.transform.position = parentPile.transform.position;
-            else
-                go.transform.position = data.currentPosition;
+            Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
+            chestBillboard.SetMaterial(4733, 0);
+            chestBillboard.transform.position = go.transform.position;
+            chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0); // May not need to ground align part? Will see from testing I guess.
+            GameObjectHelper.AlignBillboardToGround(go, chestBillboard.Summary.Size);
+        }
 
-            return go;
+        public static void AddOpenChestToSceneFromSave(OpenChestData data) // Just a note, this will likely cause duplicate save-data for the mod save-data and the DFU save-data. Maybe see if I can remove the "SerializableLootContainer" component to maybe prevent this?
+        {
+            if (data.loadID <= 0)
+                return;
+
+            DaggerfallLoot openChest = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, data.currentPosition, GameObjectHelper.GetBestParent(), data.textureArchive, data.textureRecord, data.loadID, null, false);
+            openChest.gameObject.name = GameObjectHelper.GetGoFlatName(data.textureArchive, data.textureRecord);
+            openChest.Items.DeserializeItems(data.items);
+            GameObject.Destroy(openChest.GetComponent<SerializableLootContainer>());
         }
     }
 }

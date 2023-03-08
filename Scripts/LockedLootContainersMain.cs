@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/5/2023, 4:00 PM
+// Last Edit:		3/8/2023, 1:15 AM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Utility;
 using Wenzil.Console;
 using System;
+using DaggerfallWorkshop.Game.Serialization;
 
 namespace LockedLootContainers
 {
@@ -524,9 +525,10 @@ namespace LockedLootContainers
                         {
                             closedChestData.PicksAttempted++;
                             ApplyLockPickAttemptCosts();
-                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, closedChestData.LoadID, null, false);
+                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
                             openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
                             openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                             // Show success and play unlock sound
                             DaggerfallUI.AddHUDText("The lock clicks open...", 4f);

@@ -12,6 +12,7 @@ using DaggerfallWorkshop.Utility.AssetInjection;
 using LockedLootContainers;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Items;
+using DaggerfallWorkshop.Game.Serialization;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 {
@@ -131,9 +132,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     chest.PicksAttempted++;
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, chest.LoadID, null, false);
+                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
                     openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
                     openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                    GameObject.Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                     // Show success and play unlock sound
                     DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
