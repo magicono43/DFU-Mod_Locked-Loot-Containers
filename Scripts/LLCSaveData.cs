@@ -72,7 +72,7 @@ namespace LockedLootContainers
             Dictionary<ulong, OpenChestData> openChestEntries = new Dictionary<ulong, OpenChestData>();
             LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
 
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first.
             {
                 for (int i = 0; i < closedChests.Length; i++)
                 {
@@ -142,13 +142,13 @@ namespace LockedLootContainers
             return data;
         }
 
-        public void RestoreSaveData(object dataIn) // Tomorrow, test all the changes I made to the save/loading stuff and make sure it all works fine (hopefully.)
+        public void RestoreSaveData(object dataIn)
         {
             LLCSaveData data = (LLCSaveData)dataIn;
             Dictionary<ulong, ClosedChestData> closedChests = data.ClosedChests;
             Dictionary<ulong, OpenChestData> openChests = data.OpenChests;
 
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first, to confirm this works at all.
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first.
             {
                 foreach (KeyValuePair<ulong, ClosedChestData> chest in closedChests)
                 {
@@ -166,7 +166,7 @@ namespace LockedLootContainers
                     AddOpenChestToSceneFromSave(chest.Value);
                 }
 
-                if (closedChests.Count > 0 || openChests.Count > 0) // This is here to try and prevent the random static loot-piles from respawning when loading saves for whatever reason, needs testing.
+                if (closedChests.Count > 0 || openChests.Count > 0) // This is here to try and prevent the random static loot-piles from respawning when loading saves for whatever reason.
                 {
                     DaggerfallLoot[] lootPiles = GameObject.FindObjectsOfType<DaggerfallLoot>();
                     List<GameObject> deleteQue = new List<GameObject>();
@@ -238,11 +238,11 @@ namespace LockedLootContainers
             Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
             chestBillboard.SetMaterial(4733, 0);
             chestBillboard.transform.position = go.transform.position;
-            chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0); // May not need to ground align part? Will see from testing I guess.
+            chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0);
             GameObjectHelper.AlignBillboardToGround(go, chestBillboard.Summary.Size);
         }
 
-        public static void AddOpenChestToSceneFromSave(OpenChestData data) // Just a note, this will likely cause duplicate save-data for the mod save-data and the DFU save-data. Maybe see if I can remove the "SerializableLootContainer" component to maybe prevent this?
+        public static void AddOpenChestToSceneFromSave(OpenChestData data)
         {
             if (data.loadID <= 0)
                 return;
