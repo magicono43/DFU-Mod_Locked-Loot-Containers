@@ -11,7 +11,7 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        private static void AttemptMeleeChestBash(LLCObject chest, DaggerfallUnityItem weapon)
+        private static void AttemptMeleeChestBash(LLCObject chest, DaggerfallUnityItem weapon) // Start here next time to try refactoring bash system to be "HP" based rather than current system.
         {
             if (chest != null)
             {
@@ -20,15 +20,15 @@ namespace LockedLootContainers
                 Vector3 pos = chest.gameObject.transform.position;
                 DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
 
-                bool isHardBash = false;
+                bool critBash = false;
                 chest.HasBeenBashed = true;
 
                 if (BashLockRoll(chest, weapon))
                 {
-                    if (LockHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
+                    if (DetermineDamageToLock(chest, weapon)) // False = Light Bash, True = Hard Bash
                     {
                         chest.LockBashedHardTimes++;
-                        isHardBash = true;
+                        critBash = true;
                     }
                     else
                         chest.LockBashedLightTimes++;
@@ -61,7 +61,7 @@ namespace LockedLootContainers
                     if (ChestHardBashRoll(chest, weapon)) // False = Light Bash, True = Hard Bash
                     {
                         chest.ChestBashedHardTimes++;
-                        isHardBash = true;
+                        critBash = true;
                     }
                     else
                         chest.ChestBashedLightTimes++;
@@ -78,7 +78,7 @@ namespace LockedLootContainers
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, isHardBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, critBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
                         Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
                     }
@@ -86,7 +86,7 @@ namespace LockedLootContainers
                     {
                         // Chest body was hit with bash, but is still intact.
                         if (dfAudioSource != null)
-                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, false, isHardBash), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
+                            AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, false, critBash), chest.gameObject.transform.position, UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                 }
             }
@@ -171,7 +171,7 @@ namespace LockedLootContainers
             int wepSkill = Player.Skills.GetLiveSkillValue(skillUsed); // Might add accuracy modifier for weapon type, but for now just keep it more simple.
             float accuracyCheck = Mathf.Round(wepSkill / 4) + Mathf.Round(Willp * .2f) + Mathf.Round(Agili * .5f) + Mathf.Round(Speed * .1f) + Mathf.Round(Luck * .3f);
 
-            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(accuracyCheck, 5f, 70f))))
+            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(accuracyCheck, 4f, 65f))))
             {
                 Player.TallySkill((DFCareer.Skills)skillUsed, 1);
                 return true;
@@ -180,75 +180,81 @@ namespace LockedLootContainers
                 return false;
         }
 
-        public static bool LockHardBashRoll(LLCObject chest, DaggerfallUnityItem weapon) // Roll to determine if bashed lock was hit hard or lightly, I.E. Effectively or not very effectively.
+        public static int DetermineDamageToLock(LLCObject chest, DaggerfallUnityItem weapon) // Determine how much damage the lock takes from a bash attempt, if any.
         {
             int lockMat = LockMaterialToDaggerfallValue(chest.LockMaterial);
             int weapMat = (weapon != null) ? weapon.NativeMaterialValue : -1;
             int matDiff = weapMat - lockMat;
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
-            bool hardBash = false;
+            bool critBash = false;
 
             if (wepSkillID == (int)DFCareer.Skills.HandToHand) // Checks if the "weapon" being used is the player's fists.
             {
                 if (lockMat < 0) // If lock is made of wood
                 {
-                    float hardBashChance = Mathf.Round(Stren + (int)Mathf.Round(Luck / 5f) + 30f);
-                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 4f, 60f))))
-                        hardBash = true;
+                    float critBashChance = Mathf.Round(Stren + (int)Mathf.Round(Luck / 5f) + 30f);
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(critBashChance, 4f, 60f))))
+                        critBash = true;
 
-                    ApplyBashingCostLogic(chest, weapon, true, true, hardBash, matDiff);
-                    return hardBash;
+                    ApplyBashingCostLogic(chest, weapon, true, true, critBash, matDiff);
+
+                    if (!critBash && Dice100.SuccessRoll(LockDamageNegationChance(chest, null, wepSkillID)))
+                        return 0;
+                    else
+                        return CalculateLockDamage(chest, weapon, wepSkillID, critBash);
                 }
                 else // If lock is made from any metal
                 {
-                    float hardBashChance = Mathf.Round(Stren + (int)Mathf.Round(Luck / 5f) + 5f);
-                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 1f, 30f))))
-                        hardBash = true;
+                    float critBashChance = Mathf.Round(Stren + (int)Mathf.Round(Luck / 5f) + 5f);
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(critBashChance, 1f, 30f))))
+                        critBash = true;
 
-                    ApplyBashingCostLogic(chest, weapon, true, false, hardBash, matDiff);
-                    return hardBash;
+                    ApplyBashingCostLogic(chest, weapon, true, false, critBash, matDiff);
+
+                    if (!critBash && Dice100.SuccessRoll(LockDamageNegationChance(chest, null, wepSkillID)))
+                        return 0;
                 }
             }
             else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well, but just this for now.
             {
                 if (lockMat < 0) // If lock is made of wood
                 {
-                    float hardBashChance = Mathf.Round((int)Mathf.Round(Mathf.Clamp(weapon.weightInKg - 2f, 0.75f, 20f) / (0.6f - (Stren / 100f))) + (int)Mathf.Round(Luck / 5f) + 40f);
-                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 10f, 100f))))
-                        hardBash = true;
+                    float critBashChance = Mathf.Round((int)Mathf.Round(Mathf.Clamp(weapon.weightInKg - 2f, 0.75f, 20f) / (0.6f - (Stren / 100f))) + (int)Mathf.Round(Luck / 5f) + 40f);
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(critBashChance, 10f, 100f))))
+                        critBash = true;
 
-                    ApplyBashingCostLogic(chest, weapon, true, true, hardBash, matDiff);
-                    return hardBash;
+                    ApplyBashingCostLogic(chest, weapon, true, true, critBash, matDiff);
+                    return critBash;
                 }
                 else // If lock is made from any metal
                 {
-                    float hardBashChance = Mathf.Round((int)Mathf.Round(Mathf.Clamp(weapon.weightInKg - 2f, 0.75f, 20f) / (0.6f - (Stren / 100f))) + (int)Mathf.Round(Luck / 5f) + 5f);
-                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 2f, 97f))))
-                        hardBash = true;
+                    float critBashChance = Mathf.Round((int)Mathf.Round(Mathf.Clamp(weapon.weightInKg - 2f, 0.75f, 20f) / (0.6f - (Stren / 100f))) + (int)Mathf.Round(Luck / 5f) + 5f);
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(critBashChance, 2f, 97f))))
+                        critBash = true;
 
-                    ApplyBashingCostLogic(chest, weapon, true, false, hardBash, matDiff);
-                    return hardBash;
+                    ApplyBashingCostLogic(chest, weapon, true, false, critBash, matDiff);
+                    return critBash;
                 }
             }
             else // For all non-blunt weapons for now.
             {
                 if (lockMat < 0) // If lock is made of wood
                 {
-                    float hardBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(Stren / 10f)) * 10f) + (int)Mathf.Round(Luck / 5f) + 40f); // Just for now, will have to see through testing if this needs work.
-                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 10f, 100f))))
-                        hardBash = true;
+                    float critBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(Stren / 10f)) * 10f) + (int)Mathf.Round(Luck / 5f) + 40f); // Just for now, will have to see through testing if this needs work.
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(critBashChance, 10f, 100f))))
+                        critBash = true;
 
-                    ApplyBashingCostLogic(chest, weapon, true, true, hardBash, matDiff);
-                    return hardBash;
+                    ApplyBashingCostLogic(chest, weapon, true, true, critBash, matDiff);
+                    return critBash;
                 }
                 else // If lock is made from any metal
                 {
-                    float hardBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(Stren / 10f)) * 10f) + (int)Mathf.Round(Luck / 5f) + 30f); // Just for now, will have to see through testing if this needs work.
-                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(hardBashChance, 2f, 97f))))
-                        hardBash = true;
+                    float critBashChance = Mathf.Round(((matDiff + (int)Mathf.Round(Stren / 10f)) * 10f) + (int)Mathf.Round(Luck / 5f) + 30f); // Just for now, will have to see through testing if this needs work.
+                    if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(critBashChance, 2f, 97f))))
+                        critBash = true;
 
-                    ApplyBashingCostLogic(chest, weapon, true, false, hardBash, matDiff);
-                    return hardBash;
+                    ApplyBashingCostLogic(chest, weapon, true, false, critBash, matDiff);
+                    return critBash;
                 }
             }
         }

@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/8/2023, 2:20 PM
+// Last Edit:		3/8/2023, 11:40 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -101,7 +101,7 @@ namespace LockedLootContainers
 
         private void Start()
         {
-            Debug.Log("Begin mod init: Locked Loot Containers"); // Still have alot of things to work on, but getting closer and closer to public release. Maybe work on save-data stuff next?
+            Debug.Log("Begin mod init: Locked Loot Containers");
 
             Instance = this;
 

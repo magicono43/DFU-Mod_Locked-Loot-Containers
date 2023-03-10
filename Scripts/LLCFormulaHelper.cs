@@ -5,6 +5,7 @@ using DaggerfallWorkshop.Game.Items;
 using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Entity;
+using DaggerfallWorkshop.Game.Formulas;
 
 namespace LockedLootContainers
 {
@@ -136,6 +137,28 @@ namespace LockedLootContainers
                 else
                     return false;
             }
+        }
+
+        public static int LockDamageNegationChance(LLCObject chest, DaggerfallUnityItem weapon, int skillID)
+        {
+            int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? (int)Mathf.Round(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
+
+            if (skillID == (int)DFCareer.Skills.HandToHand)
+                return 20 + lockStab - ((int)Mathf.Round(Stren * 0.7f) + (int)Mathf.Round(Luck * 0.1f));
+            else
+                return lockStab - ((int)Mathf.Round(Stren * 0.7f) + (int)Mathf.Round(Luck * 0.1f));
+        }
+
+        public static int CalculateLockDamage(LLCObject chest, DaggerfallUnityItem weapon, int skillID, bool critBash)
+        {
+            int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? (int)Mathf.Round(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
+
+            if (skillID == (int)DFCareer.Skills.HandToHand)
+                return CalculateHandToHandDamage(); // Continue work on this stuff next time.
+            else if (skillID == (int)DFCareer.Skills.BluntWeapon)
+                return 2;
+            else
+                return 3;
         }
 
         public static int LockJamChance(LLCObject chest) // Will have to test this out, but I think I'm fairly satisfied with the formula so far.
@@ -608,6 +631,15 @@ namespace LockedLootContainers
             int timePassed = 1200 - (Speed * 12);
             DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
             Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
+        }
+
+        public static int CalculateHandToHandDamage()
+        {
+            int minBaseDamage = (Player.Skills.GetLiveSkillValue(DFCareer.Skills.HandToHand) / 10) + 1;
+            int maxBaseDamage = (Player.Skills.GetLiveSkillValue(DFCareer.Skills.HandToHand) / 5) + 1;
+            int damage = UnityEngine.Random.Range(minBaseDamage, maxBaseDamage + 1);
+            damage += FormulaHelper.DamageModifier(Player.Stats.LiveStrength);
+            return damage;
         }
 
         public static int DaggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.
