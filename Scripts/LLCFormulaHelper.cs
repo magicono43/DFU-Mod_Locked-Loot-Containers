@@ -79,7 +79,7 @@ namespace LockedLootContainers
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.6f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .3f) + Mathf.Round(Agili * 1.1f) + Mathf.Round(Speed * .35f) + Mathf.Round(Luck * .30f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 15f, 100f))))
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 15f, 100f))))
                 {
                     if (LockP >= 60) { } // Do nothing
                     else { Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(2 - attempts, 0, 2)); }
@@ -92,7 +92,7 @@ namespace LockedLootContainers
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.7f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .4f) + Mathf.Round(Agili * 1f) + Mathf.Round(Speed * .30f) + Mathf.Round(Luck * .30f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 10f, 100f))))
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 10f, 100f))))
                 {
                     if (LockP >= 80) { } // Do nothing
                     else { Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(3 - attempts, 0, 3)); }
@@ -105,7 +105,7 @@ namespace LockedLootContainers
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.8f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .5f) + Mathf.Round(Agili * .9f) + Mathf.Round(Speed * .25f) + Mathf.Round(Luck * .30f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 7f, 95f))))
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 7f, 95f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(4 - attempts, 0, 4));
                     return true;
@@ -117,7 +117,7 @@ namespace LockedLootContainers
             {
                 int lockP = (int)Mathf.Ceil(LockP * 1.9f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .6f) + Mathf.Round(Agili * .8f) + Mathf.Round(Speed * .20f) + Mathf.Round(Luck * .30f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f))))
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 3f, 90f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(5 - attempts, 0, 5));
                     return true;
@@ -129,7 +129,7 @@ namespace LockedLootContainers
             {
                 int lockP = (int)Mathf.Ceil(LockP * 2f);
                 float successChance = (lockComp * -1) + lockP + Mathf.Round(PickP / 10) + Mathf.Round(Intel * .7f) + Mathf.Round(Agili * .7f) + Mathf.Round(Speed * .15f) + Mathf.Round(Luck * .30f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 1f, 80f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
                 {
                     Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(6 - attempts, 0, 6));
                     return true;
@@ -141,24 +141,29 @@ namespace LockedLootContainers
 
         public static int LockDamageNegationChance(LLCObject chest, DaggerfallUnityItem weapon, int skillID)
         {
-            int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? (int)Mathf.Round(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
+            int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? Mathf.RoundToInt(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
 
-            if (skillID == (int)DFCareer.Skills.HandToHand)
-                return 20 + lockStab - ((int)Mathf.Round(Stren * 0.7f) + (int)Mathf.Round(Luck * 0.1f));
+            if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
+                return 20 + lockStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
             else
-                return lockStab - ((int)Mathf.Round(Stren * 0.7f) + (int)Mathf.Round(Luck * 0.1f));
+                return lockStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
         }
 
         public static int CalculateLockDamage(LLCObject chest, DaggerfallUnityItem weapon, int skillID, bool critBash)
         {
-            int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? (int)Mathf.Round(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
+            int damage = 0;
+            int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? Mathf.RoundToInt(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
+            float lockDamRes = Mathf.Abs((lockStab * 0.35f / 100f) -1f);
 
-            if (skillID == (int)DFCareer.Skills.HandToHand)
-                return CalculateHandToHandDamage(); // Continue work on this stuff next time.
+            if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateHandToHandDamage() * 0.7f * lockDamRes));
             else if (skillID == (int)DFCareer.Skills.BluntWeapon)
-                return 2;
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * 0.8f * lockDamRes));
             else
-                return 3;
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * lockDamRes));
+
+            damage = (critBash) ? damage * 4 : damage;
+            return damage;
         }
 
         public static int LockJamChance(LLCObject chest) // Will have to test this out, but I think I'm fairly satisfied with the formula so far.
@@ -166,8 +171,8 @@ namespace LockedLootContainers
             float jamResist = (float)chest.JamResist / 100f;
             float resistMod = (jamResist - 1f) * -1f;
 
-            float jamChance = (int)Mathf.Ceil(chest.PicksAttempted * (UnityEngine.Random.Range(14, 26) - (int)Mathf.Round(Luck / 5f)) * resistMod);
-            return (int)Mathf.Round(Mathf.Clamp(jamChance, 5f, 95f));
+            float jamChance = (int)Mathf.Ceil(chest.PicksAttempted * (UnityEngine.Random.Range(14, 26) - Mathf.RoundToInt(Luck / 5f)) * resistMod);
+            return Mathf.RoundToInt(Mathf.Clamp(jamChance, 5f, 95f));
         }
 
         public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, DaggerfallUnityItem bashingWep, int wepSkillID) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
@@ -186,19 +191,19 @@ namespace LockedLootContainers
 
                 if (bashingWep == null && wepSkillID == (short)DFCareer.Skills.HandToHand)
                 {
-                    float conditionMod = (float)Mathf.Max(2, UnityEngine.Random.Range(2, 14 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(2, UnityEngine.Random.Range(2, 14 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (wepSkillID == (short)DFCareer.Skills.BluntWeapon)
                 {
-                    float conditionMod = (float)Mathf.Max(8, UnityEngine.Random.Range(8, 17 + Mathf.Clamp(Mathf.Round(matDiff / 2), -6, 6) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(8, UnityEngine.Random.Range(8, 17 + Mathf.Clamp(Mathf.Round(matDiff / 2), -6, 6) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else
                 {
-                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 15 + Mathf.Clamp(matDiff * 2, -6, 14) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 15 + Mathf.Clamp(matDiff * 2, -6, 14) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -211,19 +216,19 @@ namespace LockedLootContainers
 
                 if (bashingWep == null && wepSkillID == (short)DFCareer.Skills.HandToHand)
                 {
-                    float conditionMod = (float)Mathf.Max(3, UnityEngine.Random.Range(3, 15 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(3, UnityEngine.Random.Range(3, 15 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (wepSkillID == (short)DFCareer.Skills.BluntWeapon)
                 {
-                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 19 + Mathf.Clamp(matDiff, -6, 12) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 19 + Mathf.Clamp(matDiff, -6, 12) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else
                 {
-                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 16 + Mathf.Clamp(matDiff, -6, 10) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 16 + Mathf.Clamp(matDiff, -6, 10) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -231,7 +236,7 @@ namespace LockedLootContainers
             else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
                 item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
             {
-                float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 19 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 19 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
@@ -276,13 +281,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(35, UnityEngine.Random.Range(35, 51 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(35, UnityEngine.Random.Range(35, 51 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 17 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 50) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 17 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 50) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -292,13 +297,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(27, UnityEngine.Random.Range(27, 44 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(27, UnityEngine.Random.Range(27, 44 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 9 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 40) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 9 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 40) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -309,13 +314,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(60, UnityEngine.Random.Range(60, 110 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(60, UnityEngine.Random.Range(60, 110 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(30, UnityEngine.Random.Range(30, 32 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 100) + (int)Mathf.Round(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(30, UnityEngine.Random.Range(30, 32 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 100) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -360,20 +365,20 @@ namespace LockedLootContainers
 
             if (item.ItemGroup == ItemGroups.Weapons && item.TemplateIndex != (int)Weapons.Arrow)
             {
-                float conditionMod = (float)Mathf.Max(11, UnityEngine.Random.Range(11, 26 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(11, UnityEngine.Random.Range(11, 26 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
             else if (item.ItemGroup == ItemGroups.Armor)
             {
-                float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 23 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 23 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
             else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
                 item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
             {
-                float conditionMod = (float)Mathf.Max(20, UnityEngine.Random.Range(20, 52 + (int)Mathf.Round(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(20, UnityEngine.Random.Range(20, 52 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
@@ -546,25 +551,25 @@ namespace LockedLootContainers
                 switch (item.TemplateIndex)
                 {
                     case (int)Armor.Cuirass:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(20f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(20f * luckMod) + 1));
                     case (int)Armor.Gauntlets:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(6f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(6f * luckMod) + 1));
                     case (int)Armor.Greaves:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(12f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(12f * luckMod) + 1));
                     case (int)Armor.Left_Pauldron:
                     case (int)Armor.Right_Pauldron:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(10f * luckMod) + 1));
                     case (int)Armor.Helm:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(12f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(12f * luckMod) + 1));
                     case (int)Armor.Boots:
                     case (int)Armor.Buckler:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(10f * luckMod) + 1));
                     case (int)Armor.Round_Shield:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(14f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(14f * luckMod) + 1));
                     case (int)Armor.Kite_Shield:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(18f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(18f * luckMod) + 1));
                     case (int)Armor.Tower_Shield:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(25f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(25f * luckMod) + 1));
                     default:
                         return 1;
                 }
@@ -574,39 +579,39 @@ namespace LockedLootContainers
                 switch (item.TemplateIndex)
                 {
                     case (int)Weapons.Dagger:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(2f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(2f * luckMod) + 1));
                     case (int)Weapons.Tanto:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(3f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(3f * luckMod) + 1));
                     case (int)Weapons.Staff:
                     case (int)Weapons.Shortsword:
                     case (int)Weapons.Wakazashi:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(6f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(6f * luckMod) + 1));
                     case (int)Weapons.Broadsword:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(13f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(13f * luckMod) + 1));
                     case (int)Weapons.Saber:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(9f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(9f * luckMod) + 1));
                     case (int)Weapons.Longsword:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(10f * luckMod) + 1));
                     case (int)Weapons.Katana:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(8f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(8f * luckMod) + 1));
                     case (int)Weapons.Claymore:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(18f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(18f * luckMod) + 1));
                     case (int)Weapons.Dai_Katana:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(15f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(15f * luckMod) + 1));
                     case (int)Weapons.Mace:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(10f * luckMod) + 1));
                     case (int)Weapons.Flail:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(16f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(16f * luckMod) + 1));
                     case (int)Weapons.Warhammer:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(14f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(14f * luckMod) + 1));
                     case (int)Weapons.Battle_Axe:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(10f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(10f * luckMod) + 1));
                     case (int)Weapons.War_Axe:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(14f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(14f * luckMod) + 1));
                     case (int)Weapons.Short_Bow:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(2f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(2f * luckMod) + 1));
                     case (int)Weapons.Long_Bow:
-                        return Mathf.Max(1, UnityEngine.Random.Range(1, (int)Mathf.Round(4f * luckMod) + 1));
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(4f * luckMod) + 1));
                     default:
                         return 1;
                 }
@@ -640,6 +645,14 @@ namespace LockedLootContainers
             int damage = UnityEngine.Random.Range(minBaseDamage, maxBaseDamage + 1);
             damage += FormulaHelper.DamageModifier(Player.Stats.LiveStrength);
             return damage;
+        }
+
+        public static int CalculateWeaponDamage(DaggerfallUnityItem weapon)
+        {
+            int wepDamage = UnityEngine.Random.Range(weapon.GetBaseDamageMin(), weapon.GetBaseDamageMax() + 1);
+            wepDamage += FormulaHelper.DamageModifier(Player.Stats.LiveStrength);
+            wepDamage += weapon.GetWeaponMaterialModifier();
+            return wepDamage;
         }
 
         public static int DaggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.

@@ -198,7 +198,7 @@ namespace LockedLootContainers
 
                     ApplyBashingCostLogic(chest, weapon, true, true, critBash, matDiff);
 
-                    if (!critBash && Dice100.SuccessRoll(LockDamageNegationChance(chest, null, wepSkillID)))
+                    if (!critBash && Dice100.SuccessRoll(LockDamageNegationChance(chest, weapon, wepSkillID)))
                         return 0;
                     else
                         return CalculateLockDamage(chest, weapon, wepSkillID, critBash);
@@ -211,8 +211,10 @@ namespace LockedLootContainers
 
                     ApplyBashingCostLogic(chest, weapon, true, false, critBash, matDiff);
 
-                    if (!critBash && Dice100.SuccessRoll(LockDamageNegationChance(chest, null, wepSkillID)))
+                    if (!critBash && Dice100.SuccessRoll(LockDamageNegationChance(chest, weapon, wepSkillID)))
                         return 0;
+                    else
+                        return CalculateLockDamage(chest, weapon, wepSkillID, critBash); // Continue here next I work on this? For the different weapon types and such below this.
                 }
             }
             else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well, but just this for now.
