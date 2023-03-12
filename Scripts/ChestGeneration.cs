@@ -548,7 +548,7 @@ namespace LockedLootContainers
 
         public static int RollChestSturdiness(ChestMaterials chestMat, string dungBlocName, int roomValueMod)
         {
-            int chestSturdiness = 1;
+            int chestSturdiness = 1; // Next time I work on this, maybe have the "Hit Point" values be defined in these methods, mainly determined by the Sturdiness value and some added RNG, will see.
             int randomMod = UnityEngine.Random.Range(-20, 21);
             int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
             bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.

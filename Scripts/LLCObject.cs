@@ -30,18 +30,17 @@ namespace LockedLootContainers
         ChestMaterials chestMaterial = ChestMaterials.None;
         int chestSturdiness = 1;
         int chestMagicResist = 1;
+        int chestHitPoints = 0;
 
         LockMaterials lockMaterial = LockMaterials.None;
         int lockSturdiness = 1;
         int lockMagicResist = 1;
         int lockComplexity = 1;
         int jamResist = 1;
+        int lockHitPoints = 0;
 
         int picksAttempted = 0;
-        int lockBashedLightTimes = 0;
-        int lockBashedHardTimes = 0;
-        int chestBashedLightTimes = 0;
-        int chestBashedHardTimes = 0;
+        int lockMechHitPoints = 0;
 
         int trapAmount = 0;
         int trapType = 0; // May eventually if possibly to have more than 1 trap on a chest, that this would be better as an array/list of the effects attached kind of like spell-bundle arrays.
@@ -139,6 +138,12 @@ namespace LockedLootContainers
             set { chestMagicResist = value; }
         }
 
+        public int ChestHitPoints
+        {
+            get { return chestHitPoints; }
+            set { chestHitPoints = value; }
+        }
+
         public LockMaterials LockMaterial
         {
             get { return lockMaterial; }
@@ -169,34 +174,22 @@ namespace LockedLootContainers
             set { jamResist = value; }
         }
 
+        public int LockHitPoints
+        {
+            get { return lockHitPoints; }
+            set { lockHitPoints = value; }
+        }
+
         public int PicksAttempted
         {
             get { return picksAttempted; }
             set { picksAttempted = value; }
         }
 
-        public int LockBashedLightTimes
+        public int LockMechHitPoints
         {
-            get { return lockBashedLightTimes; }
-            set { lockBashedLightTimes = value; }
-        }
-
-        public int LockBashedHardTimes
-        {
-            get { return lockBashedHardTimes; }
-            set { lockBashedHardTimes = value; }
-        }
-
-        public int ChestBashedLightTimes
-        {
-            get { return chestBashedLightTimes; }
-            set { chestBashedLightTimes = value; }
-        }
-
-        public int ChestBashedHardTimes
-        {
-            get { return chestBashedHardTimes; }
-            set { chestBashedHardTimes = value; }
+            get { return lockMechHitPoints; }
+            set { lockMechHitPoints = value; }
         }
 
         public int TrapAmount

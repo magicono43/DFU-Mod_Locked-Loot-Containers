@@ -154,13 +154,42 @@ namespace LockedLootContainers
             int damage = 0;
             int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? Mathf.RoundToInt(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
             float lockDamRes = Mathf.Abs((lockStab * 0.35f / 100f) -1f);
+            float luckMod = (Luck / 500f) + 1f;
 
             if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
-                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateHandToHandDamage() * 0.7f * lockDamRes));
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateHandToHandDamage() * 0.7f * lockDamRes * luckMod));
             else if (skillID == (int)DFCareer.Skills.BluntWeapon)
-                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * 0.8f * lockDamRes));
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * 0.8f * lockDamRes * luckMod));
             else
-                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * lockDamRes));
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * lockDamRes * luckMod));
+
+            damage = (critBash) ? damage * 4 : damage;
+            return damage;
+        }
+
+        public static int ChestDamageNegationChance(LLCObject chest, DaggerfallUnityItem weapon, int skillID)
+        {
+            int chestStab = (chest.ChestMaterial == ChestMaterials.Wood) ? Mathf.RoundToInt(chest.ChestSturdiness / 0.7f) : chest.ChestSturdiness;
+
+            if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
+                return 30 + chestStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
+            else
+                return 10 + chestStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
+        }
+
+        public static int CalculateChestDamage(LLCObject chest, DaggerfallUnityItem weapon, int skillID, bool critBash)
+        {
+            int damage = 0;
+            int chestStab = (chest.ChestMaterial == ChestMaterials.Wood) ? Mathf.RoundToInt(chest.ChestSturdiness / 0.7f) : chest.ChestSturdiness;
+            float chestDamRes = Mathf.Abs((chestStab * 0.45f / 100f) - 1f);
+            float luckMod = (Luck / 500f) + 1f;
+
+            if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateHandToHandDamage() * 0.6f * chestDamRes * luckMod));
+            else if (skillID == (int)DFCareer.Skills.BluntWeapon)
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * chestDamRes * luckMod));
+            else
+                damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * 0.7f * chestDamRes * luckMod));
 
             damage = (critBash) ? damage * 4 : damage;
             return damage;
@@ -649,6 +678,9 @@ namespace LockedLootContainers
 
         public static int CalculateWeaponDamage(DaggerfallUnityItem weapon)
         {
+            if (weapon == null)
+                return 1;
+
             int wepDamage = UnityEngine.Random.Range(weapon.GetBaseDamageMin(), weapon.GetBaseDamageMax() + 1);
             wepDamage += FormulaHelper.DamageModifier(Player.Stats.LiveStrength);
             wepDamage += weapon.GetWeaponMaterialModifier();
