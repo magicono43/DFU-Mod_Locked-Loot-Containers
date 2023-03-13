@@ -394,11 +394,15 @@ namespace LockedLootContainers
                 llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
                 llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
 
+                llcObj.ChestHitPoints = CalculateChestHitPoints(llcObj.ChestSturdiness);
+                llcObj.LockHitPoints = CalculateLockHitPoints(llcObj.LockSturdiness);
+
                 llcObj.ChestMagicResist = RollChestMagicResist(llcObj.ChestMaterial, llcObj.ChestSturdiness, totalRoomValueMod);
                 llcObj.LockMagicResist = RollLockMagicResist(llcObj.LockMaterial, llcObj.LockSturdiness, totalRoomValueMod);
 
                 llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
                 llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
+                llcObj.LockMechHitPoints = CalculateLockMechanismHitPoints(llcObj.JamResist, llcObj.LockSturdiness);
 
                 UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
@@ -548,7 +552,7 @@ namespace LockedLootContainers
 
         public static int RollChestSturdiness(ChestMaterials chestMat, string dungBlocName, int roomValueMod)
         {
-            int chestSturdiness = 1; // Next time I work on this, maybe have the "Hit Point" values be defined in these methods, mainly determined by the Sturdiness value and some added RNG, will see.
+            int chestSturdiness = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
             int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
             bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
@@ -575,6 +579,12 @@ namespace LockedLootContainers
             }
 
             return (int)Mathf.Clamp(chestSturdiness + randomMod + roomMod, 1, 100);
+        }
+
+        public static int CalculateChestHitPoints(int chestStab)
+        {
+            float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
+            return (int)Mathf.Max(1, chestStab * randomMod * 10f);
         }
 
         public static int RollLockSturdiness(LockMaterials lockMat, string dungBlocName, int roomValueMod)
@@ -606,6 +616,12 @@ namespace LockedLootContainers
             }
 
             return (int)Mathf.Clamp(lockSturdiness + randomMod + roomMod, 1, 100);
+        }
+
+        public static int CalculateLockHitPoints(int lockStab)
+        {
+            float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
+            return (int)Mathf.Max(1, lockStab * randomMod * 3f);
         }
 
         public static int RollChestMagicResist(ChestMaterials chestMat, int chestSturdy, int roomValueMod)
@@ -725,6 +741,13 @@ namespace LockedLootContainers
             }
 
             return (int)Mathf.Clamp(jamResist + randomMod + roomMod, 1, 100);
+        }
+
+        public static int CalculateLockMechanismHitPoints(int jamRes, int lockStab)
+        {
+            float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
+            float stabMod = Mathf.Abs((lockStab * 0.20f / 100f) + 1f);
+            return (int)Mathf.Max(1, jamRes * stabMod * randomMod * 2f);
         }
 
         public static int EnemyRoomValueMods(EnemyEntity enemyEntity) // Will want to take into account modded enemies and such later on when getting to the polishing parts.

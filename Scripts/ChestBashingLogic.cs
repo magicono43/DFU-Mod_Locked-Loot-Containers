@@ -27,7 +27,7 @@ namespace LockedLootContainers
                 {
                     damDealt = DetermineDamageToLock(chest, weapon);
 
-                    if (BreakLockAttempt(chest, weapon, damDealt))
+                    if (BreakLockAttempt(chest, damDealt))
                     {
                         // Lock was hit with bash and is now broken, so chest loot is accessible.
                         BashingOpenChestDamagesLoot(chest, weapon, false);
@@ -55,7 +55,7 @@ namespace LockedLootContainers
                     bool critBash = false;
                     damDealt = DetermineDamageToChest(chest, weapon, out critBash);
 
-                    if (SmashOpenChestAttempt(chest, weapon, damDealt))
+                    if (SmashOpenChestAttempt(chest, damDealt))
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged greatly most likely.)
                         BashingOpenChestDamagesLoot(chest, weapon, true);
@@ -239,7 +239,7 @@ namespace LockedLootContainers
                 return CalculateLockDamage(chest, weapon, wepSkillID, critBash);
         }
 
-        public static bool BreakLockAttempt(LLCObject chest, DaggerfallUnityItem weapon, int damage) // Determine if bashed lock breaks or not this attempt, granting full access to loot.
+        public static bool BreakLockAttempt(LLCObject chest, int damage) // Determine if bashed lock breaks or not this attempt, granting full access to loot.
         {
             int lockHP = chest.LockHitPoints - damage;
 
@@ -327,7 +327,7 @@ namespace LockedLootContainers
                 return CalculateChestDamage(chest, weapon, wepSkillID, critBash);
         }
 
-        public static bool SmashOpenChestAttempt(LLCObject chest, DaggerfallUnityItem weapon, int damage) // Determine if bashed chest body breaks open or not this attempt, granting full access to loot.
+        public static bool SmashOpenChestAttempt(LLCObject chest, int damage) // Determine if bashed chest body breaks open or not this attempt, granting full access to loot.
         {
             int chestHP = chest.ChestHitPoints - damage;
 
@@ -354,7 +354,7 @@ namespace LockedLootContainers
             else
             {
                 int damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(bowUsed) * 0.8f * chestDamRes * luckMod));
-                bool smashSuccess = SmashOpenChestAttempt(chest, bowUsed, damage);
+                bool smashSuccess = SmashOpenChestAttempt(chest, damage);
 
                 if (smashSuccess)
                 {

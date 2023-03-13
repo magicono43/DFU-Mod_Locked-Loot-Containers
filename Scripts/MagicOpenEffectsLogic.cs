@@ -55,9 +55,10 @@ namespace LockedLootContainers
                 else
                 {
                     closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
-                    if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
+                    int mechDamDealt = DetermineDamageToLockMechanism(closedChestData);
+
+                    if (DoesLockJam(closedChestData, mechDamDealt))
                     {
-                        closedChestData.IsLockJammed = true;
                         DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetMagicLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
@@ -216,7 +217,9 @@ namespace LockedLootContainers
                         if (!alreadyCheckedDamEffects)
                         {
                             alreadyCheckedDamEffects = true;
-                            if (ChestBlownOpenRoll(chest, totalDamageMag, missile.ElementType))
+                            int damDealt = DetermineMagicDamageToChest(chest, totalDamageMag, missile.ElementType);
+
+                            if (ChestBlownOpenAttempt(chest, damDealt))
                             {
                                 // Chest has been blown open by damage health spell and contents are accessible (but damaged greatly, if not outright destroyed.)
                                 SpellDestroyingChestDamagesLoot(chest, damOrDisin[i], totalDamageMag);
@@ -263,17 +266,30 @@ namespace LockedLootContainers
                 return false;
         }
 
-        public static bool ChestBlownOpenRoll(LLCObject chest, int effectMagnitude, ElementTypes element) // Roll to determine if damage health spell effect(s) "blow open" the chest hit and gives access to what remains.
+        public static int DetermineMagicDamageToChest(LLCObject chest, int effectMagnitude, ElementTypes element) // Determine how much damage the chest takes from a bash attempt, if any.
         {
-            int magicResist = chest.ChestMagicResist;
-            int sturdiness = chest.ChestSturdiness;
             float elementModifier = ElementModBasedOnChestMaterial(chest, element);
-            float blowOpenChestChance = (magicResist * -1f) + Mathf.Floor(sturdiness / -4f) + Mathf.Round(effectMagnitude * (elementModifier + ((float)Destr / 500f))) + (int)Mathf.Round(Luck / 10f);
 
-            if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(blowOpenChestChance, 0f, 93f))))
-                return true;
+            if (Dice100.SuccessRoll(ChestMagicDamageNegationChance(chest, elementModifier)))
+                return 0;
             else
+                return CalculateChestMagicDamage(chest, effectMagnitude, elementModifier);
+        }
+
+        public static bool ChestBlownOpenAttempt(LLCObject chest, int damage) // Determine if damage health spell effect(s) "blow open" the chest hit and gives access to what remains.
+        {
+            int chestHP = chest.ChestHitPoints - damage;
+
+            if (chestHP <= 0)
+            {
+                chest.ChestHitPoints = -1;
+                return true;
+            }
+            else
+            {
+                chest.ChestHitPoints = chestHP;
                 return false;
+            }
         }
 
         public static void SpellDestroyingChestDamagesLoot(LLCObject chest, int damOrDisin, int spellMag)

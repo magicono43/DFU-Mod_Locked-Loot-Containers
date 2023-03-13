@@ -25,16 +25,15 @@ namespace LockedLootContainers
         public ChestMaterials chestMaterial;
         public int chestSturdiness;
         public int chestMagicResist;
+        public int chestHitPoints;
         public LockMaterials lockMaterial;
         public int lockSturdiness;
         public int lockMagicResist;
         public int lockComplexity;
         public int jamResist;
+        public int lockHitPoints;
         public int picksAttempted;
-        public int lockBashedLightTimes;
-        public int lockBashedHardTimes;
-        public int chestBashedLightTimes;
-        public int chestBashedHardTimes;
+        public int lockMechHitPoints;
         public ItemData_v1[] attachedLoot;
     }
 
@@ -90,16 +89,15 @@ namespace LockedLootContainers
                         chestMaterial = closedChests[i].ChestMaterial,
                         chestSturdiness = closedChests[i].ChestSturdiness,
                         chestMagicResist = closedChests[i].ChestMagicResist,
+                        chestHitPoints = closedChests[i].ChestHitPoints,
                         lockMaterial = closedChests[i].LockMaterial,
                         lockSturdiness = closedChests[i].LockSturdiness,
                         lockMagicResist = closedChests[i].LockMagicResist,
                         lockComplexity = closedChests[i].LockComplexity,
                         jamResist = closedChests[i].JamResist,
+                        lockHitPoints = closedChests[i].LockHitPoints,
                         picksAttempted = closedChests[i].PicksAttempted,
-                        lockBashedLightTimes = closedChests[i].LockBashedLightTimes,
-                        lockBashedHardTimes = closedChests[i].LockBashedHardTimes,
-                        chestBashedLightTimes = closedChests[i].ChestBashedLightTimes,
-                        chestBashedHardTimes = closedChests[i].ChestBashedHardTimes,
+                        lockMechHitPoints = closedChests[i].LockMechHitPoints,
                         attachedLoot = closedChests[i].AttachedLoot.SerializeItems()
                     };
 
@@ -223,16 +221,15 @@ namespace LockedLootContainers
             chest.ChestMaterial = data.chestMaterial;
             chest.ChestSturdiness = data.chestSturdiness;
             chest.ChestMagicResist = data.chestMagicResist;
+            chest.ChestHitPoints = data.chestHitPoints;
             chest.LockMaterial = data.lockMaterial;
             chest.LockSturdiness = data.lockSturdiness;
             chest.LockMagicResist = data.lockMagicResist;
             chest.LockComplexity = data.lockComplexity;
             chest.JamResist = data.jamResist;
+            chest.LockHitPoints = data.lockHitPoints;
             chest.PicksAttempted = data.picksAttempted;
-            chest.LockBashedLightTimes = data.lockBashedLightTimes;
-            chest.LockBashedHardTimes = data.lockBashedHardTimes;
-            chest.ChestBashedLightTimes = data.chestBashedLightTimes;
-            chest.ChestBashedHardTimes = data.chestBashedHardTimes;
+            chest.LockMechHitPoints = data.lockMechHitPoints;
             chest.AttachedLoot = loot;
 
             Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();

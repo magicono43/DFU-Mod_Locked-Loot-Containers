@@ -149,9 +149,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     chest.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
-                    if (Dice100.SuccessRoll(LockedLootContainersMain.LockJamChance(chest)))
+                    int mechDamDealt = LockedLootContainersMain.DetermineDamageToLockMechanism(chest);
+
+                    if (LockedLootContainersMain.DoesLockJam(chest, mechDamDealt))
                     {
-                        chest.IsLockJammed = true;
                         DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickJammedClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);

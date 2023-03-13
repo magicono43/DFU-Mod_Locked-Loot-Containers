@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/12/2023, 1:30 AM
+// Last Edit:		3/12/2023, 8:40 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -542,9 +542,10 @@ namespace LockedLootContainers
                         {
                             closedChestData.PicksAttempted++;
                             ApplyLockPickAttemptCosts();
-                            if (Dice100.SuccessRoll(LockJamChance(closedChestData)))
+                            int mechDamDealt = DetermineDamageToLockMechanism(closedChestData);
+
+                            if (DoesLockJam(closedChestData, mechDamDealt))
                             {
-                                closedChestData.IsLockJammed = true;
                                 DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
                                 if (dfAudioSource != null)
                                     AudioSource.PlayClipAtPoint(GetLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);

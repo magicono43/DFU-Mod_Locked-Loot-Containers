@@ -152,17 +152,28 @@ namespace LockedLootContainers
         public static int CalculateLockDamage(LLCObject chest, DaggerfallUnityItem weapon, int skillID, bool critBash)
         {
             int damage = 0;
+            int lockmechDam = 0;
             int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? Mathf.RoundToInt(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
             float lockDamRes = Mathf.Abs((lockStab * 0.35f / 100f) -1f);
             float luckMod = (Luck / 500f) + 1f;
 
             if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
+            {
                 damage = Mathf.Max(1, Mathf.RoundToInt(CalculateHandToHandDamage() * 0.7f * lockDamRes * luckMod));
+                lockmechDam = (critBash) ? Mathf.RoundToInt(damage * 0.5f * 0.8f) * 4 : Mathf.RoundToInt(damage * 0.5f * 0.8f);
+            }
             else if (skillID == (int)DFCareer.Skills.BluntWeapon)
+            {
                 damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * 0.8f * lockDamRes * luckMod));
+                lockmechDam = (critBash) ? Mathf.RoundToInt(damage * 0.5f) * 4 : Mathf.RoundToInt(damage * 0.5f);
+            }
             else
+            {
                 damage = Mathf.Max(1, Mathf.RoundToInt(CalculateWeaponDamage(weapon) * lockDamRes * luckMod));
+                lockmechDam = (critBash) ? Mathf.RoundToInt(damage * 0.5f * 0.6f) * 4 : Mathf.RoundToInt(damage * 0.5f * 0.6f);
+            }
 
+            DoesLockJam(chest, lockmechDam);
             damage = (critBash) ? damage * 4 : damage;
             return damage;
         }
@@ -195,13 +206,68 @@ namespace LockedLootContainers
             return damage;
         }
 
-        public static int LockJamChance(LLCObject chest) // Will have to test this out, but I think I'm fairly satisfied with the formula so far.
+        public static int ChestMagicDamageNegationChance(LLCObject chest, float elementMod)
         {
-            float jamResist = (float)chest.JamResist / 100f;
-            float resistMod = (jamResist - 1f) * -1f;
+            int chestResist = chest.ChestMagicResist;
+            int chestStab = chest.ChestSturdiness;
 
-            float jamChance = (int)Mathf.Ceil(chest.PicksAttempted * (UnityEngine.Random.Range(14, 26) - Mathf.RoundToInt(Luck / 5f)) * resistMod);
-            return Mathf.RoundToInt(Mathf.Clamp(jamChance, 5f, 95f));
+            return chestResist + Mathf.RoundToInt(chestStab / 5f) - Mathf.RoundToInt(elementMod * ((Destr * 0.4f) + (Willp * 0.6f) + (Luck * 0.2f)));
+        }
+
+        public static int CalculateChestMagicDamage(LLCObject chest, int magnitude, float elementMod)
+        {
+            int damage = 0;
+            int chestResist = chest.ChestMagicResist;
+            int chestStab = chest.ChestSturdiness;
+            float chestDamRes = Mathf.Abs(((Mathf.RoundToInt(chestStab * 0.2f) + chestResist) * 0.4f / 100f) - 1f);
+            float luckMod = (Luck / 250f) + 1f;
+
+            damage = Mathf.Max(1, Mathf.RoundToInt(magnitude * elementMod * chestDamRes * luckMod));
+
+            return damage;
+        }
+
+        public static int DetermineDamageToLockMechanism(LLCObject chest) // Determine how much damage the locking mechanism takes from a lock-pick attempt, if any.
+        {
+            if (Dice100.SuccessRoll(LockMechanismDamageNegationChance(chest)))
+                return 0;
+            else
+                return CalculateLockMechanismDamage(chest);
+        }
+
+        public static int LockMechanismDamageNegationChance(LLCObject chest)
+        {
+            int jamResist = chest.JamResist;
+
+            return jamResist - (chest.PicksAttempted * (10 - Mathf.RoundToInt(Luck * 0.1f)));
+        }
+
+        public static int CalculateLockMechanismDamage(LLCObject chest)
+        {
+            int damage = UnityEngine.Random.Range(30, 61);
+            float mechDamRes = Mathf.Abs((chest.JamResist * 0.3f / 100f) - 1f);
+
+            damage = damage - Mathf.RoundToInt(Luck * 0.3f);
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * mechDamRes));
+
+            return damage;
+        }
+
+        public static bool DoesLockJam(LLCObject chest, int damage) // Determine if damage dealt to the locking mechanism should cause it to become jammed and inoperable.
+        {
+            int lockMechHP = chest.LockMechHitPoints - damage;
+
+            if (lockMechHP <= 0)
+            {
+                chest.LockMechHitPoints = -1;
+                chest.IsLockJammed = true;
+                return true;
+            }
+            else
+            {
+                chest.LockMechHitPoints = lockMechHP;
+                return false;
+            }
         }
 
         public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, DaggerfallUnityItem bashingWep, int wepSkillID) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
