@@ -308,19 +308,19 @@ namespace LockedLootContainers
 
                     if (!item.IsQuestItem)
                     {
-                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(100 + (int)Mathf.Round(Luck / -5f)))
+                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(80 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
@@ -339,19 +339,19 @@ namespace LockedLootContainers
 
                     if (!item.IsQuestItem)
                     {
-                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
+                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(65 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }

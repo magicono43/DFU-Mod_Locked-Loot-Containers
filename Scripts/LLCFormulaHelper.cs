@@ -286,19 +286,19 @@ namespace LockedLootContainers
 
                 if (bashingWep == null && wepSkillID == (short)DFCareer.Skills.HandToHand)
                 {
-                    float conditionMod = (float)Mathf.Max(2, UnityEngine.Random.Range(2, 14 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(4, UnityEngine.Random.Range(4, 15 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (wepSkillID == (short)DFCareer.Skills.BluntWeapon)
                 {
-                    float conditionMod = (float)Mathf.Max(8, UnityEngine.Random.Range(8, 17 + Mathf.Clamp(Mathf.Round(matDiff / 2), -6, 6) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 18 + Mathf.Clamp(Mathf.Round(matDiff / 2), -6, 6) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else
                 {
-                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 15 + Mathf.Clamp(matDiff * 2, -6, 14) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(6, UnityEngine.Random.Range(6, 16 + Mathf.Clamp(matDiff * 2, -6, 14) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -311,19 +311,19 @@ namespace LockedLootContainers
 
                 if (bashingWep == null && wepSkillID == (short)DFCareer.Skills.HandToHand)
                 {
-                    float conditionMod = (float)Mathf.Max(3, UnityEngine.Random.Range(3, 15 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(4, UnityEngine.Random.Range(4, 15 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (wepSkillID == (short)DFCareer.Skills.BluntWeapon)
                 {
-                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 19 + Mathf.Clamp(matDiff, -6, 12) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 18 + Mathf.Clamp(matDiff, -6, 12) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else
                 {
-                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 16 + Mathf.Clamp(matDiff, -6, 10) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(6, UnityEngine.Random.Range(6, 16 + Mathf.Clamp(matDiff, -6, 10) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -331,7 +331,7 @@ namespace LockedLootContainers
             else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
                 item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
             {
-                float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 19 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 28 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
@@ -376,7 +376,7 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(35, UnityEngine.Random.Range(35, 51 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(40, UnityEngine.Random.Range(40, 61 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -392,13 +392,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(27, UnityEngine.Random.Range(27, 44 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(40, UnityEngine.Random.Range(40, 61 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(7, UnityEngine.Random.Range(7, 9 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 40) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(10, UnityEngine.Random.Range(10, 13 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 50) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -409,13 +409,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(60, UnityEngine.Random.Range(60, 110 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(90, UnityEngine.Random.Range(90, 110 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(30, UnityEngine.Random.Range(30, 32 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 100) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(40, UnityEngine.Random.Range(40, 43 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 100) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -460,20 +460,20 @@ namespace LockedLootContainers
 
             if (item.ItemGroup == ItemGroups.Weapons && item.TemplateIndex != (int)Weapons.Arrow)
             {
-                float conditionMod = (float)Mathf.Max(11, UnityEngine.Random.Range(11, 26 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(18, UnityEngine.Random.Range(18, 38 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
             else if (item.ItemGroup == ItemGroups.Armor)
             {
-                float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 23 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 35 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
             else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
                 item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
             {
-                float conditionMod = (float)Mathf.Max(20, UnityEngine.Random.Range(20, 52 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(70, UnityEngine.Random.Range(70, 110 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }

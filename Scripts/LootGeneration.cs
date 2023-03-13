@@ -250,7 +250,7 @@ namespace LockedLootContainers
             Array enumArray;
             int enumIndex = -1;
 
-            switch (itemGroupLLC)
+            switch (itemGroupLLC) // Next time I work on this, try and fix up the mostly place-holder loot generation stuff, especially the armor/weapon material odds stuff, etc.
             {
                 default:
                     return null;

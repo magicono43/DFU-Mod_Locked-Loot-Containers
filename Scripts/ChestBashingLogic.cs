@@ -366,7 +366,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static void ApplyBashingCostLogic(LLCObject chest, DaggerfallUnityItem weapon, bool hitLock = false, bool hitWood = false, bool hardBash = false, int matDiff = -100) // Applies vitals damage to player and the weapon used during bash attempt.
+        public static void ApplyBashingCostLogic(LLCObject chest, DaggerfallUnityItem weapon, bool hitLock = false, bool hitWood = false, bool critBash = false, int matDiff = -100) // Applies vitals damage to player and the weapon used during bash attempt.
         {
             // Will have to consider later when doing the stuff for "bashing" with the bow, I.E. shooting arrows at a chest, and how to deal with that stuff, possibly different method entirely.
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
@@ -378,11 +378,11 @@ namespace LockedLootContainers
             if (chest == null)
                 return;
 
-            BashingDamageLootContents(chest, weapon, wepSkillID, hitLock, hitWood, hardBash);
+            BashingDamageLootContents(chest, weapon, wepSkillID, hitLock, hitWood, critBash);
 
-            if (hitLock && hardBash) { bashHitMod = 0.7f; } // Math was confusing me on how to combine these values together for some reason, so just doing this weird if-else chain here instead, for now.
-            else if (hitLock && !hardBash) { bashHitMod = 0.35f; }
-            else if (!hitLock && hardBash) { bashHitMod = 1f; }
+            if (hitLock && critBash) { bashHitMod = 0.7f; } // Math was confusing me on how to combine these values together for some reason, so just doing this weird if-else chain here instead, for now.
+            else if (hitLock && !critBash) { bashHitMod = 0.35f; }
+            else if (!hitLock && critBash) { bashHitMod = 1f; }
             else { bashHitMod = 0.5f; }
 
             if (weapon == null && wepSkillID == (short)DFCareer.Skills.HandToHand) // If player is bashing chest with their bare fists
@@ -490,7 +490,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static void BashingDamageLootContents(LLCObject chest, DaggerfallUnityItem weapon, int wepSkillID, bool hitLock, bool hitWood, bool hardBash)
+        public static void BashingDamageLootContents(LLCObject chest, DaggerfallUnityItem weapon, int wepSkillID, bool hitLock, bool hitWood, bool critBash)
         {
             int initialItemCount = chest.AttachedLoot.Count;
 
@@ -498,7 +498,7 @@ namespace LockedLootContainers
             {
                 if (hitLock)
                 {
-                    if (hardBash)
+                    if (critBash)
                     {
                         for (int i = 0; i < initialItemCount; i++)
                         {
@@ -514,7 +514,7 @@ namespace LockedLootContainers
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -533,11 +533,11 @@ namespace LockedLootContainers
 
                             if (!item.IsQuestItem)
                             {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(5 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(10 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -547,7 +547,7 @@ namespace LockedLootContainers
                 }
                 else
                 {
-                    if (hardBash)
+                    if (critBash)
                     {
                         for (int i = 0; i < initialItemCount; i++)
                         {
@@ -559,7 +559,7 @@ namespace LockedLootContainers
 
                             if (!item.IsQuestItem)
                             {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -567,11 +567,11 @@ namespace LockedLootContainers
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -590,11 +590,11 @@ namespace LockedLootContainers
 
                             if (!item.IsQuestItem)
                             {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(40 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -602,7 +602,7 @@ namespace LockedLootContainers
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(10 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -615,60 +615,7 @@ namespace LockedLootContainers
             {
                 if (hitLock)
                 {
-                    if (hardBash)
-                    {
-                        for (int i = 0; i < initialItemCount; i++)
-                        {
-                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
-                            if (item == null)
-                                continue;
-
-                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
-
-                            if (!item.IsQuestItem)
-                            {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(5 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < initialItemCount; i++)
-                        {
-                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
-                            if (item == null)
-                                continue;
-
-                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
-
-                            if (!item.IsQuestItem)
-                            {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(5 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (hardBash)
+                    if (critBash)
                     {
                         for (int i = 0; i < initialItemCount; i++)
                         {
@@ -692,7 +639,60 @@ namespace LockedLootContainers
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(40 + (int)Mathf.Round(Luck / -5f)))
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (critBash)
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(100 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -700,6 +700,96 @@ namespace LockedLootContainers
                         }
                     }
                     else
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if (weapon != null) // If player is bashing chest with any other types of weapons (in this case all the bladed ones)
+            {
+                if (hitLock)
+                {
+                    if (critBash)
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(40 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(80 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < initialItemCount; i++)
+                        {
+                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
+                            if (item == null)
+                                continue;
+
+                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
+
+                            if (!item.IsQuestItem)
+                            {
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                                {
+                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (critBash)
                     {
                         for (int i = 0; i < initialItemCount; i++)
                         {
@@ -715,44 +805,15 @@ namespace LockedLootContainers
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(95 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(15 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(50 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else if (weapon != null) // If player is bashing chest with any other types of weapons (in this case all the bladed ones)
-            {
-                if (hitLock)
-                {
-                    if (hardBash)
-                    {
-                        for (int i = 0; i < initialItemCount; i++)
-                        {
-                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
-                            if (item == null)
-                                continue;
-
-                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
-
-                            if (!item.IsQuestItem)
-                            {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(15 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(50 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -771,76 +832,19 @@ namespace LockedLootContainers
 
                             if (!item.IsQuestItem)
                             {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(10 + (int)Mathf.Round(Luck / -5f)))
+                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(40 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(15 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (hardBash)
-                    {
-                        for (int i = 0; i < initialItemCount; i++)
-                        {
-                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
-                            if (item == null)
-                                continue;
-
-                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
-
-                            if (!item.IsQuestItem)
-                            {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(15 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < initialItemCount; i++)
-                        {
-                            DaggerfallUnityItem item = chest.AttachedLoot.GetItem(i);
-                            if (item == null)
-                                continue;
-
-                            LootItemSturdiness itemStab = DetermineLootItemSturdiness(item);
-
-                            if (!item.IsQuestItem)
-                            {
-                                if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(40 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
-                                {
-                                    if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
-                                }
-                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(10 + (int)Mathf.Round(Luck / -5f)))
+                                else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
                                 {
                                     if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                                 }
@@ -874,7 +878,7 @@ namespace LockedLootContainers
 
                         if (!item.IsQuestItem)
                         {
-                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(50 + (int)Mathf.Round(Luck / -5f)))
+                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -882,11 +886,11 @@ namespace LockedLootContainers
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(15 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -905,19 +909,19 @@ namespace LockedLootContainers
 
                         if (!item.IsQuestItem)
                         {
-                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(20 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -936,19 +940,19 @@ namespace LockedLootContainers
 
                         if (!item.IsQuestItem)
                         {
-                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(25 + (int)Mathf.Round(Luck / -5f)))
+                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(30 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(15 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -986,7 +990,7 @@ namespace LockedLootContainers
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(35 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -1005,19 +1009,19 @@ namespace LockedLootContainers
 
                         if (!item.IsQuestItem)
                         {
-                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(80 + (int)Mathf.Round(Luck / -5f)))
+                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(100 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(50 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(55 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -1036,19 +1040,19 @@ namespace LockedLootContainers
 
                         if (!item.IsQuestItem)
                         {
-                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(50 + (int)Mathf.Round(Luck / -5f)))
+                            if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(95 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
-                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(45 + (int)Mathf.Round(Luck / -5f)))
+                            else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
                             {
                                 if (HandleDestroyingLootItem(chest, item, weapon, wepSkillID)) { i--; continue; }
                             }
@@ -1076,7 +1080,7 @@ namespace LockedLootContainers
 
                 if (!item.IsQuestItem)
                 {
-                    if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
+                    if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
                     {
                         if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
                     }
@@ -1084,7 +1088,7 @@ namespace LockedLootContainers
                     {
                         if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
                     }
-                    else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                    else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(60 + (int)Mathf.Round(Luck / -5f)))
                     {
                         if (HandleDestroyingLootItem(chest, item)) { i--; continue; }
                     }
