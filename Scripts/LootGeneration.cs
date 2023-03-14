@@ -253,7 +253,7 @@ namespace LockedLootContainers
             Array enumArray;
             int enumIndex = -1;
 
-            switch (itemGroupLLC) // Next time I work on this, try and fix the mostly place-holder loot generation, now that I got random materials handled for now, recheck and see what else need changes.
+            switch (itemGroupLLC)
             {
                 default:
                     return null;
@@ -281,7 +281,7 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.Shields:
                     enumArray = Enum.GetValues(typeof(Shields));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), FormulaHelper.RandomArmorMaterial(UnityEngine.Random.Range(1, 21))); // Random level for now.
+                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), (ArmorMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, false, true));
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.SmallWeapons:
@@ -294,7 +294,11 @@ namespace LockedLootContainers
                     enumArray = Enum.GetValues(typeof(MediumWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
                     if (enumIndex >= 8) // Arrows
-                        return ItemBuilder.CreateWeapon(Weapons.Arrow, (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage)); // Will likely want to change their stack amount to something else later.
+                    {
+                        item = ItemBuilder.CreateWeapon(Weapons.Arrow, WeaponMaterialTypes.Steel);
+                        item.stackCount = UnityEngine.Random.Range(8, 36);
+                        return item;
+                    }
                     else // Other Medium Sized Weapons
                     {
                         item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage));
@@ -459,11 +463,21 @@ namespace LockedLootContainers
             }
         }
 
-        public static int RollWeaponOrArmorMaterial(float oddsAverage, bool isWeapon = true)
+        public static int RollWeaponOrArmorMaterial(float oddsAverage, bool isWeapon = true, bool isShield = false)
         {
             int matTypes = Enum.GetValues(typeof(WeaponMaterialTypes)).Length - 1;
             int[] itemRolls = new int[] { };
             List<int> itemRollsList = new List<int>();
+
+            if (isShield)
+            {
+                int shieldMat = UnityEngine.Random.Range(0, 3);
+
+                if (shieldMat == 0)
+                    return (int)ArmorMaterialTypes.Leather;
+                else if (shieldMat == 1)
+                    return (int)ArmorMaterialTypes.Chain;
+            }
 
             for (int i = 0; i < matTypes; i++)
             {
