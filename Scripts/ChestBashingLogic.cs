@@ -268,7 +268,7 @@ namespace LockedLootContainers
                 if (chestMat < 0) // If chest is made of wood
                 {
                     float hardBashChance = Mathf.Round(Stren + Mathf.RoundToInt(Luck / 5f) + 15f);
-                    if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(hardBashChance, 2f, 40f))))
+                    if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(hardBashChance, 2f, 50f))))
                         critBash = true;
 
                     ApplyBashingCostLogic(chest, weapon, false, true, critBash, matDiff);
@@ -276,7 +276,7 @@ namespace LockedLootContainers
                 else // If chest is made from any metal
                 {
                     float hardBashChance = Mathf.Round(Stren + Mathf.RoundToInt(Luck / 5f) + 3f);
-                    if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(hardBashChance, 0f, 25f))))
+                    if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(hardBashChance, 0f, 40f))))
                         critBash = true;
 
                     ApplyBashingCostLogic(chest, weapon, false, false, critBash, matDiff);
@@ -440,9 +440,9 @@ namespace LockedLootContainers
             {
                 if (hitWood) // Hitting either wooden lock or chest body with a blunt type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, 4 + Mathf.RoundToInt((Stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
-                    float rolledFatiguePercent = Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.Round(3 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
-                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.01f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, (3 + Mathf.RoundToInt((Stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
+                    float rolledFatiguePercent = Mathf.Max(2, UnityEngine.Random.Range(2, Mathf.Round(4 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
@@ -450,9 +450,9 @@ namespace LockedLootContainers
                 }
                 else // Hitting either metal lock or chest body with a blunt type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(3, UnityEngine.Random.Range(3, 6 + Mathf.RoundToInt((Stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
-                    float rolledFatiguePercent = Mathf.Max(4, UnityEngine.Random.Range(4, Mathf.Round(10 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
-                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.04f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    float rolledWepDamPercent = Mathf.Max(2, UnityEngine.Random.Range(2, (4 + Mathf.RoundToInt((Stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
+                    float rolledFatiguePercent = Mathf.Max(5, UnityEngine.Random.Range(5, Mathf.Round(13 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.05f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
@@ -463,10 +463,10 @@ namespace LockedLootContainers
             {
                 if (hitWood) // Hitting either wooden lock or chest body with a bladed type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, 4 + Mathf.RoundToInt((Stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
+                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, (3 + Mathf.RoundToInt((Stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
                     rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (1 + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (1 + chest.LockSturdiness / 300f));
-                    float rolledFatiguePercent = Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.Round(3 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
-                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.01f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    float rolledFatiguePercent = Mathf.Max(2, UnityEngine.Random.Range(2, Mathf.Round(4 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
@@ -474,10 +474,10 @@ namespace LockedLootContainers
                 }
                 else // Hitting either metal lock or chest body with a bladed type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(3, UnityEngine.Random.Range(3, 6 + Mathf.RoundToInt((Stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0))); // Won't include "bashHitMod" for now, since this is already getting messy and confusing as it is, do testing before worrying.
+                    float rolledWepDamPercent = Mathf.Max(3, UnityEngine.Random.Range(2, (4 + Mathf.RoundToInt((Stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
                     rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (1 + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (1 + chest.LockSturdiness / 300f));
-                    float rolledFatiguePercent = Mathf.Max(2, UnityEngine.Random.Range(2, Mathf.Round(8 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
-                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
+                    float rolledFatiguePercent = Mathf.Max(6, UnityEngine.Random.Range(6, Mathf.Round(14 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
+                    fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.06f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                     Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.

@@ -144,7 +144,7 @@ namespace LockedLootContainers
             int lockStab = (chest.LockMaterial == LockMaterials.Wood) ? Mathf.RoundToInt(chest.LockSturdiness / 0.7f) : chest.LockSturdiness;
 
             if (skillID == (int)DFCareer.Skills.HandToHand || weapon == null)
-                return 20 + lockStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
+                return 15 + lockStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
             else
                 return lockStab - (Mathf.RoundToInt(Stren * 0.7f) + Mathf.RoundToInt(Luck * 0.1f));
         }
@@ -720,7 +720,7 @@ namespace LockedLootContainers
         public static void ApplyLockPickAttemptCosts()
         {
             Player.TallySkill(DFCareer.Skills.Lockpicking, 1);
-            int timePassed = 300 - (Speed * 3);
+            int timePassed = 450 - (Speed * 3);
             DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
             Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
         }
@@ -728,7 +728,7 @@ namespace LockedLootContainers
         public static void ApplyInspectionCosts()
         {
             Player.TallySkill(DFCareer.Skills.Lockpicking, 1);
-            int timePassed = 1200 - (Speed * 12);
+            int timePassed = 1800 - (Speed * 12);
             DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
             Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
         }

@@ -197,13 +197,13 @@ namespace LockedLootContainers
                         RaycastHit hit;
                         for (int h = 0; h < rays.Length; h++)
                         {
-                            if (Physics.Raycast(rays[h], out hit, 12f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
+                            if (Physics.Raycast(rays[h], out hit, 8f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
                             {
                                 rayDistances[h] = hit.distance;
                             }
                             else
                             {
-                                rayDistances[h] = 12f;
+                                rayDistances[h] = 8f;
                             }
                         }
 
@@ -584,7 +584,7 @@ namespace LockedLootContainers
         public static int CalculateChestHitPoints(int chestStab)
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
-            return (int)Mathf.Max(1, chestStab * randomMod * 10f);
+            return (int)Mathf.Max(1, chestStab * randomMod * 6f);
         }
 
         public static int RollLockSturdiness(LockMaterials lockMat, string dungBlocName, int roomValueMod)
@@ -621,7 +621,7 @@ namespace LockedLootContainers
         public static int CalculateLockHitPoints(int lockStab)
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
-            return (int)Mathf.Max(1, lockStab * randomMod * 3f);
+            return (int)Mathf.Max(1, lockStab * randomMod * 2f);
         }
 
         public static int RollChestMagicResist(ChestMaterials chestMat, int chestSturdy, int roomValueMod)
