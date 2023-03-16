@@ -30,17 +30,20 @@ namespace LockedLootContainers
         ChestMaterials chestMaterial = ChestMaterials.None;
         int chestSturdiness = 1;
         int chestMagicResist = 1;
-        int chestHitPoints = 0;
+        int chestStartHP = 0;
+        int chestCurrentHP = 0;
 
         LockMaterials lockMaterial = LockMaterials.None;
         int lockSturdiness = 1;
         int lockMagicResist = 1;
         int lockComplexity = 1;
         int jamResist = 1;
-        int lockHitPoints = 0;
+        int lockStartHP = 0;
+        int lockCurrentHP = 0;
 
         int picksAttempted = 0;
-        int lockMechHitPoints = 0;
+        int lockMechStartHP = 0;
+        int lockMechCurrentHP = 0;
 
         int trapAmount = 0;
         int trapType = 0; // May eventually if possibly to have more than 1 trap on a chest, that this would be better as an array/list of the effects attached kind of like spell-bundle arrays.
@@ -138,10 +141,16 @@ namespace LockedLootContainers
             set { chestMagicResist = value; }
         }
 
-        public int ChestHitPoints
+        public int ChestStartHP
         {
-            get { return chestHitPoints; }
-            set { chestHitPoints = value; }
+            get { return chestStartHP; }
+            set { chestStartHP = value; }
+        }
+
+        public int ChestCurrentHP
+        {
+            get { return chestCurrentHP; }
+            set { chestCurrentHP = value; }
         }
 
         public LockMaterials LockMaterial
@@ -174,10 +183,16 @@ namespace LockedLootContainers
             set { jamResist = value; }
         }
 
-        public int LockHitPoints
+        public int LockStartHP
         {
-            get { return lockHitPoints; }
-            set { lockHitPoints = value; }
+            get { return lockStartHP; }
+            set { lockStartHP = value; }
+        }
+
+        public int LockCurrentHP
+        {
+            get { return lockCurrentHP; }
+            set { lockCurrentHP = value; }
         }
 
         public int PicksAttempted
@@ -186,10 +201,16 @@ namespace LockedLootContainers
             set { picksAttempted = value; }
         }
 
-        public int LockMechHitPoints
+        public int LockMechStartHP
         {
-            get { return lockMechHitPoints; }
-            set { lockMechHitPoints = value; }
+            get { return lockMechStartHP; }
+            set { lockMechStartHP = value; }
+        }
+
+        public int LockMechCurrentHP
+        {
+            get { return lockMechCurrentHP; }
+            set { lockMechCurrentHP = value; }
         }
 
         public int TrapAmount

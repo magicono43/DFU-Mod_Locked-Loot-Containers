@@ -255,17 +255,17 @@ namespace LockedLootContainers
 
         public static bool DoesLockJam(LLCObject chest, int damage) // Determine if damage dealt to the locking mechanism should cause it to become jammed and inoperable.
         {
-            int lockMechHP = chest.LockMechHitPoints - damage;
+            int lockMechHP = chest.LockMechCurrentHP - damage;
 
             if (lockMechHP <= 0)
             {
-                chest.LockMechHitPoints = -1;
+                chest.LockMechCurrentHP = -1;
                 chest.IsLockJammed = true;
                 return true;
             }
             else
             {
-                chest.LockMechHitPoints = lockMechHP;
+                chest.LockMechCurrentHP = lockMechHP;
                 return false;
             }
         }

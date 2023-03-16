@@ -278,16 +278,16 @@ namespace LockedLootContainers
 
         public static bool ChestBlownOpenAttempt(LLCObject chest, int damage) // Determine if damage health spell effect(s) "blow open" the chest hit and gives access to what remains.
         {
-            int chestHP = chest.ChestHitPoints - damage;
+            int chestHP = chest.ChestCurrentHP - damage;
 
             if (chestHP <= 0)
             {
-                chest.ChestHitPoints = -1;
+                chest.ChestCurrentHP = -1;
                 return true;
             }
             else
             {
-                chest.ChestHitPoints = chestHP;
+                chest.ChestCurrentHP = chestHP;
                 return false;
             }
         }

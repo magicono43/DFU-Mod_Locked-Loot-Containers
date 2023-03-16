@@ -229,5 +229,29 @@ namespace LockedLootContainers
             else if (jam >= 76 && jam <= 90) { text = "Oiled" + " (" + jam.ToString() + ")"; color = Teal2; }
             else { text = "Effortless" + " (" + jam.ToString() + ")"; color = Teal1; }
         }
+
+        public static string GetRemainingHealthDescription(LLCObject chest, bool isLock)
+        {
+            int percentRemains = 100;
+            if (isLock)
+                percentRemains = Mathf.CeilToInt((chest.LockCurrentHP / chest.LockStartHP) * 100f);
+            else
+                percentRemains = Mathf.CeilToInt((chest.ChestCurrentHP / chest.ChestStartHP) * 100f);
+
+            if (percentRemains >= 86)
+                return "Undamaged";
+            else if (percentRemains <= 85 && percentRemains >= 71)
+                return "Dented";
+            else if (percentRemains <= 70 && percentRemains >= 56)
+                return "Scarred";
+            else if (percentRemains <= 55 && percentRemains >= 41)
+                return "Damaged";
+            else if (percentRemains <= 40 && percentRemains >= 26)
+                return "Battered";
+            else if (percentRemains <= 25 && percentRemains >= 11)
+                return "Ruined";
+            else
+                return "Destroyed";
+        }
     }
 }

@@ -394,15 +394,15 @@ namespace LockedLootContainers
                 llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
                 llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
 
-                llcObj.ChestHitPoints = CalculateChestHitPoints(llcObj.ChestSturdiness);
-                llcObj.LockHitPoints = CalculateLockHitPoints(llcObj.LockSturdiness);
+                SetChestHitPoints(llcObj);
+                SetLockHitPoints(llcObj);
 
                 llcObj.ChestMagicResist = RollChestMagicResist(llcObj.ChestMaterial, llcObj.ChestSturdiness, totalRoomValueMod);
                 llcObj.LockMagicResist = RollLockMagicResist(llcObj.LockMaterial, llcObj.LockSturdiness, totalRoomValueMod);
 
                 llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
                 llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
-                llcObj.LockMechHitPoints = CalculateLockMechanismHitPoints(llcObj.JamResist, llcObj.LockSturdiness);
+                SetLockMechanismHitPoints(llcObj);
 
                 UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
@@ -581,10 +581,12 @@ namespace LockedLootContainers
             return (int)Mathf.Clamp(chestSturdiness + randomMod + roomMod, 1, 100);
         }
 
-        public static int CalculateChestHitPoints(int chestStab)
+        public static void SetChestHitPoints(LLCObject chest)
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
-            return (int)Mathf.Max(1, chestStab * randomMod * 6f);
+            int finalHP = (int)Mathf.Max(1, chest.ChestSturdiness * randomMod * 6f);
+            chest.ChestStartHP = finalHP;
+            chest.ChestCurrentHP = finalHP;
         }
 
         public static int RollLockSturdiness(LockMaterials lockMat, string dungBlocName, int roomValueMod)
@@ -618,10 +620,12 @@ namespace LockedLootContainers
             return (int)Mathf.Clamp(lockSturdiness + randomMod + roomMod, 1, 100);
         }
 
-        public static int CalculateLockHitPoints(int lockStab)
+        public static void SetLockHitPoints(LLCObject chest)
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
-            return (int)Mathf.Max(1, lockStab * randomMod * 2f);
+            int finalHP = (int)Mathf.Max(1, chest.LockSturdiness * randomMod * 2f);
+            chest.LockStartHP = finalHP;
+            chest.LockCurrentHP = finalHP;
         }
 
         public static int RollChestMagicResist(ChestMaterials chestMat, int chestSturdy, int roomValueMod)
@@ -743,11 +747,13 @@ namespace LockedLootContainers
             return (int)Mathf.Clamp(jamResist + randomMod + roomMod, 1, 100);
         }
 
-        public static int CalculateLockMechanismHitPoints(int jamRes, int lockStab)
+        public static void SetLockMechanismHitPoints(LLCObject chest)
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
-            float stabMod = Mathf.Abs((lockStab * 0.20f / 100f) + 1f);
-            return (int)Mathf.Max(1, jamRes * stabMod * randomMod * 2f);
+            float stabMod = Mathf.Abs((chest.LockSturdiness * 0.20f / 100f) + 1f);
+            int finalHP = (int)Mathf.Max(1, chest.JamResist * chest.LockSturdiness * randomMod * 2f);
+            chest.LockMechStartHP = finalHP;
+            chest.LockMechCurrentHP = finalHP;
         }
 
         public static int EnemyRoomValueMods(EnemyEntity enemyEntity) // Will want to take into account modded enemies and such later on when getting to the polishing parts.

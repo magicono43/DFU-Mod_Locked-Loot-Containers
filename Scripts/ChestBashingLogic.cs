@@ -241,16 +241,16 @@ namespace LockedLootContainers
 
         public static bool BreakLockAttempt(LLCObject chest, int damage) // Determine if bashed lock breaks or not this attempt, granting full access to loot.
         {
-            int lockHP = chest.LockHitPoints - damage;
+            int lockHP = chest.LockCurrentHP - damage;
 
             if (lockHP <= 0)
             {
-                chest.LockHitPoints = -1;
+                chest.LockCurrentHP = -1;
                 return true;
             }
             else
             {
-                chest.LockHitPoints = lockHP;
+                chest.LockCurrentHP = lockHP;
                 return false;
             }
         }
@@ -329,16 +329,16 @@ namespace LockedLootContainers
 
         public static bool SmashOpenChestAttempt(LLCObject chest, int damage) // Determine if bashed chest body breaks open or not this attempt, granting full access to loot.
         {
-            int chestHP = chest.ChestHitPoints - damage;
+            int chestHP = chest.ChestCurrentHP - damage;
 
             if (chestHP <= 0)
             {
-                chest.ChestHitPoints = -1;
+                chest.ChestCurrentHP = -1;
                 return true;
             }
             else
             {
-                chest.ChestHitPoints = chestHP;
+                chest.ChestCurrentHP = chestHP;
                 return false;
             }
         }

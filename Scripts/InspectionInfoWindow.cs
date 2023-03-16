@@ -72,12 +72,12 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             Panel chestPictureBox = DaggerfallUI.AddPanel(new Rect(113, 64, 30, 22), NativePanel);
             //chestPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For testing purposes
             chestPictureBox.ToolTip = defaultToolTip;
-            chestPictureBox.ToolTipText = "Chest Info";
+            chestPictureBox.ToolTipText = "The Chest Looks " + LockedLootContainersMain.GetRemainingHealthDescription(chest, false);
 
             Panel lockPictureBox = DaggerfallUI.AddPanel(new Rect(176, 64, 30, 22), NativePanel);
             //lockPictureBox.BackgroundColor = new Color(0.9f, 0.1f, 0.5f, 0.75f); // For testing purposes
             lockPictureBox.ToolTip = defaultToolTip;
-            lockPictureBox.ToolTipText = "Lock Info";
+            lockPictureBox.ToolTipText = "The Lock Looks " + LockedLootContainersMain.GetRemainingHealthDescription(chest, true);
 
             // Exit Button
             Button exitButton = DaggerfallUI.AddButton(new Rect(139, 122, 43, 15), NativePanel);
