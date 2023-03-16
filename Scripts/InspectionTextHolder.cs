@@ -234,9 +234,9 @@ namespace LockedLootContainers
         {
             int percentRemains = 100;
             if (isLock)
-                percentRemains = Mathf.CeilToInt((chest.LockCurrentHP / chest.LockStartHP) * 100f);
+                percentRemains = Mathf.CeilToInt((chest.LockCurrentHP * 100f) / chest.LockStartHP);
             else
-                percentRemains = Mathf.CeilToInt((chest.ChestCurrentHP / chest.ChestStartHP) * 100f);
+                percentRemains = Mathf.CeilToInt((chest.ChestCurrentHP * 100f) / chest.ChestStartHP);
 
             if (percentRemains >= 86)
                 return "Undamaged";

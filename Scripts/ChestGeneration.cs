@@ -584,7 +584,7 @@ namespace LockedLootContainers
         public static void SetChestHitPoints(LLCObject chest)
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
-            int finalHP = (int)Mathf.Max(1, chest.ChestSturdiness * randomMod * 6f);
+            int finalHP = (int)Mathf.Max(1, chest.ChestSturdiness * randomMod * 5f);
             chest.ChestStartHP = finalHP;
             chest.ChestCurrentHP = finalHP;
         }
@@ -751,7 +751,7 @@ namespace LockedLootContainers
         {
             float randomMod = Mathf.Abs((UnityEngine.Random.Range(-30, 31) / 100f) - 1f);
             float stabMod = Mathf.Abs((chest.LockSturdiness * 0.20f / 100f) + 1f);
-            int finalHP = (int)Mathf.Max(1, chest.JamResist * chest.LockSturdiness * randomMod * 2f);
+            int finalHP = (int)Mathf.Max(1, chest.JamResist * stabMod * randomMod * 2f);
             chest.LockMechStartHP = finalHP;
             chest.LockMechCurrentHP = finalHP;
         }

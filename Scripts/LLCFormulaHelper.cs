@@ -77,7 +77,7 @@ namespace LockedLootContainers
 
             if (lockComp >= 0 && lockComp <= 19)
             {
-                int lockP = (int)Mathf.Ceil(LockP * 1.7f);
+                int lockP = Mathf.CeilToInt(LockP * 1.7f);
                 float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.1f) + Mathf.Round(Agili * 0.7f) + Mathf.Round(Speed * 0.3f) + Mathf.Round(Luck * 0.2f);
                 if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 10f, 100f))))
                 {
@@ -90,7 +90,7 @@ namespace LockedLootContainers
             }
             else if (lockComp >= 20 && lockComp <= 39)
             {
-                int lockP = (int)Mathf.Ceil(LockP * 1.7f);
+                int lockP = Mathf.CeilToInt(LockP * 1.7f);
                 float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.2f) + Mathf.Round(Agili * 0.6f) + Mathf.Round(Speed * 0.25f) + Mathf.Round(Luck * 0.2f);
                 if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 7f, 100f))))
                 {
@@ -103,7 +103,7 @@ namespace LockedLootContainers
             }
             else if (lockComp >= 40 && lockComp <= 59)
             {
-                int lockP = (int)Mathf.Ceil(LockP * 1.7f);
+                int lockP = Mathf.CeilToInt(LockP * 1.7f);
                 float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.3f) + Mathf.Round(Agili * 0.5f) + Mathf.Round(Speed * 0.2f) + Mathf.Round(Luck * 0.2f);
                 if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 5f, 95f))))
                 {
@@ -115,7 +115,7 @@ namespace LockedLootContainers
             }
             else if (lockComp >= 60 && lockComp <= 79)
             {
-                int lockP = (int)Mathf.Ceil(LockP * 1.7f);
+                int lockP = Mathf.CeilToInt(LockP * 1.7f);
                 float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.4f) + Mathf.Round(Agili * 0.4f) + Mathf.Round(Speed * 0.15f) + Mathf.Round(Luck * 0.2f);
                 if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 3f, 90f))))
                 {
@@ -127,7 +127,7 @@ namespace LockedLootContainers
             }
             else
             {
-                int lockP = (int)Mathf.Ceil(LockP * 1.7f);
+                int lockP = Mathf.CeilToInt(LockP * 1.7f);
                 float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.5f) + Mathf.Round(Agili * 0.3f) + Mathf.Round(Speed * 0.1f) + Mathf.Round(Luck * 0.2f);
                 if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 1f, 80f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
                 {
@@ -286,19 +286,19 @@ namespace LockedLootContainers
 
                 if (bashingWep == null && wepSkillID == (short)DFCareer.Skills.HandToHand)
                 {
-                    float conditionMod = (float)Mathf.Max(4, UnityEngine.Random.Range(4, 15 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(3, UnityEngine.Random.Range(3, 12 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (wepSkillID == (short)DFCareer.Skills.BluntWeapon)
                 {
-                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 18 + Mathf.Clamp(Mathf.Round(matDiff / 2), -6, 6) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(6, UnityEngine.Random.Range(6, 15 + Mathf.Clamp(Mathf.Round(matDiff / 2), -6, 6) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else
                 {
-                    float conditionMod = (float)Mathf.Max(6, UnityEngine.Random.Range(6, 16 + Mathf.Clamp(matDiff * 2, -6, 14) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(4, UnityEngine.Random.Range(4, 13 + Mathf.Clamp(matDiff * 2, -6, 14) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -311,19 +311,19 @@ namespace LockedLootContainers
 
                 if (bashingWep == null && wepSkillID == (short)DFCareer.Skills.HandToHand)
                 {
-                    float conditionMod = (float)Mathf.Max(4, UnityEngine.Random.Range(4, 15 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(3, UnityEngine.Random.Range(3, 12 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (wepSkillID == (short)DFCareer.Skills.BluntWeapon)
                 {
-                    float conditionMod = (float)Mathf.Max(9, UnityEngine.Random.Range(9, 18 + Mathf.Clamp(matDiff, -6, 12) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(6, UnityEngine.Random.Range(6, 15 + Mathf.Clamp(matDiff, -6, 12) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else
                 {
-                    float conditionMod = (float)Mathf.Max(6, UnityEngine.Random.Range(6, 16 + Mathf.Clamp(matDiff, -6, 10) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(5, UnityEngine.Random.Range(5, 13 + Mathf.Clamp(matDiff, -6, 10) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -331,13 +331,13 @@ namespace LockedLootContainers
             else if (item.ItemGroup == ItemGroups.MensClothing || item.ItemGroup == ItemGroups.WomensClothing || item.ItemGroup == ItemGroups.Books ||
                 item.ItemGroup == ItemGroups.Jewellery || item.ItemGroup == ItemGroups.Paintings)
             {
-                float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 28 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                float conditionMod = (float)Mathf.Max(12, UnityEngine.Random.Range(12, 23 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                 int damAmount = (int)(item.maxCondition * conditionMod);
                 return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
             }
             else if (item.IsAStack())
             {
-                int breakNum = UnityEngine.Random.Range(1, item.stackCount + 1);
+                int breakNum = UnityEngine.Random.Range(1, Mathf.Max(2, Mathf.CeilToInt(item.stackCount * 0.25f) + 1));
                 DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
                 wasteItem.stackCount = breakNum * wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
@@ -423,7 +423,7 @@ namespace LockedLootContainers
             }
             else if (item.IsAStack())
             {
-                int breakNum = UnityEngine.Random.Range((int)Mathf.Ceil(item.stackCount * 0.8f), item.stackCount + 1);
+                int breakNum = UnityEngine.Random.Range(Mathf.CeilToInt(item.stackCount * 0.55f), item.stackCount + 1);
                 DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
                 wasteItem.stackCount = breakNum * wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
@@ -479,7 +479,7 @@ namespace LockedLootContainers
             }
             else if (item.IsAStack())
             {
-                int breakNum = UnityEngine.Random.Range((int)Mathf.Ceil(item.stackCount * 0.55f), item.stackCount + 1);
+                int breakNum = UnityEngine.Random.Range(Mathf.CeilToInt(item.stackCount * 0.35f), item.stackCount + 1);
                 DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
                 wasteItem.stackCount = breakNum * wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
@@ -722,7 +722,7 @@ namespace LockedLootContainers
             Player.TallySkill(DFCareer.Skills.Lockpicking, 1);
             int timePassed = 450 - (Speed * 3);
             DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
-            Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
+            Player.DecreaseFatigue(Mathf.CeilToInt(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
         }
 
         public static void ApplyInspectionCosts()
@@ -730,7 +730,7 @@ namespace LockedLootContainers
             Player.TallySkill(DFCareer.Skills.Lockpicking, 1);
             int timePassed = 1800 - (Speed * 12);
             DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(timePassed);
-            Player.DecreaseFatigue((int)Mathf.Ceil(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
+            Player.DecreaseFatigue(Mathf.CeilToInt(PlayerEntity.DefaultFatigueLoss * (timePassed / 60)));
         }
 
         public static int CalculateHandToHandDamage()

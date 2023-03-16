@@ -486,19 +486,19 @@ namespace LockedLootContainers
                 switch (i)
                 {
                     case (int)WeaponMaterialTypes.Iron:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(80 / oddsAverage), 1, 300); break;
+                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(75 / oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Steel:
                         fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(60 / oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Silver:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(50 / oddsAverage), 1, 300); break;
+                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(45 / oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Elven:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(40 / oddsAverage), 1, 300); break;
+                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(35 / oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Dwarven:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(25 * oddsAverage), 1, 300); break;
+                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(20 * oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Mithril:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(17 * oddsAverage), 1, 300); break;
+                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(15 * oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Adamantium:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(12 * oddsAverage), 1, 300); break;
+                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(10 * oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Ebony:
                         fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(8 * oddsAverage), 1, 300); break;
                     case (int)WeaponMaterialTypes.Orcish:
