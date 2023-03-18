@@ -197,13 +197,13 @@ namespace LockedLootContainers
                         RaycastHit hit;
                         for (int h = 0; h < rays.Length; h++)
                         {
-                            if (Physics.Raycast(rays[h], out hit, 8f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
+                            if (Physics.Raycast(rays[h], out hit, 5f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
                             {
                                 rayDistances[h] = hit.distance;
                             }
                             else
                             {
-                                rayDistances[h] = 8f;
+                                rayDistances[h] = 5f;
                             }
                         }
 
@@ -212,8 +212,8 @@ namespace LockedLootContainers
                         boxDimensions[2] = (rayDistances[4] + rayDistances[5]); // z-axis? front and back
                         Vector3 boxDimVector = new Vector3(boxDimensions[1], boxDimensions[0], boxDimensions[2]) * 2f;
 
-                        // Testing Box Sizes Here
-                        /*GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        /*// Testing Box Sizes Here
+                        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         cube.transform.position = pos;
                         cube.transform.rotation = lootPiles[i].transform.rotation;
                         cube.transform.localScale = boxDimVector;*/
@@ -331,7 +331,13 @@ namespace LockedLootContainers
         // Definitely going to have to tweak and probably reconsider how the room context stuff modifies the chest odds, might be too drastic in some contexts and dungeon types, will have to see.
         public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod, int[] miscGroupOdds, int[] itemGroupOdds)
         {
-            int chestOdds = baseChestOdds + totalRoomValueMod;
+            float roomMod = 1f;
+            if (totalRoomValueMod < 0)
+                roomMod = (totalRoomValueMod / 50f) + 1f;
+            else
+                roomMod = Mathf.Abs((totalRoomValueMod / 25f) + 1f);
+
+            int chestOdds = Mathf.RoundToInt(baseChestOdds * roomMod);
             int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
 
             if (chestOdds <= 0)
@@ -433,6 +439,57 @@ namespace LockedLootContainers
             }
         }
 
+        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
+        {
+            // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
+            // int[] rarity = { 180, 162, 120, 84, 108, 66, 48, 24 };
+            float[] odds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            float mod = roomValueMod;
+
+            odds = new float[] { 180-(mod*1.25f), 162-(mod*0.75f), 120-(mod*0.5f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
+
+            for (int i = 0; i < odds.Length; i++)
+            {
+                if (!allowedMats[i])
+                    continue;
+
+                int randomModifier = UnityEngine.Random.Range(0, Mathf.RoundToInt(odds[i]) + 1);
+                matRolls[i] = randomModifier;
+            }
+
+            int max = matRolls[0];
+            int index = 0;
+
+            for (int i = 0; i < matRolls.Length; i++)
+            {
+                if (index == i)
+                    continue;
+
+                if (max == matRolls[i])
+                {
+                    if (CoinFlip())
+                        continue;
+                    else
+                    {
+                        max = matRolls[i];
+                        index = i;
+                        continue;
+                    }
+                }
+
+                if (max < matRolls[i])
+                {
+                    max = matRolls[i];
+                    index = i;
+                }
+            }
+
+            index += 1;
+            return (ChestMaterials)index;
+        }
+
+        /*
         public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
         {
             int[] itemRolls = new int[] { };
@@ -486,10 +543,65 @@ namespace LockedLootContainers
                 return (ChestMaterials)chosenMaterial; // Will have to see if this works to return the proper enum value, I think it should but will see with live debugging.
             }
         }
+        */
 
-        // I eventually will want the lock material to be somewhat restricted depending on what material the chest it is attached to is made of. So like a daedric chest won't have a wooden lock
-        // and stuff like that. Or so that it's unlikely for a wooden chest to have a daedric lock, that sort of thing. I don't know how I will do it right this moment, but I'll try and get that
-        // resolved later on for polishing and such. For now, just leave it the same process as for determing chest material basically, just for testing and proof of working and such, etc.
+        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
+        {
+            // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
+            // int[] rarity = { 180, 162, 120, 84, 108, 66, 48, 24 };
+            float[] odds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            float mod = roomValueMod;
+
+            odds = new float[] { 180-(mod*1.25f), 162-(mod*0.75f), 120-(mod*0.5f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
+
+            for (int i = 0; i < odds.Length; i++)
+            {
+                if (!allowedMats[i])
+                    continue;
+
+                if (i < (int)chestMats - 3 || i >= (int)chestMats + 3) // Maybe do this based on a "rarity" value or something, or a general "protection level" or something instead of this current method.
+                    continue; // Still need to test this, possibly with live-debugging, because for some reason the concept in numbers is confusing me a bit, will test and see the results.
+
+                if (i == (int)chestMats - 1)
+                    odds[i] = (int)Mathf.Floor(odds[i] / 3); // This is here to attempt to make having the same material chest and lock less likely, giving the dupe material a lower value.
+
+                int randomModifier = UnityEngine.Random.Range(0, Mathf.RoundToInt(odds[i]) + 1);
+                matRolls[i] = randomModifier;
+            }
+
+            int max = matRolls[0];
+            int index = 0;
+
+            for (int i = 0; i < matRolls.Length; i++)
+            {
+                if (index == i)
+                    continue;
+
+                if (max == matRolls[i])
+                {
+                    if (CoinFlip())
+                        continue;
+                    else
+                    {
+                        max = matRolls[i];
+                        index = i;
+                        continue;
+                    }
+                }
+
+                if (max < matRolls[i])
+                {
+                    max = matRolls[i];
+                    index = i;
+                }
+            }
+
+            index += 1;
+            return (LockMaterials)index;
+        }
+
+        /*
         public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats)
         {
             int[] itemRolls = new int[] { };
@@ -549,12 +661,13 @@ namespace LockedLootContainers
                 return (LockMaterials)chosenMaterial; // Will have to see if this works to return the proper enum value, I think it should but will see with live debugging.
             }
         }
+        */
 
         public static int RollChestSturdiness(ChestMaterials chestMat, string dungBlocName, int roomValueMod)
         {
             int chestSturdiness = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
             bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
 
             switch (chestMat)
@@ -593,7 +706,7 @@ namespace LockedLootContainers
         {
             int lockSturdiness = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
             bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
 
             switch (lockMat)
@@ -632,7 +745,7 @@ namespace LockedLootContainers
         {
             int chestMagicRes = 1;
             int randomMod = UnityEngine.Random.Range(-10, 11);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 4f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 7f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
 
             switch (chestMat)
             {
@@ -662,7 +775,7 @@ namespace LockedLootContainers
         {
             int lockMagicRes = 1;
             int randomMod = UnityEngine.Random.Range(-10, 11);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 4f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 7f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
 
             switch (lockMat)
             {
@@ -691,7 +804,7 @@ namespace LockedLootContainers
         public static int RollLockComplexity(LockMaterials lockMat, int roomValueMod)
         {
             int lockComplexity = 1;
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
 
             switch (lockMat)
             {
@@ -721,7 +834,7 @@ namespace LockedLootContainers
         {
             int jamResist = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 3f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
 
             switch (lockMat)
             {
@@ -767,23 +880,23 @@ namespace LockedLootContainers
                     case (int)ClassCareers.Archer:
                     case (int)ClassCareers.Warrior:
                     case (int)ClassCareers.Knight:
-                        return 4;
+                        return 10;
                     case (int)ClassCareers.Mage:
                     case (int)ClassCareers.Spellsword:
                     case (int)ClassCareers.Sorcerer:
                     case (int)ClassCareers.Healer:
                     case (int)ClassCareers.Ranger:
-                        return 2;
+                        return 5;
                     case (int)ClassCareers.Rogue:
                     case (int)ClassCareers.Acrobat:
                     case (int)ClassCareers.Assassin:
                     case (int)ClassCareers.Barbarian:
-                        return -2;
+                        return -5;
                     case (int)ClassCareers.Nightblade:
                     case (int)ClassCareers.Bard:
                     case (int)ClassCareers.Burglar:
                     case (int)ClassCareers.Thief:
-                        return -4;
+                        return -10;
                     default:
                         return 0;
                 }
@@ -793,23 +906,23 @@ namespace LockedLootContainers
                 switch (enemyEntity.CareerIndex) // Assumed context that room/area would be in that would warrant based on monsters/beasts near it, some remove, many add to value based on this.
                 {
                     case (int)MonsterCareers.Rat:
-                        return -5;
+                        return -10;
                     case (int)MonsterCareers.GiantBat:
                     case (int)MonsterCareers.Spider:
                     case (int)MonsterCareers.Slaughterfish:
                     case (int)MonsterCareers.Giant:
                     case (int)MonsterCareers.GiantScorpion:
-                        return -3;
+                        return -6;
                     case (int)MonsterCareers.GrizzlyBear:
                     case (int)MonsterCareers.SabertoothTiger:
                     case (int)MonsterCareers.Harpy:
                     case (int)MonsterCareers.Dreugh:
-                        return -2;
+                        return -3;
                     case (int)MonsterCareers.Imp:
                     case (int)MonsterCareers.OrcSergeant:
                     case (int)MonsterCareers.Ghost:
                     case (int)MonsterCareers.Dragonling:
-                        return 1;
+                        return 2;
                     case (int)MonsterCareers.SkeletalWarrior:
                     case (int)MonsterCareers.OrcShaman:
                     case (int)MonsterCareers.Wraith:
@@ -818,14 +931,14 @@ namespace LockedLootContainers
                     case (int)MonsterCareers.FireAtronach:
                     case (int)MonsterCareers.FleshAtronach:
                     case (int)MonsterCareers.IceAtronach:
-                        return 2;
+                        return 3;
                     case (int)MonsterCareers.Mummy:
                     case (int)MonsterCareers.Gargoyle:
                     case (int)MonsterCareers.FrostDaedra:
                     case (int)MonsterCareers.FireDaedra:
                     case (int)MonsterCareers.IronAtronach:
                     case (int)MonsterCareers.Lamia:
-                        return 3;
+                        return 6;
                     case (int)MonsterCareers.OrcWarlord:
                     case (int)MonsterCareers.DaedraSeducer:
                     case (int)MonsterCareers.VampireAncient:
@@ -833,7 +946,7 @@ namespace LockedLootContainers
                     case (int)MonsterCareers.Lich:
                     case (int)MonsterCareers.AncientLich:
                     case (int)MonsterCareers.Dragonling_Alternate:
-                        return 4;
+                        return 10;
                     default:
                         return 0;
                 }
@@ -847,25 +960,25 @@ namespace LockedLootContainers
                 case 97: // Divine Statues
                 case 98: // Monster Statues
                 case 202: // Demonic Statues
-                    return 5;
+                    return 11;
                 case 208: // Lab Equipment
                 case 216: // Treasure
-                    return 3;
+                    return 7;
                 case 205: // Containers
                 case 207: // Equipment
                 case 209: // Library Stuff
-                    return 2;
+                    return 4;
                 case 200: // Misc Furniture
                 case 204: // Various Clothing
                 case 210: // Lights
                 case 218: // Pots and Pans
-                    return 1;
+                    return 2;
                 case 214: // Work Tools
-                    return -1;
-                case 201: // Animals
                     return -2;
+                case 201: // Animals
+                    return -5;
                 case 206: // Death
-                    return -3;
+                    return -11;
                 default:
                     return 0;
             }
@@ -874,15 +987,15 @@ namespace LockedLootContainers
         public static int ModelRoomValueMods(int modelID) // Will have to check and take into consideration mods like Hand-painted models and see what that might do to these in that circumstance.
         {
             if ((modelID >= 55000 && modelID <= 55005) || (modelID >= 55013 && modelID <= 55015)) // Presumably Non-secret doors
-                return 4;
+                return 7;
             if ((modelID >= 55006 && modelID <= 55012) || (modelID >= 55017 && modelID <= 55033)) // Presumably Secret doors
-                return 12;
+                return 20;
             if (modelID >= 41000 && modelID <= 41002) // Bed models
-                return 6;
+                return 10;
             if (modelID >= 41815 && modelID <= 41834) // Crate models
-                return 2;
+                return 3;
             if (modelID >= 41811 && modelID <= 41813) // Chest models
-                return 14;
+                return 15;
 
             return 0;
         }

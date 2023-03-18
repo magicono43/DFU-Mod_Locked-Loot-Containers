@@ -37,30 +37,30 @@ namespace LockedLootContainers
                 }
             }
 
-            float lowOddsMod = 0f;
-            float midOddsMod = 0f;
-            float highOddsMod = 0f;
+            float lowOddsMod = 1f;
+            float midOddsMod = 1f;
+            float highOddsMod = 1f;
             float oddsAverage = 1f;
 
             switch (llcObj.ChestMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
             {
                 default:
                 case ChestMaterials.Wood:
-                    lowOddsMod += 0.18f; midOddsMod += 0.30f; highOddsMod += 0.40f; break; // Average = 0.587
+                    lowOddsMod += 0.18f; midOddsMod += 0.30f; highOddsMod += 0.40f; break; // Average = 0.587, 1.174
                 case ChestMaterials.Iron:
-                    lowOddsMod += 0.30f; midOddsMod += 0.43f; highOddsMod += 0.5f; break; // Average = 0.82
+                    lowOddsMod += 0.30f; midOddsMod += 0.43f; highOddsMod += 0.5f; break; // Average = 0.82, 1.64
                 case ChestMaterials.Steel:
-                    lowOddsMod += 0.55f; midOddsMod += 0.65f; highOddsMod += 0.75f; break; // Average = 1.3
+                    lowOddsMod += 0.55f; midOddsMod += 0.65f; highOddsMod += 0.75f; break; // Average = 1.3, 2.6
                 case ChestMaterials.Orcish:
-                    lowOddsMod += 1.1f; midOddsMod += 1.3f; highOddsMod += 1.5f; break; // Average = 2.6
+                    lowOddsMod += 1.1f; midOddsMod += 1.3f; highOddsMod += 1.5f; break; // Average = 2.6, 5.2
                 case ChestMaterials.Mithril:
-                    lowOddsMod += 0.7f; midOddsMod += 0.55f; highOddsMod += 0.55f; break; // Average = 1.2
+                    lowOddsMod += 0.7f; midOddsMod += 0.55f; highOddsMod += 0.55f; break; // Average = 1.2, 2.4
                 case ChestMaterials.Dwarven:
-                    lowOddsMod += 1.25f; midOddsMod += 0.65f; highOddsMod += 0.75f; break; // Average = 1.77
+                    lowOddsMod += 1.25f; midOddsMod += 0.65f; highOddsMod += 0.75f; break; // Average = 1.77, 3.54
                 case ChestMaterials.Adamantium:
-                    lowOddsMod += 1.45f; midOddsMod += 0.85f; highOddsMod += 1.0f; break; // Average = 2.2
+                    lowOddsMod += 1.45f; midOddsMod += 0.85f; highOddsMod += 1.0f; break; // Average = 2.2, 4.4
                 case ChestMaterials.Daedric:
-                    lowOddsMod += 2.25f; midOddsMod += 1.6f; highOddsMod += 1.25f; break; // Average = 3.4
+                    lowOddsMod += 2.25f; midOddsMod += 1.6f; highOddsMod += 1.25f; break; // Average = 3.4, 6.8
             }
 
             switch (llcObj.LockMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
@@ -91,7 +91,7 @@ namespace LockedLootContainers
             else if (llcObj.LockComplexity >= 60 && llcObj.LockComplexity <= 79) { lowOddsMod += 0.73f; midOddsMod += 0.43f; highOddsMod += 0.5f; }
             else { lowOddsMod += 1.13f; midOddsMod += 0.8f; highOddsMod += 0.63f; }
 
-            oddsAverage = (lowOddsMod + midOddsMod + highOddsMod) / 3f;
+            oddsAverage = 2f * (lowOddsMod + midOddsMod + highOddsMod) / 3f;
 
             for (int i = 0; i < miscGroupOdds.Length; i++) // Heavily placeholder for now, but don't feel like going too deep into this right now.
             {
@@ -463,6 +463,81 @@ namespace LockedLootContainers
             }
         }
 
+        public static int RollWeaponOrArmorMaterial(float oddsAverage, bool isWeapon = true, bool isShield = false) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
+        {
+            // Iron, Steel, Silver, Elven, Dwarven, Mithril, Adamantium, Ebony, Orcish, Daedric
+            // int[] rarity = { 348, 240, 180, 144, 108, 84, 60, 48, 36, 24 };
+            float[] lootOdds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            float mod = oddsAverage;
+
+            if (isShield)
+            {
+                int shieldMat = UnityEngine.Random.Range(0, 3);
+
+                if (shieldMat == 0)
+                    return (int)ArmorMaterialTypes.Leather;
+                else if (shieldMat == 1)
+                    return (int)ArmorMaterialTypes.Chain;
+            }
+
+            if (oddsAverage <= 2)
+            {
+                lootOdds = new float[] { 348*mod, 240*(mod*0.9f), 180*(mod*0.8f), 144*(mod*0.7f), 108*(mod*0.6f), 84*(mod*0.5f), 60*(mod*0.4f), 48*(mod*0.3f), 36*(mod*0.2f), 24*(mod*0.1f) };
+            }
+            else if (oddsAverage <= 4)
+            {
+                lootOdds = new float[] { 348*(mod*0.1f), 240*(mod*0.2f), 180*(mod*0.3f), 144*(mod*0.4f), 108*mod, 84*(mod*0.9f), 60*(mod*0.8f), 48*(mod*0.7f), 36*(mod*0.6f), 24*(mod*0.5f) };
+            }
+            else
+            {
+                lootOdds = new float[] { 348*(mod*0.1f), 240*(mod*0.2f), 180*(mod*0.3f), 144*(mod*0.4f), 108*(mod*0.5f), 84*(mod*0.6f), 60*(mod*0.7f), 48*(mod*0.8f), 36*(mod*0.9f), 24*mod };
+            }
+
+            for (int i = 0; i < lootOdds.Length; i++)
+            {
+                int randomModifier = UnityEngine.Random.Range(0, Mathf.RoundToInt(lootOdds[i]) + 1);
+                matRolls[i] = randomModifier;
+            }
+
+            int max = matRolls[0];
+            int index = 0;
+
+            for (int i = 0; i < matRolls.Length; i++)
+            {
+                if (index == i)
+                    continue;
+
+                if (max == matRolls[i])
+                {
+                    if (CoinFlip())
+                        continue;
+                    else
+                    {
+                        max = matRolls[i];
+                        index = i;
+                        continue;
+                    }
+                }
+
+                if (max < matRolls[i])
+                {
+                    max = matRolls[i];
+                    index = i;
+                }
+            }
+
+            if (isWeapon)
+            {
+                return index;
+            }
+            else
+            {
+                return 0x0200 + index;
+            }
+        }
+
+        /*
         public static int RollWeaponOrArmorMaterial(float oddsAverage, bool isWeapon = true, bool isShield = false)
         {
             int matTypes = Enum.GetValues(typeof(WeaponMaterialTypes)).Length - 1;
@@ -529,5 +604,6 @@ namespace LockedLootContainers
                 return 0x0200 + chosenMaterial;
             }
         }
+        */
     }
 }
