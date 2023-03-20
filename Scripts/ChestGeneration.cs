@@ -167,12 +167,6 @@ namespace LockedLootContainers
                         miscGroupOdds = new int[] { 50, 5, 50, 500, 500, 5000, 5, 5, 5, 5, 5, 5, 55, 5 };
                         itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
                         break;
-                        // Start back here next time I suppose. Keep getting the feeling that I'm going to be reworking this entire system as I go along, but if I keep trying to find this unattainable
-                        // "Perfect Method" I'm just going to be sitting here spinning my wheels and getting nowhere. So even if this method has to be reworked/redone later, getting to there is more
-                        // important than it actually working in the end honestly. Main thing I'm still not sure how I'm going to do is specifying certain items from each item group so they make
-                        // more sense depending on the context, etc. But I'll just have to probably fail a few times before I find "better" method to do this, so just keep chugging along even if
-                        // it does not seem like it makes sense, otherwise I"ll be getting nowhere no matter how much I contemplate and think about it, just go.
-                        // Might want to consider a sort of point based system here for the loot odds or something, so it's easier to try and "balance out" while doing this maybe.
                 }
 
                 // Make list of loot-piles currently in the dungeon "scene."
@@ -327,15 +321,23 @@ namespace LockedLootContainers
             }
         }
 
-        // This is really rough, mainly just for testing, because having some trouble thinking of a good formula for it all atm.
-        // Definitely going to have to tweak and probably reconsider how the room context stuff modifies the chest odds, might be too drastic in some contexts and dungeon types, will have to see.
         public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod, int[] miscGroupOdds, int[] itemGroupOdds)
         {
             float roomMod = 1f;
             if (totalRoomValueMod < 0)
-                roomMod = (totalRoomValueMod / 50f) + 1f;
+            {
+                if (Dice100.SuccessRoll(20))
+                    roomMod = (Mathf.Abs(totalRoomValueMod) / 50f) + 1f;
+                else
+                    roomMod = (totalRoomValueMod / 50f) + 1f;
+            }
             else
-                roomMod = Mathf.Abs((totalRoomValueMod / 25f) + 1f);
+            {
+                if (totalRoomValueMod < 70 && Dice100.SuccessRoll(10))
+                    roomMod = ((totalRoomValueMod * -1) / 100f) + 1f;
+                else
+                    roomMod = Mathf.Abs((totalRoomValueMod / 25f) + 1f);
+            }
 
             int chestOdds = Mathf.RoundToInt(baseChestOdds * roomMod);
             int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
@@ -374,28 +376,16 @@ namespace LockedLootContainers
                 int seed = int.Parse(truncText);
                 UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
 
-                // Adding new properties to chest based on rolls for chest materials, rarity, possibly traps later, etc.
-                llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod); // Alright for now just do something simple without a limited ticket sort of system, will try that more later on.
+                llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod);
 
                 // Creates random seed for determining lock material value and other values
                 string jumbledText = truncText.Substring(5) + UnityEngine.Random.Range(333, 99999).ToString();
-                truncText = (jumbledText.Length > 9) ? jumbledText.Substring(0, 9) : jumbledText; // Might get index out of range, but will see.
+                truncText = (jumbledText.Length > 9) ? jumbledText.Substring(0, 9) : jumbledText;
                 Debug.LogFormat("Attempting to parse value for lock & others seed: {0}", truncText);
                 seed = int.Parse(truncText);
                 UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
 
                 llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
-                /*
-                So I'm thinking I'll try and make a sort of "Hat of tickets" function that will populate a "hat" of a limited number of possible "tickets" to pick from.
-                This will work kind of similar to my random generation stuff in stuff like "Jewelry Additions", but possibly better, but also maybe more complex?
-                But the tickets will have a value given to them based on what values from the possible chest and lock materials are permitted in this case. Somehow the rarity
-                of the material in question will determine what proportion of tickets from the limited pool that material is given. Maybe have the flags checked from least rare to most rare,
-                and give the least rare some large amount of tickets from the max at the start, then slowly go through the rest of the permitted ones from what amount of tickets are remaining
-                and give them tickets based on what are left each time another is given more or something. Somehow also try to incorperate the "totalRoomValueMod" to either increase the
-                amount of tickets rarer materials get, if it's positive above some value, or more to less rare materials if it's below some value or something. Don't know how I'll do this
-                all exactly, but atleast I have some idea how I might try it. Worst case I could try something similar to how vanilla DFU determines the plate armors in FormulaHelper.cs?
-                Don't know, will have to see tomorrow how it pans out, but might be a bit confusing at first, maybe make the tickets from the pool like 300, 500, or 1000 or something, will see.
-                */
 
                 llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
                 llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
@@ -412,14 +402,6 @@ namespace LockedLootContainers
 
                 UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
-                // ALSO NOTE: Add console debug helper comments/lines to make viewing generation results quicker, DO THIS BEFORE THE BELOW STUFF TOMORROW!
-                // Possibly also look at giving more random seeds somehow during chest generation to reduce potential overservable patterns, using stuff like hashcodes or something.
-                // Now that I have the primary immediately important attributes set and defined for the chest and lock, I will next do some actual testing of all of this in the Unity Editor, to confirm
-                // that it works, as well as make any fixes/modifications of these features for now, so then afterward I can work on the next aspects. So basically, test what I have done the past few
-                // days in Unity Editor, then afterward if I am satisfied with the results generally, I will likely start on the next mod feature aspect, that being dealing with the loot generation
-                // such as how old loot items are handled and imported in or not, what the overall value of items and what ones to generate for a specific chest based on many variables, and possibly some
-                // other things as well. The loot part might time some time to get right, but then after all that, probably try to work on traps, then after those probably more testing and polishing, etc.
-
                 // Set position
                 Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
                 chestParentObj.transform.position = pos;
@@ -433,21 +415,19 @@ namespace LockedLootContainers
 
                 // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
 
-                // This is where chest loot generation starts, for now atleast.
-                // Will have to change some stuff around in the actual chest "replacement" part to instead use the "new" loot collection rather than just the old one like for testing so far.
                 PopulateChestLoot(llcObj, totalRoomValueMod, miscGroupOdds, itemGroupOdds);
             }
         }
 
-        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
+        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            // int[] rarity = { 180, 162, 120, 84, 108, 66, 48, 24 };
+            // int[] rarity = { 180, 162, 126, 84, 108, 66, 48, 24 };
             float[] odds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
             int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
             float mod = roomValueMod;
 
-            odds = new float[] { 180-(mod*1.25f), 162-(mod*0.75f), 120-(mod*0.5f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
+            odds = new float[] { 180-(mod*1.75f), 162-(mod*0.75f), 126-(mod*0.25f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
 
             for (int i = 0; i < odds.Length; i++)
             {
@@ -489,79 +469,23 @@ namespace LockedLootContainers
             return (ChestMaterials)index;
         }
 
-        /*
-        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
-        {
-            int[] itemRolls = new int[] { };
-            List<int> itemRollsList = new List<int>();
-
-            for (int i = 0; i < allowedMats.Length; i++)
-            {
-                int arrayStart = itemRollsList.Count;
-                int fillElements = 0;
-                switch (i)
-                {
-                    case (int)PermittedMaterials.Wood:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(95 - (roomValueMod * 4), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Iron:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(75 - (roomValueMod * 3), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Steel:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(45 + (roomValueMod * 2), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Orcish:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(25 + (roomValueMod * 1), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Mithril:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(35 + (roomValueMod * 2), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Dwarven:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(20 + (roomValueMod * 1), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Adamantium:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(15 + (roomValueMod * 1), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Daedric:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(5 + (roomValueMod * 1), 1, 300) : 0; break;
-                    default:
-                        fillElements = 0; break;
-                }
-
-                if (fillElements <= 0)
-                    continue;
-
-                itemRolls = FillArray(itemRollsList, arrayStart, fillElements, i);
-            }
-
-            int chosenMaterial = -1;
-
-            if (itemRolls.Length > 0)
-                chosenMaterial = PickOneOf(itemRolls);
-
-            if (chosenMaterial == -1)
-            {
-                Debug.Log("For some reason this chest material did not get chosen properly, defaulting to wood...");
-                return ChestMaterials.Wood;
-            }
-            else
-            {
-                chosenMaterial += 1; // Add 1 to this to factor out the "none" value from both chest and lock material enums.
-                return (ChestMaterials)chosenMaterial; // Will have to see if this works to return the proper enum value, I think it should but will see with live debugging.
-            }
-        }
-        */
-
-        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
+        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats)
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            // int[] rarity = { 180, 162, 120, 84, 108, 66, 48, 24 };
+            // int[] rarity = { 180, 162, 126, 84, 108, 66, 48, 24 };
             float[] odds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
             int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
             float mod = roomValueMod;
 
-            odds = new float[] { 180-(mod*1.25f), 162-(mod*0.75f), 120-(mod*0.5f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
+            odds = new float[] { 180-(mod*1.75f), 162-(mod*0.75f), 126-(mod*0.25f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
 
             for (int i = 0; i < odds.Length; i++)
             {
                 if (!allowedMats[i])
                     continue;
 
-                if (i < (int)chestMats - 3 || i >= (int)chestMats + 3) // Maybe do this based on a "rarity" value or something, or a general "protection level" or something instead of this current method.
-                    continue; // Still need to test this, possibly with live-debugging, because for some reason the concept in numbers is confusing me a bit, will test and see the results.
+                if (i < (int)chestMats - 3 || i >= (int)chestMats + 3)
+                    continue;
 
                 if (i == (int)chestMats - 1)
                     odds[i] = (int)Mathf.Floor(odds[i] / 3); // This is here to attempt to make having the same material chest and lock less likely, giving the dupe material a lower value.
@@ -600,68 +524,6 @@ namespace LockedLootContainers
             index += 1;
             return (LockMaterials)index;
         }
-
-        /*
-        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats)
-        {
-            int[] itemRolls = new int[] { };
-            List<int> itemRollsList = new List<int>();
-
-            for (int i = 0; i < allowedMats.Length; i++)
-            {
-                if (i < (int)chestMats - 3 || i >= (int)chestMats + 3) // Maybe do this based on a "rarity" value or something, or a general "protection level" or something instead of this current method.
-                    continue; // Still need to test this, possibly with live-debugging, because for some reason the concept in numbers is confusing me a bit, will test and see the results.
-
-                int arrayStart = itemRollsList.Count;
-                int fillElements = 0;
-                switch (i)
-                {
-                    case (int)PermittedMaterials.Wood:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(95 - (roomValueMod * 4), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Iron:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(75 - (roomValueMod * 3), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Steel:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(45 + (roomValueMod * 2), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Orcish:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(25 + (roomValueMod * 1), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Mithril:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(35 + (roomValueMod * 2), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Dwarven:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(20 + (roomValueMod * 1), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Adamantium:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(15 + (roomValueMod * 1), 1, 300) : 0; break;
-                    case (int)PermittedMaterials.Daedric:
-                        fillElements = (allowedMats[i]) ? (int)Mathf.Clamp(5 + (roomValueMod * 1), 1, 300) : 0; break;
-                    default:
-                        fillElements = 0; break;
-                }
-
-                if (i == (int)chestMats)
-                    fillElements = (int)Mathf.Floor(fillElements / 4); // This is here to attempt to make having the same material chest and lock less likely, giving the dupe material less tickets.
-
-                if (fillElements <= 0)
-                    continue;
-
-                itemRolls = FillArray(itemRollsList, arrayStart, fillElements, i);
-            }
-
-            int chosenMaterial = -1;
-
-            if (itemRolls.Length > 0)
-                chosenMaterial = PickOneOf(itemRolls);
-
-            if (chosenMaterial == -1)
-            {
-                Debug.Log("For some reason this chest material did not get chosen properly, defaulting to wood...");
-                return LockMaterials.Wood;
-            }
-            else
-            {
-                chosenMaterial += 1; // Add 1 to this to factor out the "none" value from both chest and lock material enums.
-                return (LockMaterials)chosenMaterial; // Will have to see if this works to return the proper enum value, I think it should but will see with live debugging.
-            }
-        }
-        */
 
         public static int RollChestSturdiness(ChestMaterials chestMat, string dungBlocName, int roomValueMod)
         {

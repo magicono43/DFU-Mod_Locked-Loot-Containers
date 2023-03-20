@@ -311,10 +311,10 @@ namespace LockedLootContainers
                     default:
                     case ArmorMaterialTypes.Leather:
                         scrapMat = 0; break;
-                    case ArmorMaterialTypes.Chain:
-                    case ArmorMaterialTypes.Chain2:
                     case ArmorMaterialTypes.Iron:
                         scrapMat = 1; break;
+                    case ArmorMaterialTypes.Chain:
+                    case ArmorMaterialTypes.Chain2:
                     case ArmorMaterialTypes.Steel:
                         scrapMat = 2; break;
                     case ArmorMaterialTypes.Silver:

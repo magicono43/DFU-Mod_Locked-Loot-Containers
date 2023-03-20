@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/18/2023, 12:30 AM
+// Last Edit:		3/20/2023, 12:50 AM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -443,8 +443,18 @@ namespace LockedLootContainers
 
             public static string Execute(params string[] args)
             {
-                LLCObject[] chests = FindObjectsOfType<LLCObject>();
-                if (chests.Length - 1 <= 0) // I think it's detecting the actual LLCObject that is the base of them all but not an actual chest? No big deal either way.
+                LLCObject[] gos = FindObjectsOfType<LLCObject>();
+                List<LLCObject> chestList = new List<LLCObject>();
+                for (int i = 0; i < gos.Length; i++)
+                {
+                    if (gos[i].ChestStartHP == 0 && gos[i].LockStartHP == 0) // Meant to remove the actual LLCObject that is the base of them all but not an actual chests.
+                        continue;
+                    else
+                        chestList.Add(gos[i]);
+                }
+                LLCObject[] chests = chestList.ToArray();
+
+                if (chests.Length <= 0)
                     return "Error: No chests in scene.";
 
                 LLCObject chest = chests[UnityEngine.Random.Range(0, chests.Length)];

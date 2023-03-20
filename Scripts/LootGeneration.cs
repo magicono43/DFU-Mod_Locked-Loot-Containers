@@ -28,77 +28,77 @@ namespace LockedLootContainers
             // Loop through all the items in the "old" loot-pile and delete them from there based on their vanilla IDs, the idea being to leave most modded items alone.
             for (int i = 0; i < initialItemCount; i++)
             {
-                DaggerfallUnityItem item = chestItems.GetItem(i); // Hmm, this will almost definitely cause an "Index out of range" error, so I'll have to consider how to solve that issue.
+                DaggerfallUnityItem item = chestItems.GetItem(i);
 
                 if (!item.IsQuestItem && item.TemplateIndex >= 0 && item.TemplateIndex <= 511) // Check items for vanilla template index, and remove if they match.
                 {
                     chestItems.RemoveItem(item);
-                    i--; // Will have to see if this keeps "Index out of range" error from happening, but kind of doubt it, will see.
+                    i--;
                 }
             }
 
-            float lowOddsMod = 1f;
-            float midOddsMod = 1f;
-            float highOddsMod = 1f;
+            float lowOddsMod = 0f;
+            float midOddsMod = 0f;
+            float highOddsMod = 0f;
             float oddsAverage = 1f;
 
-            switch (llcObj.ChestMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
+            switch (llcObj.ChestMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen.
             {
                 default:
                 case ChestMaterials.Wood:
-                    lowOddsMod += 0.18f; midOddsMod += 0.30f; highOddsMod += 0.40f; break; // Average = 0.587, 1.174
+                    lowOddsMod += 0.5f; midOddsMod += 0.75f; highOddsMod += 1.0f; break; // Average = 1.5
                 case ChestMaterials.Iron:
-                    lowOddsMod += 0.30f; midOddsMod += 0.43f; highOddsMod += 0.5f; break; // Average = 0.82, 1.64
+                    lowOddsMod += 1.0f; midOddsMod += 1.25f; highOddsMod += 1.5f; break; // Average = 2.5
                 case ChestMaterials.Steel:
-                    lowOddsMod += 0.55f; midOddsMod += 0.65f; highOddsMod += 0.75f; break; // Average = 1.3, 2.6
+                    lowOddsMod += 1.75f; midOddsMod += 2.0f; highOddsMod += 2.25f; break; // Average = 4.0
                 case ChestMaterials.Orcish:
-                    lowOddsMod += 1.1f; midOddsMod += 1.3f; highOddsMod += 1.5f; break; // Average = 2.6, 5.2
+                    lowOddsMod += 2.75f; midOddsMod += 3.25f; highOddsMod += 3.75f; break; // Average = 6.5
                 case ChestMaterials.Mithril:
-                    lowOddsMod += 0.7f; midOddsMod += 0.55f; highOddsMod += 0.55f; break; // Average = 1.2, 2.4
+                    lowOddsMod += 2.5f; midOddsMod += 1.75f; highOddsMod += 1.75f; break; // Average = 4.0
                 case ChestMaterials.Dwarven:
-                    lowOddsMod += 1.25f; midOddsMod += 0.65f; highOddsMod += 0.75f; break; // Average = 1.77, 3.54
+                    lowOddsMod += 3.5f; midOddsMod += 2.0f; highOddsMod += 2.0f; break; // Average = 5.0
                 case ChestMaterials.Adamantium:
-                    lowOddsMod += 1.45f; midOddsMod += 0.85f; highOddsMod += 1.0f; break; // Average = 2.2, 4.4
+                    lowOddsMod += 4.5f; midOddsMod += 2.25f; highOddsMod += 3.0f; break; // Average = 6.5
                 case ChestMaterials.Daedric:
-                    lowOddsMod += 2.25f; midOddsMod += 1.6f; highOddsMod += 1.25f; break; // Average = 3.4, 6.8
+                    lowOddsMod += 7.0f; midOddsMod += 4.0f; highOddsMod += 2.5f; break; // Average = 9.0
             }
 
-            switch (llcObj.LockMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
+            switch (llcObj.LockMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen.
             {
                 default:
                 case LockMaterials.Wood:
-                    lowOddsMod += 0.09f; midOddsMod += 0.15f; highOddsMod += 0.20f; break;
+                    lowOddsMod += 0.5f; midOddsMod += 0.75f; highOddsMod += 1.0f; break;
                 case LockMaterials.Iron:
-                    lowOddsMod += 0.15f; midOddsMod += 0.22f; highOddsMod += 0.25f; break;
+                    lowOddsMod += 1.0f; midOddsMod += 1.25f; highOddsMod += 1.5f; break;
                 case LockMaterials.Steel:
-                    lowOddsMod += 0.28f; midOddsMod += 0.33f; highOddsMod += 0.38f; break;
+                    lowOddsMod += 1.75f; midOddsMod += 2.0f; highOddsMod += 2.25f; break;
                 case LockMaterials.Orcish:
-                    lowOddsMod += 0.55f; midOddsMod += 0.65f; highOddsMod += 0.75f; break;
+                    lowOddsMod += 2.75f; midOddsMod += 3.25f; highOddsMod += 3.75f; break;
                 case LockMaterials.Mithril:
-                    lowOddsMod += 0.35f; midOddsMod += 0.28f; highOddsMod += 0.28f; break;
+                    lowOddsMod += 2.5f; midOddsMod += 1.75f; highOddsMod += 1.75f; break;
                 case LockMaterials.Dwarven:
-                    lowOddsMod += 0.63f; midOddsMod += 0.33f; highOddsMod += 0.38f; break;
+                    lowOddsMod += 3.5f; midOddsMod += 2.0f; highOddsMod += 2.0f; break;
                 case LockMaterials.Adamantium:
-                    lowOddsMod += 0.73f; midOddsMod += 0.43f; highOddsMod += 0.5f; break;
+                    lowOddsMod += 4.5f; midOddsMod += 2.25f; highOddsMod += 3.0f; break;
                 case LockMaterials.Daedric:
-                    lowOddsMod += 1.13f; midOddsMod += 0.8f; highOddsMod += 0.63f; break;
+                    lowOddsMod += 7.0f; midOddsMod += 4.0f; highOddsMod += 2.5f; break;
             }
 
-            // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
-            if (llcObj.LockComplexity < 0 || (llcObj.LockComplexity >= 0 && llcObj.LockComplexity <= 19)) { lowOddsMod += 0.15f; midOddsMod += 0.22f; highOddsMod += 0.25f; }
-            else if (llcObj.LockComplexity >= 20 && llcObj.LockComplexity <= 39) { lowOddsMod += 0.35f; midOddsMod += 0.28f; highOddsMod += 0.28f; }
-            else if (llcObj.LockComplexity >= 40 && llcObj.LockComplexity <= 59) { lowOddsMod += 0.63f; midOddsMod += 0.33f; highOddsMod += 0.38f; }
-            else if (llcObj.LockComplexity >= 60 && llcObj.LockComplexity <= 79) { lowOddsMod += 0.73f; midOddsMod += 0.43f; highOddsMod += 0.5f; }
-            else { lowOddsMod += 1.13f; midOddsMod += 0.8f; highOddsMod += 0.63f; }
+            oddsAverage = (lowOddsMod + midOddsMod + highOddsMod) / 3f;
 
-            oddsAverage = 2f * (lowOddsMod + midOddsMod + highOddsMod) / 3f;
+            // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
+            if (llcObj.LockComplexity < 0 || (llcObj.LockComplexity >= 0 && llcObj.LockComplexity <= 19)) { lowOddsMod += 0f; midOddsMod += 0f; highOddsMod += 0f; }
+            else if (llcObj.LockComplexity >= 20 && llcObj.LockComplexity <= 39) { lowOddsMod += 0.25f; midOddsMod += 0.25f; highOddsMod += 0.25f; }
+            else if (llcObj.LockComplexity >= 40 && llcObj.LockComplexity <= 59) { lowOddsMod += 0.5f; midOddsMod += 0.5f; highOddsMod += 0.5f; }
+            else if (llcObj.LockComplexity >= 60 && llcObj.LockComplexity <= 79) { lowOddsMod += 0.75f; midOddsMod += 0.75f; highOddsMod += 0.75f; }
+            else { lowOddsMod += 1.0f; midOddsMod += 1.0f; highOddsMod += 1.0f; }
 
             for (int i = 0; i < miscGroupOdds.Length; i++) // Heavily placeholder for now, but don't feel like going too deep into this right now.
             {
                 if (i <= 0 || i == 12 || i == 13)
                     continue;
                 else
-                    miscGroupOdds[i] = (int)Mathf.Round(miscGroupOdds[i] * midOddsMod);
+                    miscGroupOdds[i] = (int)Mathf.Round(miscGroupOdds[i] * ((lowOddsMod + midOddsMod + highOddsMod) / 6f));
             }
 
             for (int i = 0; i < itemGroupOdds.Length; i++) // Odds are modified in this loop for each item group within the "itemGroupOdds" array.
@@ -106,11 +106,11 @@ namespace LockedLootContainers
                 if (itemGroupOdds[i] <= 0)
                     continue;
                 else if (itemGroupOdds[i] > 0 && itemGroupOdds[i] <= 15)
-                    itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * lowOddsMod);
+                    itemGroupOdds[i] = (int)Mathf.Round((itemGroupOdds[i] + (totalRoomValueMod / 12f)) * (lowOddsMod / 2f));
                 else if (itemGroupOdds[i] > 15 && itemGroupOdds[i] <= 50)
-                    itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * midOddsMod);
+                    itemGroupOdds[i] = (int)Mathf.Round((itemGroupOdds[i] + (totalRoomValueMod / 4f)) * (midOddsMod / 2f));
                 else
-                    itemGroupOdds[i] = (int)Mathf.Round(itemGroupOdds[i] * highOddsMod);
+                    itemGroupOdds[i] = (int)Mathf.Round((itemGroupOdds[i] + (totalRoomValueMod / 2f)) * (highOddsMod / 2f));
             }
 
             // Debug log string creator, for testing purposes only.
@@ -226,8 +226,22 @@ namespace LockedLootContainers
 
                 while (Dice100.SuccessRoll(itemChance))
                 {
+                    if (itemChance >= 60) // This is to try and reduce certain items basically always appearing due to the multiplication of odds, will see if it makes things better or worse.
+                    {
+                        if (Dice100.SuccessRoll(20))
+                        {
+                            itemChance -= 100;
+                            continue;
+                        }
+                        else if (itemChance >= 150) // This is to attempt to reduce the seeming "consistency" of high probability loot filling up any high-value chests with a large multipler.
+                        {
+                            if (CoinFlip())
+                                itemChance -= 100;
+                        }
+                    }
+
                     DaggerfallUnityItem item = null;
-                    item = DetermineLootItem(i, conditionMod, oddsAverage);
+                    item = DetermineLootItem(i, conditionMod, oddsAverage, totalRoomValueMod);
 
                     if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
                         chestItems.AddItem(item);
@@ -235,17 +249,9 @@ namespace LockedLootContainers
                     itemChance -= 100;
                 }
             }
-
-            // Now that I tested the "miscGroupOdds" a bit, and fixed some bugs. I should probably consider moving onto the next feature I plan on working on for the mod.
-            // Still not exactly sure what I should work on next though, maybe try and get the basic trap stuff to work? That or more of the numbers and formula for stuff like pick chance, etc.
-
-            // Oh yeah, something to note, I may want to consider making a spreadsheet or something with all those various values for all the dungeon types and such, to make it easier to work with, etc.
-            // So presumably after the above for-loop, there will possibly be some left over "room value" mods applied somehow and then items will start being rolled based on the itemGroupOdds array values.
-            // Will continue working on this loot generation stuff tomorrow. For now, keep using "Jewelry Additions" loot generation code and methods as a primary example to copy/pull from.
-            // Next maybe work on actually generating items and resources in the chest based on various factors such as dungeon type, totalRoomValueMod, and the various chest attributes possibly?
         }
 
-        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, float conditionMod, float oddsAverage)
+        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, float conditionMod, float oddsAverage, int totalRoomValueMod)
         {
             Genders gender = GameManager.Instance.PlayerEntity.Gender;
             Races race = GameManager.Instance.PlayerEntity.Race;
@@ -274,20 +280,20 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.HeavyArmor:
                     enumArray = Enum.GetValues(typeof(HeavyArmor));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    ArmorMaterialTypes plateType = (ArmorMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, false); // Will have materials be determined based on other factors later, placeholder for now.
+                    ArmorMaterialTypes plateType = (ArmorMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod, false); // Will have materials be determined based on other factors later, placeholder for now.
                     item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), plateType); // Will need testing to see if casting to vanilla enum works here.
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.Shields:
                     enumArray = Enum.GetValues(typeof(Shields));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), (ArmorMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, false, true));
+                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), (ArmorMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod, false, true));
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.SmallWeapons:
                     enumArray = Enum.GetValues(typeof(SmallWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 2);
-                    item = (enumIndex >= 0 && enumIndex <= 3) ? ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage)) : ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)Jewellery.Wand);
+                    item = (enumIndex >= 0 && enumIndex <= 3) ? ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod)) : ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)Jewellery.Wand);
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.MediumWeapons:
@@ -301,14 +307,14 @@ namespace LockedLootContainers
                     }
                     else // Other Medium Sized Weapons
                     {
-                        item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage));
+                        item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod));
                         item.currentCondition = (int)(item.maxCondition * conditionMod);
                         return item;
                     }
                 case (int)ChestLootItemGroups.LargeWeapons:
                     enumArray = Enum.GetValues(typeof(LargeWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage));
+                    item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod));
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.MensClothing:
@@ -463,17 +469,31 @@ namespace LockedLootContainers
             }
         }
 
-        public static int RollWeaponOrArmorMaterial(float oddsAverage, bool isWeapon = true, bool isShield = false) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
+        public static int RollWeaponOrArmorMaterial(float oddsAverage, int totalRoomValueMod, bool isWeapon = true, bool isShield = false) // Testing this out for now, no clue if it's actually going to be a decent method or not for rarity.
         {
             // Iron, Steel, Silver, Elven, Dwarven, Mithril, Adamantium, Ebony, Orcish, Daedric
-            // int[] rarity = { 348, 240, 180, 144, 108, 84, 60, 48, 36, 24 };
+            // int[] rarity = { 240, 222, 168, 150, 96, 84, 60, 48, 36, 24 };
             float[] lootOdds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            float mod = oddsAverage;
+
+            float roomMod = 0f;
+            float mod = 1f;
+            if (totalRoomValueMod < 0)
+            {
+                totalRoomValueMod = Mathf.FloorToInt(UnityEngine.Random.Range(totalRoomValueMod * 0.5f, totalRoomValueMod * 1.5f));
+                roomMod = (totalRoomValueMod / 100f);
+                mod = (oddsAverage + roomMod) / 2f;
+            }
+            else
+            {
+                totalRoomValueMod = Mathf.CeilToInt(UnityEngine.Random.Range(totalRoomValueMod * 0.2f, totalRoomValueMod * 1.2f));
+                roomMod = Mathf.Abs(totalRoomValueMod / 100f); // Work more on this loot and material generation stuff tomorrow, try getting similar to chest generation stuff, that being a better place.
+                mod = (oddsAverage + roomMod) / 2f;
+            }
 
             if (isShield)
             {
-                int shieldMat = UnityEngine.Random.Range(0, 3);
+                int shieldMat = UnityEngine.Random.Range(0, 4);
 
                 if (shieldMat == 0)
                     return (int)ArmorMaterialTypes.Leather;
@@ -481,17 +501,17 @@ namespace LockedLootContainers
                     return (int)ArmorMaterialTypes.Chain;
             }
 
-            if (oddsAverage <= 2)
+            if (mod <= 1.8f)
             {
-                lootOdds = new float[] { 348*mod, 240*(mod*0.9f), 180*(mod*0.8f), 144*(mod*0.7f), 108*(mod*0.6f), 84*(mod*0.5f), 60*(mod*0.4f), 48*(mod*0.3f), 36*(mod*0.2f), 24*(mod*0.1f) };
+                lootOdds = new float[] { 240*mod, 222*(mod*0.9f), 168*(mod*0.8f), 150*(mod*0.7f), 96*(mod*0.5f), 84*(mod*0.4f), 60*(mod*0.3f), 48*(mod*0.25f), 36*(mod*0.2f), 24*(mod*0.1f) };
             }
-            else if (oddsAverage <= 4)
+            else if (mod <= 3.1f)
             {
-                lootOdds = new float[] { 348*(mod*0.1f), 240*(mod*0.2f), 180*(mod*0.3f), 144*(mod*0.4f), 108*mod, 84*(mod*0.9f), 60*(mod*0.8f), 48*(mod*0.7f), 36*(mod*0.6f), 24*(mod*0.5f) };
+                lootOdds = new float[] { 240*(mod*0.1f), 222*(mod*0.2f), 168*(mod*0.3f), 150*(mod*0.4f), 96*mod, 84*(mod*0.9f), 60*(mod*0.8f), 48*(mod*0.7f), 36*(mod*0.6f), 24*(mod*0.5f) };
             }
             else
             {
-                lootOdds = new float[] { 348*(mod*0.1f), 240*(mod*0.2f), 180*(mod*0.3f), 144*(mod*0.4f), 108*(mod*0.5f), 84*(mod*0.6f), 60*(mod*0.7f), 48*(mod*0.8f), 36*(mod*0.9f), 24*mod };
+                lootOdds = new float[] { 240*(mod*0.05f), 222*(mod*0.1f), 168*(mod*0.2f), 150*(mod*0.3f), 96*(mod*0.45f), 84*(mod*0.6f), 60*(mod*0.7f), 48*(mod*0.8f), 36*(mod*0.9f), 24*mod };
             }
 
             for (int i = 0; i < lootOdds.Length; i++)
@@ -536,74 +556,5 @@ namespace LockedLootContainers
                 return 0x0200 + index;
             }
         }
-
-        /*
-        public static int RollWeaponOrArmorMaterial(float oddsAverage, bool isWeapon = true, bool isShield = false)
-        {
-            int matTypes = Enum.GetValues(typeof(WeaponMaterialTypes)).Length - 1;
-            int[] itemRolls = new int[] { };
-            List<int> itemRollsList = new List<int>();
-
-            if (isShield)
-            {
-                int shieldMat = UnityEngine.Random.Range(0, 3);
-
-                if (shieldMat == 0)
-                    return (int)ArmorMaterialTypes.Leather;
-                else if (shieldMat == 1)
-                    return (int)ArmorMaterialTypes.Chain;
-            }
-
-            for (int i = 0; i < matTypes; i++)
-            {
-                int arrayStart = itemRollsList.Count;
-                int fillElements = 0;
-                switch (i)
-                {
-                    case (int)WeaponMaterialTypes.Iron:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(75 / oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Steel:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(60 / oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Silver:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(45 / oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Elven:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(35 / oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Dwarven:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(20 * oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Mithril:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(15 * oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Adamantium:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(10 * oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Ebony:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(8 * oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Orcish:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(6 * oddsAverage), 1, 300); break;
-                    case (int)WeaponMaterialTypes.Daedric:
-                        fillElements = (int)Mathf.Clamp(Mathf.RoundToInt(4 * oddsAverage), 1, 300); break;
-                    default:
-                        fillElements = 0; break;
-                }
-
-                if (fillElements <= 0)
-                    continue;
-
-                itemRolls = FillArray(itemRollsList, arrayStart, fillElements, i);
-            }
-
-            int chosenMaterial = -1;
-
-            if (itemRolls.Length > 0)
-                chosenMaterial = PickOneOf(itemRolls);
-
-            if (isWeapon)
-            {
-                return chosenMaterial;
-            }
-            else
-            {
-                return 0x0200 + chosenMaterial;
-            }
-        }
-        */
     }
 }
