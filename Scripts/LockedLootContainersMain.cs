@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/20/2023, 12:50 AM
+// Last Edit:		3/20/2023, 2:20 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -363,10 +363,103 @@ namespace LockedLootContainers
                 ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(LLCSoundTest.command, LLCSoundTest.description, LLCSoundTest.usage, LLCSoundTest.Execute);
             }
             catch (Exception e)
             {
                 Debug.LogError(string.Format("Error Registering LockLootContainers Console commands: {0}", e.Message));
+            }
+        }
+
+        private static class LLCSoundTest
+        {
+            public static readonly string command = "llcsound";
+            public static readonly string description = "Allowed playing of mod's sound-clips for testing purposes.";
+            public static readonly string usage = "llcsound [groupName] [clipIndex] [volumeMod]";
+
+            public static string Execute(params string[] args)
+            {
+                string errorText = "Error: something went wrong";
+                string group = args[0];
+                float volume = 1f;
+                AudioClip[] clips = { null };
+
+                if (args.Length < 2 || args.Length > 3) return "Invalid entry, see usage notes.";
+
+                if (!int.TryParse(args[1], out int clipIndex))
+                    return string.Format("`{0}` is not a number, please use a number for [clipIndex].", args[1]);
+
+                if (args.Length == 3)
+                {
+                    if (!float.TryParse(args[2], out volume))
+                        return string.Format("`{0}` is not a number, please use a number for [volumeMod].", args[2]);
+                }
+
+                if (clipIndex < 0)
+                    clipIndex = 0;
+
+                if (Player != null)
+                {
+                    if (args[0] == "lastsound") { clips[0] = lastSoundPlayed; }
+                    else if (args[0] == "unarmedhitwoodlight") { clips = UnarmedHitWoodLightClips; }
+                    else if (args[0] == "unarmedhitwoodhard") { clips = UnarmedHitWoodHardClips; }
+                    else if (args[0] == "unarmedhitmetal") { clips = UnarmedHitMetalClips; }
+                    else if (args[0] == "blunthitwoodlight") { clips = BluntHitWoodLightClips; }
+                    else if (args[0] == "blunthitwoodhard") { clips = BluntHitWoodHardClips; }
+                    else if (args[0] == "blunthitmetallight") { clips = BluntHitMetalLightClips; }
+                    else if (args[0] == "blunthitmetalhard") { clips = BluntHitMetalHardClips; }
+                    else if (args[0] == "bladehitwoodlight") { clips = BladeHitWoodLightClips; }
+                    else if (args[0] == "bladehitwoodhard") { clips = BladeHitWoodHardClips; }
+                    else if (args[0] == "bladehitmetallight") { clips = BladeHitMetalLightClips; }
+                    else if (args[0] == "bladehitmetalhard") { clips = BladeHitMetalHardClips; }
+                    else if (args[0] == "arrowhitwood") { clips = ArrowHitWoodClips; }
+                    else if (args[0] == "arrowhitmetal") { clips = ArrowHitMetalClips; }
+                    else if (args[0] == "hitmetallock") { clips = HitMetalLockClips; }
+                    else if (args[0] == "bashopenwood") { clips = BashOpenWoodChestClips; }
+                    else if (args[0] == "bashopenmetal") { clips = BashOpenMetalChestClips; }
+                    else if (args[0] == "bashofflock") { clips = BashOffLockClips; }
+                    else if (args[0] == "resistspell") { clips = ChestResistedSpellClips; }
+                    else if (args[0] == "blownopen") { clips = ChestBlownOpenSpellClips; }
+                    else if (args[0] == "turntodust") { clips = ChestDisintegratedSpellClips; }
+                    else if (args[0] == "lockpickfailed") { clips = LockpickAttemptClips; }
+                    else if (args[0] == "lockpickjammed") { clips = LockpickJammedClips; }
+                    else if (args[0] == "lockstilljammed") { clips = LockAlreadyJammedClips; }
+                    else if (args[0] == "lockpickworked") { clips = LockpickSuccessfulClips; }
+                    else if (args[0] == "magiclockpickfailed") { clips = MagicLockpickAttemptClips; }
+                    else if (args[0] == "magiclockpickjammed") { clips = MagicLockpickJammedClips; }
+                    else if (args[0] == "magiclockstilljammed") { clips = MagicLockAlreadyJammedClips; }
+                    else if (args[0] == "magiclockpickworked") { clips = MagicLockpickSuccessfulClips; }
+                    else { return "Error: invalid soundclip group name"; }
+                }
+
+                if (clips.Length <= 0)
+                    return "Error: soundclip group is empty";
+
+                if (clips.Length == 1)
+                {
+                    clipIndex = 0;
+                    if (clips[0] == null)
+                        return "Error: last soundclip is null";
+                }
+                else
+                {
+                    if (clips.Length <= clipIndex)
+                    {
+                        clipIndex = clips.Length - 1;
+                        errorText = string.Format("clipIndex entry larger than clip group, using max index {0} instead", clipIndex);
+                    }
+                }
+
+                if (clips[clipIndex] == null)
+                    return "Error: that clip group entry is null or empty";
+
+                if (DaggerfallUI.Instance.DaggerfallAudioSource != null)
+                {
+                    DaggerfallUI.Instance.AudioSource.PlayOneShot(clips[clipIndex], volume * DaggerfallUnity.Settings.SoundVolume);
+                    errorText = string.Format("Played entry {0}, of clip group {1}, at {2}x volume, clip name was: {3}", clipIndex, args[0], volume, clips[clipIndex].name);
+                }
+
+                return errorText;
             }
         }
 
