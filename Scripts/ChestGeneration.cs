@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Serialization;
+using DaggerfallConnect.Arena2;
 
 namespace LockedLootContainers
 {
@@ -26,6 +27,146 @@ namespace LockedLootContainers
 
         #endregion
 
+        public void AddChests_OnTransitionInterior(PlayerEnterExit.TransitionEventArgs args)
+        {
+            if (SaveLoadManager.Instance.LoadInProgress) // Hopefully this will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
+                return;
+
+            DFLocation.BuildingTypes buildingType = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.buildingType;
+            PlayerGPS.DiscoveredBuilding buildingData = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData;
+            DaggerfallLoot[] lootPiles;
+            MeshFilter[] containerModels;
+
+            bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
+            int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
+            // Misc Item Group Odds: Gold, LoC, G-Min, G-Max, LoC-Min, LoC-Max, Potions, Maps, Potion Recipes, Paintings, Soul-gems, Magic Items, Max Condition %, Min Condition %
+            int[] miscGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            // Allowed Item Groups:    Drug, Armor, Weap, Cloth, Book, Jewel, Supply, Relic, Ingred
+            // Item Group Odds %: 
+            int[] itemGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            // When I work on this next. Add these new "allowedItemGroups" and "itemGroupOdds" arrays to each dungeon type with their respective values to modify the allowed item groups and odds later on.
+
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
+            {
+                if (IsValidShop(buildingType))
+                {
+                    switch (buildingType) // I'll deal with filling out the "loot-tables" for each later when I confirm that interior chest spawning actually works at all.
+                    {
+                        case DFLocation.BuildingTypes.Alchemist:
+                        case DFLocation.BuildingTypes.Armorer:
+                        case DFLocation.BuildingTypes.WeaponSmith:
+                        case DFLocation.BuildingTypes.GeneralStore:
+                        case DFLocation.BuildingTypes.PawnShop:
+                        case DFLocation.BuildingTypes.GemStore:
+                        case DFLocation.BuildingTypes.ClothingStore:
+                        case DFLocation.BuildingTypes.Bookseller:
+                        case DFLocation.BuildingTypes.Library:
+                        case DFLocation.BuildingTypes.Bank:
+                        default:
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 25;
+                            miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                            itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                            break;
+                    }
+                }
+                else if (buildingType == DFLocation.BuildingTypes.Tavern)
+                {
+                    allowedMats = PermittedMaterials_All;
+                    baseChestOdds = 25;
+                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                }
+                else if (buildingType == DFLocation.BuildingTypes.Palace)
+                {
+                    allowedMats = PermittedMaterials_All;
+                    baseChestOdds = 25;
+                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                }
+                else if (buildingType == DFLocation.BuildingTypes.AnyHouse)
+                {
+                    allowedMats = PermittedMaterials_All;
+                    baseChestOdds = 25;
+                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                }
+                else if (buildingType == DFLocation.BuildingTypes.Temple)
+                {
+                    allowedMats = PermittedMaterials_All;
+                    baseChestOdds = 25;
+                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                }
+                else if (buildingType == DFLocation.BuildingTypes.GuildHall)
+                {
+                    switch (buildingData.factionID)
+                    {
+                        case (int)FactionFile.FactionIDs.The_Mages_Guild:
+                        case (int)FactionFile.FactionIDs.The_Fighters_Guild:
+                        case (int)FactionFile.FactionIDs.Generic_Knightly_Order: // Will have to test if this one actually works for all the knightly orders or not, will see.
+                        case (int)FactionFile.FactionIDs.The_Thieves_Guild:
+                        case (int)FactionFile.FactionIDs.The_Dark_Brotherhood:
+                        default:
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 25;
+                            miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                            itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                            break;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+
+                // Make list of loot-piles currently in the interior "scene."
+                List<GameObject> goList = new List<GameObject>();
+                lootPiles = FindObjectsOfType<DaggerfallLoot>();
+                for (int i = 0; i < lootPiles.Length; i++)
+                {
+                    if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
+                        goList.Add(lootPiles[i].gameObject);
+                }
+
+                // Make list of "valid" container type models in the current interior "scene."
+                containerModels = FindObjectsOfType<MeshFilter>();
+                for (int i = 0; i < containerModels.Length; i++)
+                {
+                    int modelID = -1;
+                    bool validID = false;
+                    string meshName = containerModels[i].mesh.name;
+
+                    if (meshName.Length > 0)
+                    {
+                        string properName = meshName.Substring(0, meshName.Length - 9);
+                        validID = int.TryParse(properName, out modelID);
+                    }
+
+                    if (validID)
+                    {
+                        if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
+                            goList.Add(containerModels[i].gameObject);
+
+                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
+                    }
+                    else
+                    {
+                        Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                    }
+                }
+                GameObject[] validGos = goList.ToArray();
+
+                for (int i = 0; i < validGos.Length; i++)
+                {
+                    MeshFilter meshFilter = validGos[i].GetComponent<MeshFilter>();
+                    DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
+
+                    ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds);
+                }
+            }
+        }
+
         public void AddChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
         {
             if (SaveLoadManager.Instance.LoadInProgress) // Hopefully this will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
@@ -33,6 +174,7 @@ namespace LockedLootContainers
 
             DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
             DaggerfallLoot[] lootPiles;
+            MeshFilter[] containerModels;
 
             bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
@@ -170,160 +312,213 @@ namespace LockedLootContainers
                 }
 
                 // Make list of loot-piles currently in the dungeon "scene."
+                List<GameObject> goList = new List<GameObject>();
                 lootPiles = FindObjectsOfType<DaggerfallLoot>();
-
                 for (int i = 0; i < lootPiles.Length; i++)
                 {
                     if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
+                        goList.Add(lootPiles[i].gameObject);
+                }
+
+                // Make list of "valid" container type models in the current dungeon "scene."
+                containerModels = FindObjectsOfType<MeshFilter>();
+                for (int i = 0; i < containerModels.Length; i++)
+                {
+                    int modelID = -1;
+                    bool validID = false;
+                    string meshName = containerModels[i].mesh.name;
+
+                    if (meshName.Length > 0)
                     {
-                        int totalRoomValueMod = 0;
-
-                        Transform oldLootPileTransform = lootPiles[i].transform;
-                        Vector3 pos = lootPiles[i].transform.position;
-
-                        Ray[] rays = { new Ray(pos, oldLootPileTransform.up), new Ray(pos, -oldLootPileTransform.up),
-                        new Ray(pos, oldLootPileTransform.right), new Ray(pos, -oldLootPileTransform.right),
-                        new Ray(pos, oldLootPileTransform.forward), new Ray(pos, -oldLootPileTransform.forward)}; // up, down, right, left, front, back.
-
-                        float[] rayDistances = { 0, 0, 0, 0, 0, 0 }; // Distances that up, down, right, left, front, and back rays traveled before hitting a collider.
-                        float[] boxDimensions = { 0.2f, 0.2f, 0.2f }; // Default dimensions of the overlap box.
-
-                        RaycastHit hit;
-                        for (int h = 0; h < rays.Length; h++)
-                        {
-                            if (Physics.Raycast(rays[h], out hit, 5f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
-                            {
-                                rayDistances[h] = hit.distance;
-                            }
-                            else
-                            {
-                                rayDistances[h] = 5f;
-                            }
-                        }
-
-                        boxDimensions[0] = (rayDistances[0] + rayDistances[1]); // y-axis? up and down
-                        boxDimensions[1] = (rayDistances[2] + rayDistances[3]); // x-axis? right and left
-                        boxDimensions[2] = (rayDistances[4] + rayDistances[5]); // z-axis? front and back
-                        Vector3 boxDimVector = new Vector3(boxDimensions[1], boxDimensions[0], boxDimensions[2]) * 2f;
-
-                        /*// Testing Box Sizes Here
-                        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        cube.transform.position = pos;
-                        cube.transform.rotation = lootPiles[i].transform.rotation;
-                        cube.transform.localScale = boxDimVector;*/
-
-                        // Collect GameObjects that overlap the box and ignore duplicates, use these later to estimate a "room value" that a chest is being generated in.
-                        // Test this part more properly tomorrow, now after knowing some of the limitations now due to the "combined models" thing with dungeons and such.
-                        // Primarily be checking for flats/billboards, other loot-piles, enemies, area of overlap box, action objects, and especially doors.
-                        List<GameObject> roomObjects = new List<GameObject>();
-                        Collider[] overlaps = Physics.OverlapBox(pos, boxDimVector, lootPiles[i].transform.rotation, PlayerLayerMask);
-                        for (int r = 0; r < overlaps.Length; r++)
-                        {
-                            GameObject go = overlaps[r].gameObject;
-
-                            if (go && go == lootPiles[i].gameObject) // Ignore the gameObject (lootpile) this box is originating from.
-                                continue;
-
-                            if (go && go.name == "CombinedModels") // Ignore the entire combinedmodels gameobject
-                                continue;
-
-                            if (go && !roomObjects.Contains(go))
-                            {
-                                roomObjects.Add(go);
-                                //Debug.LogFormat("Box overlapped GameObject, {0}", go.name);
-                            }
-
-                            // If I need examples for this look at "DaggerfallMissile.cs" under the "DoAreaOfEffect" method for something fairly similar.
-                            // Turns out, depending on the size of certain overlap boxes, you can sort of get some idea of what the object is currently in, like inside a coffin and such.
-                            // Later on consider adding toggle setting for this whole "room context" thing here, for possibly faster loading times or something without it potentially.
-
-                            DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
-                        }
-
-                        // This section below is once again primarily for testing atm. This is for all checked component types.
-                        Debug.LogFormat("Loot-pile being checked is named: {0}. With the Load ID: {1}. With Transform: x = {2}, y = {3}, z = {4}", lootPiles[i].name, lootPiles[i].LoadID, lootPiles[i].gameObject.transform.parent.localPosition.x, lootPiles[i].gameObject.transform.parent.localPosition.y, lootPiles[i].gameObject.transform.parent.localPosition.z);
-                        Debug.LogFormat("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| {0}", i);
-                        for (int g = 0; g < roomObjects.Count; g++)
-                        {
-                            if (roomObjects[g])
-                            {
-                                DaggerfallEntityBehaviour entityBehaviour = roomObjects[g].GetComponent<DaggerfallEntityBehaviour>();
-                                DaggerfallBillboard billBoard = roomObjects[g].GetComponent<DaggerfallBillboard>(); // Will have to test and eventually account for mods like "Handpainted Models" etc.
-                                MeshFilter meshFilter = roomObjects[g].GetComponent<MeshFilter>();
-
-                                if (entityBehaviour)
-                                {
-                                    EnemyEntity enemyEntity = entityBehaviour.Entity as EnemyEntity;
-                                    if (enemyEntity != null)
-                                    {
-                                        MobileEnemy enemy = enemyEntity.MobileEnemy;
-                                        int mobileID = enemy.ID;
-                                        MobileAffinity affinity = enemy.Affinity;
-                                        MobileTeams team = enemy.Team;
-
-                                        if (team != MobileTeams.PlayerAlly && team != MobileTeams.CityWatch) // Ignore mobile entities that are currently on the player's team or are city guards.
-                                        {
-                                            totalRoomValueMod += EnemyRoomValueMods(enemyEntity);
-
-                                            Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
-                                        }
-                                    }
-                                }
-                                else if (billBoard)
-                                {
-                                    BillboardSummary summary = billBoard.Summary;
-                                    FlatTypes flatType = summary.FlatType;
-                                    int archive = summary.Archive;
-                                    int record = summary.Record;
-
-                                    if (flatType != FlatTypes.Editor && flatType != FlatTypes.Nature) // Ignore editor flats and nature flats, I assume nature is just the trees and plants in exteriors?
-                                    {
-                                        totalRoomValueMod += BillboardRoomValueMods(flatType, archive, record);
-
-                                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
-                                    }
-                                }
-                                else if (meshFilter)
-                                {
-                                    int modelID = -1;
-                                    bool validID = false;
-                                    string meshName = meshFilter.mesh.name;
-
-                                    if (meshName.Length > 0)
-                                    {
-                                        string properName = meshName.Substring(0, meshName.Length - 9);
-                                        validID = int.TryParse(properName, out modelID);
-                                    }
-
-                                    if (validID)
-                                    {
-                                        totalRoomValueMod += ModelRoomValueMods(modelID);
-
-                                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
-                                    }
-                                    else
-                                    {
-                                        Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
-                                    }
-                                }
-                                else
-                                {
-                                    Debug.LogFormat("Overlap found on gameobject: {0}     By loot-pile with Load ID: {1}", roomObjects[g].name, lootPiles[i].LoadID);
-                                }
-                            }
-                        }
-                        Debug.LogFormat("-------------------------------------------------------------------------------------------------------------- {0}-", i);
-                        Debug.LogFormat("-------------------------------------- {0}-", i);
-
-                        RollIfChestShouldBeCreated(lootPiles[i], allowedMats, baseChestOdds, totalRoomValueMod, miscGroupOdds, itemGroupOdds);
+                        string properName = meshName.Substring(0, meshName.Length - 9);
+                        validID = int.TryParse(properName, out modelID);
                     }
+
+                    if (validID)
+                    {
+                        if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
+                            goList.Add(containerModels[i].gameObject);
+
+                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
+                    }
+                    else
+                    {
+                        Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                    }
+                }
+                GameObject[] validGos = goList.ToArray();
+
+                for (int i = 0; i < validGos.Length; i++)
+                {
+                    MeshFilter meshFilter = validGos[i].GetComponent<MeshFilter>();
+                    DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
+
+                    ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds);
                 }
             }
         }
 
-        public static void RollIfChestShouldBeCreated(DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod, int[] miscGroupOdds, int[] itemGroupOdds)
+        public static void ReplaceWithCustomChest(MeshFilter meshFilter, DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds)
+        {
+            int totalRoomValueMod = 0;
+            Transform goTransform = null;
+            Vector3 pos = new Vector3(0, 0, 0);
+
+            if (meshFilter == null && lootPile == null)
+                return;
+
+            if (meshFilter)
+            {
+                goTransform = meshFilter.transform;
+                pos = meshFilter.transform.position;
+            }
+
+            if (lootPile)
+            {
+                goTransform = lootPile.transform;
+                pos = lootPile.transform.position;
+            }
+
+            Ray[] rays = { new Ray(pos, goTransform.up), new Ray(pos, -goTransform.up),
+                new Ray(pos, goTransform.right), new Ray(pos, -goTransform.right),
+                new Ray(pos, goTransform.forward), new Ray(pos, -goTransform.forward)}; // up, down, right, left, front, back.
+
+            float[] rayDistances = { 0, 0, 0, 0, 0, 0 }; // Distances that up, down, right, left, front, and back rays traveled before hitting a collider.
+            float[] boxDimensions = { 0.2f, 0.2f, 0.2f }; // Default dimensions of the overlap box.
+
+            RaycastHit hit;
+            for (int h = 0; h < rays.Length; h++)
+            {
+                if (Physics.Raycast(rays[h], out hit, 5f, PlayerLayerMask)) // Using raycast instead of sphere, as I want it to be only if you are purposely targeting the chest.
+                {
+                    rayDistances[h] = hit.distance;
+                }
+                else
+                {
+                    rayDistances[h] = 5f;
+                }
+            }
+
+            boxDimensions[0] = (rayDistances[0] + rayDistances[1]); // y-axis? up and down
+            boxDimensions[1] = (rayDistances[2] + rayDistances[3]); // x-axis? right and left
+            boxDimensions[2] = (rayDistances[4] + rayDistances[5]); // z-axis? front and back
+            Vector3 boxDimVector = new Vector3(boxDimensions[1], boxDimensions[0], boxDimensions[2]) * 2f;
+
+            /*// Testing Box Sizes Here
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = pos;
+            cube.transform.rotation = lootPiles[i].transform.rotation;
+            cube.transform.localScale = boxDimVector;*/
+
+            // Collect GameObjects that overlap the box and ignore duplicates, use these later to estimate a "room value" that a chest is being generated in.
+            // Test this part more properly tomorrow, now after knowing some of the limitations now due to the "combined models" thing with dungeons and such.
+            // Primarily be checking for flats/billboards, other loot-piles, enemies, area of overlap box, action objects, and especially doors.
+            List<GameObject> roomObjects = new List<GameObject>();
+            Collider[] overlaps = Physics.OverlapBox(pos, boxDimVector, goTransform.rotation, PlayerLayerMask);
+            for (int r = 0; r < overlaps.Length; r++)
+            {
+                GameObject go = overlaps[r].gameObject;
+
+                if (go && go == goTransform.gameObject) // Ignore the gameObject (lootpile) this box is originating from.
+                    continue;
+
+                if (go && go.name == "CombinedModels") // Ignore the entire combinedmodels gameobject
+                    continue;
+
+                if (go && !roomObjects.Contains(go))
+                {
+                    roomObjects.Add(go);
+                    //Debug.LogFormat("Box overlapped GameObject, {0}", go.name);
+                }
+
+                // If I need examples for this look at "DaggerfallMissile.cs" under the "DoAreaOfEffect" method for something fairly similar.
+                // Turns out, depending on the size of certain overlap boxes, you can sort of get some idea of what the object is currently in, like inside a coffin and such.
+                // Later on consider adding toggle setting for this whole "room context" thing here, for possibly faster loading times or something without it potentially.
+
+                DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
+            }
+
+            for (int g = 0; g < roomObjects.Count; g++)
+            {
+                if (roomObjects[g])
+                {
+                    DaggerfallEntityBehaviour entityBehaviour = roomObjects[g].GetComponent<DaggerfallEntityBehaviour>();
+                    DaggerfallBillboard billBoard = roomObjects[g].GetComponent<DaggerfallBillboard>(); // Will have to test and eventually account for mods like "Handpainted Models" etc.
+                    MeshFilter meshFilt = roomObjects[g].GetComponent<MeshFilter>();
+
+                    if (entityBehaviour)
+                    {
+                        EnemyEntity enemyEntity = entityBehaviour.Entity as EnemyEntity;
+                        if (enemyEntity != null)
+                        {
+                            MobileEnemy enemy = enemyEntity.MobileEnemy;
+                            int mobileID = enemy.ID;
+                            MobileAffinity affinity = enemy.Affinity;
+                            MobileTeams team = enemy.Team;
+
+                            if (team != MobileTeams.PlayerAlly && team != MobileTeams.CityWatch) // Ignore mobile entities that are currently on the player's team or are city guards.
+                            {
+                                totalRoomValueMod += EnemyRoomValueMods(enemyEntity);
+
+                                Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
+                            }
+                        }
+                    }
+                    else if (billBoard)
+                    {
+                        BillboardSummary summary = billBoard.Summary;
+                        FlatTypes flatType = summary.FlatType;
+                        int archive = summary.Archive;
+                        int record = summary.Record;
+
+                        if (flatType != FlatTypes.Editor && flatType != FlatTypes.Nature) // Ignore editor flats and nature flats, I assume nature is just the trees and plants in exteriors?
+                        {
+                            totalRoomValueMod += BillboardRoomValueMods(flatType, archive, record);
+
+                            Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
+                        }
+                    }
+                    else if (meshFilt)
+                    {
+                        int modelID = -1;
+                        bool validID = false;
+                        string meshName = meshFilt.mesh.name;
+
+                        if (meshName.Length > 0)
+                        {
+                            string properName = meshName.Substring(0, meshName.Length - 9);
+                            validID = int.TryParse(properName, out modelID);
+                        }
+
+                        if (validID)
+                        {
+                            totalRoomValueMod += ModelRoomValueMods(modelID);
+
+                            Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
+                        }
+                        else
+                        {
+                            Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
+                    }
+                }
+            }
+
+            RollIfChestShouldBeCreated(meshFilter, lootPile, allowedMats, baseChestOdds, totalRoomValueMod, miscGroupOdds, itemGroupOdds);
+        }
+
+        public static void RollIfChestShouldBeCreated(MeshFilter meshFilter, DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int totalRoomValueMod, int[] miscGroupOdds, int[] itemGroupOdds)
         {
             float roomMod = 1f;
+            int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
+
+            if (meshFilter == null && lootPile == null)
+                return;
+
             if (totalRoomValueMod < 0)
             {
                 if (Dice100.SuccessRoll(20))
@@ -340,7 +535,6 @@ namespace LockedLootContainers
             }
 
             int chestOdds = Mathf.RoundToInt(baseChestOdds * roomMod);
-            int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
 
             if (chestOdds <= 0)
                 return;
@@ -354,19 +548,17 @@ namespace LockedLootContainers
             if (permitMatsCount <= 0)
                 return;
 
-            if (Dice100.SuccessRoll(chestOdds)) // If roll is successful, start process of replacing loot-pile with chest object as well as what properties the chest should have.
-            {
-                ItemCollection oldPileLoot = new ItemCollection();
-                oldPileLoot.TransferAll(lootPile.Items);
-                Transform oldLootPileTransform = lootPile.transform;
-                Vector3 pos = lootPile.transform.position;
-                ulong newLoadID = DaggerfallUnity.NextUID;
+            ulong newLoadID = DaggerfallUnity.NextUID;
 
-                GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldLootPileTransform.parent.parent);
+            if (meshFilter) // For right now, just assuming the model is detecting one of the "useless" vanilla chest models and nothing else that might have a loot-pile component attached.
+            {
+                Transform oldModelTransform = meshFilter.transform;
+                Vector3 pos = meshFilter.transform.position;
+
+                GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldModelTransform.parent.parent);
 
                 LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
-                llcObj.Oldloot = oldPileLoot;
-                llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
+                llcObj.AttachedLoot = new ItemCollection();
                 llcObj.LoadID = newLoadID;
 
                 // Creates random seed for determining chest material value
@@ -387,8 +579,8 @@ namespace LockedLootContainers
 
                 llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
 
-                llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
-                llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
+                llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, meshFilter.transform.parent.parent.name, totalRoomValueMod);
+                llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, meshFilter.transform.parent.parent.name, totalRoomValueMod);
 
                 SetChestHitPoints(llcObj);
                 SetLockHitPoints(llcObj);
@@ -402,6 +594,8 @@ namespace LockedLootContainers
 
                 UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
+                Destroy(meshFilter.gameObject); // Placing this up here, maybe with this destroyed first the "AlignBillboardToGround" will work better when generating the chest?
+
                 // Set position
                 Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
                 chestParentObj.transform.position = pos;
@@ -410,12 +604,76 @@ namespace LockedLootContainers
 
                 Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
-                lootPile.Items.Clear(); // Likely not necessary, but doing it just in case.
-                Destroy(lootPile.gameObject);
-
                 // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
 
                 PopulateChestLoot(llcObj, totalRoomValueMod, miscGroupOdds, itemGroupOdds);
+                return;
+            }
+
+            if (lootPile)
+            {
+                if (Dice100.SuccessRoll(chestOdds)) // If roll is successful, start process of replacing loot-pile with chest object as well as what properties the chest should have.
+                {
+                    ItemCollection oldPileLoot = new ItemCollection();
+                    oldPileLoot.TransferAll(lootPile.Items);
+                    Transform oldLootPileTransform = lootPile.transform;
+                    Vector3 pos = lootPile.transform.position;
+
+                    GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldLootPileTransform.parent.parent);
+
+                    LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
+                    llcObj.Oldloot = oldPileLoot;
+                    llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
+                    llcObj.LoadID = newLoadID;
+
+                    // Creates random seed for determining chest material value
+                    string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();
+                    string truncText = (combinedText.Length > 9) ? combinedText.Substring(0, 9) : combinedText; // Might get index out of range, but will see.
+                    Debug.LogFormat("Attempting to parse value for chest seed: {0}", truncText);
+                    int seed = int.Parse(truncText);
+                    UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
+
+                    llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod);
+
+                    // Creates random seed for determining lock material value and other values
+                    string jumbledText = truncText.Substring(5) + UnityEngine.Random.Range(333, 99999).ToString();
+                    truncText = (jumbledText.Length > 9) ? jumbledText.Substring(0, 9) : jumbledText;
+                    Debug.LogFormat("Attempting to parse value for lock & others seed: {0}", truncText);
+                    seed = int.Parse(truncText);
+                    UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
+
+                    llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
+
+                    llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
+                    llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
+
+                    SetChestHitPoints(llcObj);
+                    SetLockHitPoints(llcObj);
+
+                    llcObj.ChestMagicResist = RollChestMagicResist(llcObj.ChestMaterial, llcObj.ChestSturdiness, totalRoomValueMod);
+                    llcObj.LockMagicResist = RollLockMagicResist(llcObj.LockMaterial, llcObj.LockSturdiness, totalRoomValueMod);
+
+                    llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
+                    llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
+                    SetLockMechanismHitPoints(llcObj);
+
+                    UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
+
+                    // Set position
+                    Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
+                    chestParentObj.transform.position = pos;
+                    chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
+                    GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
+
+                    Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
+
+                    lootPile.Items.Clear(); // Likely not necessary, but doing it just in case.
+                    Destroy(lootPile.gameObject);
+
+                    // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
+
+                    PopulateChestLoot(llcObj, totalRoomValueMod, miscGroupOdds, itemGroupOdds);
+                }
             }
         }
 
@@ -860,6 +1118,27 @@ namespace LockedLootContainers
                 return 15;
 
             return 0;
+        }
+
+        public static bool IsValidShop(DFLocation.BuildingTypes buildingType) // Check if building shop type is valid to have chests be spawned in it.
+        {
+            switch (buildingType)
+            {
+                case DFLocation.BuildingTypes.Alchemist:
+                case DFLocation.BuildingTypes.Armorer:
+                case DFLocation.BuildingTypes.WeaponSmith:
+                case DFLocation.BuildingTypes.GeneralStore:
+                case DFLocation.BuildingTypes.PawnShop:
+                case DFLocation.BuildingTypes.FurnitureStore:
+                case DFLocation.BuildingTypes.GemStore:
+                case DFLocation.BuildingTypes.ClothingStore:
+                case DFLocation.BuildingTypes.Bookseller:
+                case DFLocation.BuildingTypes.Library:
+                case DFLocation.BuildingTypes.Bank:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

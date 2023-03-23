@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/20/2023, 2:20 PM
+// Last Edit:		3/22/2023, 11:10 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -125,7 +125,11 @@ namespace LockedLootContainers
 
             // Definitely consider making a custom activation for those silly 3D chest models that are in-game but never used for anything and add replace those with my custom chest objects, etc.
             PlayerActivate.RegisterCustomActivation(mod, 4733, 0, ChestActivation);
+            PlayerActivate.RegisterCustomActivation(mod, 41811, DoNothingActivation);
+            PlayerActivate.RegisterCustomActivation(mod, 41812, DoNothingActivation);
+            PlayerActivate.RegisterCustomActivation(mod, 41813, DoNothingActivation);
 
+            PlayerEnterExit.OnTransitionInterior += AddChests_OnTransitionInterior;
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
 
             // Load Resources
@@ -575,6 +579,11 @@ namespace LockedLootContainers
         }
 
         // For Testing Custom Windows
+
+        private static void DoNothingActivation(RaycastHit hit)
+        {
+
+        }
 
         private static void ChestActivation(RaycastHit hit)
         {

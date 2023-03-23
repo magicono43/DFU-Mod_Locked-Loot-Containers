@@ -74,7 +74,7 @@ namespace LockedLootContainers
             Dictionary<ulong, OpenChestData> openChestEntries = new Dictionary<ulong, OpenChestData>();
             LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
 
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first.
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon || GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
             {
                 for (int i = 0; i < closedChests.Length; i++)
                 {
@@ -152,7 +152,7 @@ namespace LockedLootContainers
             Dictionary<ulong, ClosedChestData> closedChests = data.ClosedChests;
             Dictionary<ulong, OpenChestData> openChests = data.OpenChests;
 
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon) // Will do other stuff later, but for testing right now just deal with dungeons first.
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon || GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
             {
                 foreach (KeyValuePair<ulong, ClosedChestData> chest in closedChests)
                 {
@@ -172,8 +172,28 @@ namespace LockedLootContainers
 
                 if (closedChests.Count > 0 || openChests.Count > 0) // This is here to try and prevent the random static loot-piles from respawning when loading saves for whatever reason.
                 {
+                    MeshFilter[] validModels = GameObject.FindObjectsOfType<MeshFilter>();
                     DaggerfallLoot[] lootPiles = GameObject.FindObjectsOfType<DaggerfallLoot>();
                     List<GameObject> deleteQue = new List<GameObject>();
+
+                    for (int i = 0; i < validModels.Length; i++) // Not necessarily my "complete" way I'd like to see this, but will see if it works well enough for now for the 3D model cases.
+                    {
+                        int modelID = -1;
+                        bool validID = false;
+                        string meshName = validModels[i].mesh.name;
+
+                        if (meshName.Length > 0)
+                        {
+                            string properName = meshName.Substring(0, meshName.Length - 9);
+                            validID = int.TryParse(properName, out modelID);
+                        }
+
+                        if (validID)
+                        {
+                            if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
+                                deleteQue.Add(validModels[i].gameObject);
+                        }
+                    }
 
                     for (int i = 0; i < lootPiles.Length; i++)
                     {
