@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Formulas;
+using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Game.Guilds;
 
 namespace LockedLootContainers
 {
@@ -65,8 +67,10 @@ namespace LockedLootContainers
         public static int Luck { get { return Player.Stats.LiveLuck - 50; } }
         public static int LockP { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Lockpicking); } }
         public static int PickP { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Pickpocket); } }
+        public static int Sneak { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Stealth); } }
         public static int Alter { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Alteration); } }
         public static int Destr { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Destruction); } }
+        public static int Illus { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Illusion); } }
         public static int Mysti { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Mysticism); } }
         public static int Thaum { get { return Player.Skills.GetLiveSkillValue(DFCareer.Skills.Thaumaturgy); } }
 
@@ -268,6 +272,113 @@ namespace LockedLootContainers
                 chest.LockMechCurrentHP = lockMechHP;
                 return false;
             }
+        }
+
+        public static void IsThisACrimeCheck(ChestInteractionType interactionType)
+        {
+            if (IsValidCrimeLocation())
+            {
+                PlayerGPS.DiscoveredBuilding buildingData = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData;
+                DFLocation.BuildingTypes buildingType = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.buildingType;
+
+                switch (interactionType)
+                {
+                    case ChestInteractionType.Lockpick:
+                        if (LockpickDetectionCheck(buildingData, buildingType))
+                            sdsdfds; // Register crime and potential rep loses and such if detected, will work on this part tomorrow.
+                        break;
+                    case ChestInteractionType.Magic_Lockpick:
+                        if (MagicLockpickDetectionCheck(buildingData, buildingType))
+                            sdsdfds; // Register crime and potential rep loses and such if detected, will work on this part tomorrow.
+                        break;
+                    case ChestInteractionType.Bash:
+                    case ChestInteractionType.Magic_Bash:
+                        // Register crime and potential rep loses and such if detected, will work on this part tomorrow.
+                        // Right now will always be detected when trying these forms of bashing, don't really think it would work out trying to bash open a chest "undetected."
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        public static bool IsValidCrimeLocation()
+        {
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
+                return false;
+
+            DFLocation.BuildingTypes bT = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.buildingType;
+
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
+            {
+                if (IsValidShop(bT) || bT == DFLocation.BuildingTypes.Tavern || bT == DFLocation.BuildingTypes.Temple || bT == DFLocation.BuildingTypes.GuildHall ||
+                    bT == DFLocation.BuildingTypes.AnyHouse || bT == DFLocation.BuildingTypes.Palace)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool LockpickDetectionCheck(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes buildingType)
+        {
+            int detectionChance = (20 + (buildingData.quality * 3)) * -1;
+            int closedMod = BuildingOpenCheck(buildingData, buildingType) ? 0 : 30;
+            int sneakChance = Sneak + Mathf.RoundToInt(PickP * 0.2f) + Mathf.RoundToInt(Agili * 0.6f) + Mathf.RoundToInt(Luck * 0.4f) + closedMod;
+
+            Player.TallySkill(DFCareer.Skills.Stealth, 1);
+            Player.TallySkill(DFCareer.Skills.Pickpocket, 1);
+
+            if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(detectionChance + sneakChance, 5f, 90f))))
+                return false;
+            else
+                return true;
+        }
+
+        public static bool MagicLockpickDetectionCheck(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes buildingType)
+        {
+            int detectionChance = (20 + (buildingData.quality * 3)) * -1;
+            int closedMod = BuildingOpenCheck(buildingData, buildingType) ? 0 : 30;
+            int sneakChance = Sneak + Mathf.RoundToInt(Illus * 0.2f) + Mathf.RoundToInt(Speed * 0.4f) + Mathf.RoundToInt(Luck * 0.6f) + closedMod;
+
+            Player.TallySkill(DFCareer.Skills.Stealth, 1);
+
+            if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(detectionChance + sneakChance, 5f, 90f))))
+                return false;
+            else
+                return true;
+        }
+
+        public static bool BuildingOpenCheck(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes buildingType)
+        {
+            /*
+             * Open Hours For Specific Places:
+             * Temples, Dark Brotherhood, Thieves Guild: 24/7
+             * All Other Guilds: 11:00 - 23:00
+             * Fighters Guild & Mages Guild, Rank 6 = 24/7 Access
+             * 
+             * Alchemists: 07:00 - 22:00
+             * Armorers: 09:00 - 19:00
+             * Banks: 08:00 - 15:00
+             * Bookstores: 	09:00 - 21:00
+             * Clothing Stores: 10:00 - 19:00
+             * Gem Stores: 09:00 - 18:00
+             * General Stores + Furniture Stores: 06:00 - 23:00
+             * Libraries: 09:00 - 23:00
+             * Pawn Shops + Weapon Smiths: 09:00 - 20:00
+            */
+
+            int buildingInt = (int)buildingType;
+            int hour = DaggerfallUnity.Instance.WorldTime.Now.Hour;
+            IGuild guild = GameManager.Instance.GuildManager.GetGuild(buildingData.factionID);
+            if (buildingType == DFLocation.BuildingTypes.GuildHall && (PlayerActivate.IsBuildingOpen(buildingType) || guild.HallAccessAnytime()))
+                return true;
+            if (buildingInt < 18)
+                return PlayerActivate.IsBuildingOpen(buildingType);
+            else if (buildingInt <= 22)
+                return hour < 6 || hour > 18 ? false : true;
+            else
+                return true;
         }
 
         public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, DaggerfallUnityItem bashingWep, int wepSkillID) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.

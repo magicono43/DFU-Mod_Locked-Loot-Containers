@@ -75,6 +75,19 @@ namespace LockedLootContainers
     }
 
     /// <summary>
+    /// Used to determine what type of interaction the player is "using" on a chest, right now mainly to assist with determining if a crime has been committed or not.
+    /// </summary>
+    public enum ChestInteractionType
+    {
+        None = -1,
+        Inspect = 0,
+        Lockpick = 1,
+        Magic_Lockpick = 2,
+        Bash = 3,
+        Magic_Bash = 4,
+    }
+
+    /// <summary>
     /// The vanilla item groups that this mod will be checking for and caring about during loot generation, share the same values with the vanilla groups to be used later on.
     /// </summary>
     public enum ChestLootItemGroups
