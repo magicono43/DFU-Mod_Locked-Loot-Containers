@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/23/2023, 11:45 PM
+// Last Edit:		3/24/2023, 9:45 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -615,7 +615,7 @@ namespace LockedLootContainers
                     }
                     else
                     {
-                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
                     }
                     break;
                 case PlayerActivateModes.Steal: // Attempt To Lock-pick Chest
@@ -627,9 +627,11 @@ namespace LockedLootContainers
                         Transform closedChestTransform = ChestObjRef.transform;
                         Vector3 pos = ChestObjRef.transform.position;
 
+                        IsThisACrime(ChestInteractionType.Lockpick);
+
                         if (closedChestData.IsLockJammed)
                         {
-                            DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
+                            DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 2f);
                             if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                                 dfAudioSource.AudioSource.PlayOneShot(GetLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                         }
@@ -643,7 +645,7 @@ namespace LockedLootContainers
                             Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                             // Show success and play unlock sound
-                            DaggerfallUI.AddHUDText("The lock clicks open...", 4f);
+                            DaggerfallUI.AddHUDText("The lock clicks open...", 3f);
                             if (dfAudioSource != null)
                                 AudioSource.PlayClipAtPoint(GetLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -658,13 +660,13 @@ namespace LockedLootContainers
 
                             if (DoesLockJam(closedChestData, mechDamDealt))
                             {
-                                DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
+                                DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 3f);
                                 if (dfAudioSource != null)
                                     AudioSource.PlayClipAtPoint(GetLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                             else
                             {
-                                DaggerfallUI.AddHUDText("You fail to pick the lock...", 4f);
+                                DaggerfallUI.AddHUDText("You fail to pick the lock...", 2f);
                                 if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                                     dfAudioSource.AudioSource.PlayOneShot(GetLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                             }
@@ -672,7 +674,7 @@ namespace LockedLootContainers
                     }
                     else
                     {
-                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
                     }
                     break;
                 case PlayerActivateModes.Grab: // Bring Up Custom Chest Choice Window With Buttons To Choose What To Do, Also Might Be How You Can Attempt Disarming Traps Eventually?
@@ -684,7 +686,7 @@ namespace LockedLootContainers
                     }
                     else
                     {
-                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                        DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
                     }
                     break;
                 default:

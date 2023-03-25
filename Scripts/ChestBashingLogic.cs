@@ -22,6 +22,7 @@ namespace LockedLootContainers
 
                 int damDealt = 0;
                 chest.HasBeenBashed = true;
+                IsThisACrime(ChestInteractionType.Bash);
 
                 if (BashLockRoll(chest, weapon))
                 {
@@ -37,7 +38,7 @@ namespace LockedLootContainers
                         Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 4f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 3f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetLockBashAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -65,7 +66,7 @@ namespace LockedLootContainers
                         Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 3f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, critBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -81,7 +82,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
             }
         }
 
@@ -105,6 +106,8 @@ namespace LockedLootContainers
 
                 if (chest.ChestMaterial == ChestMaterials.Wood)
                 {
+                    IsThisACrime(ChestInteractionType.Bash);
+
                     if (SmashOpenChestWithArrowAttempt(chest, bowUsed))
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged significantly.)
@@ -115,7 +118,7 @@ namespace LockedLootContainers
                         Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                         // Show success and play smash open sound
-                        DaggerfallUI.AddHUDText("The arrow smashes a large hole in the chest, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText("The arrow smashes a large hole in the chest, granting access to its contents...", 3f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource)
                         {
                             if (dfAudioSource != null)
@@ -147,7 +150,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
             }
             return false;
         }

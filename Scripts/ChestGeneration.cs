@@ -37,6 +37,12 @@ namespace LockedLootContainers
             DaggerfallLoot[] lootPiles;
             MeshFilter[] containerModels;
 
+            if (DaggerfallWorkshop.Game.Banking.DaggerfallBankManager.IsHouseOwned(buildingData.buildingKey)) // Don't check for adding chests to player owned houses.
+                return;
+
+            if (buildingType == DFLocation.BuildingTypes.Ship && DaggerfallWorkshop.Game.Banking.DaggerfallBankManager.OwnsShip) // Don't check for adding chests to player owned ships.
+                return;
+
             bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
             // Misc Item Group Odds: Gold, LoC, G-Min, G-Max, LoC-Min, LoC-Max, Potions, Maps, Potion Recipes, Paintings, Soul-gems, Magic Items, Max Condition %, Min Condition %
@@ -84,7 +90,7 @@ namespace LockedLootContainers
                     miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
                     itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
                 }
-                else if (buildingType == DFLocation.BuildingTypes.AnyHouse)
+                else if (IsValidTownHouse(buildingType))
                 {
                     allowedMats = PermittedMaterials_All;
                     baseChestOdds = 25;
@@ -148,6 +154,8 @@ namespace LockedLootContainers
                         if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
                             goList.Add(containerModels[i].gameObject);
 
+                        // Would like to eventually have other "container" type models have a chance to be replaced with a custom chest, but for now I'll just leave it as it is, maybe in a future version.
+
                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
                     }
                     else
@@ -162,7 +170,13 @@ namespace LockedLootContainers
                     MeshFilter meshFilter = validGos[i].GetComponent<MeshFilter>();
                     DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
 
-                    ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds);
+                    int buildingQualityRoomMod = 0;
+                    if (buildingData.quality <= 7)
+                        buildingQualityRoomMod = (buildingData.quality * 10) - 80;
+                    else
+                        buildingQualityRoomMod = (buildingData.quality * 5) - 40;
+
+                    ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, buildingQualityRoomMod);
                 }
             }
         }
@@ -339,6 +353,8 @@ namespace LockedLootContainers
                         if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
                             goList.Add(containerModels[i].gameObject);
 
+                        // Would like to eventually have other "container" type models have a chance to be replaced with a custom chest, but for now I'll just leave it as it is, maybe in a future version.
+
                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
                     }
                     else
@@ -350,17 +366,20 @@ namespace LockedLootContainers
 
                 for (int i = 0; i < validGos.Length; i++)
                 {
-                    MeshFilter meshFilter = validGos[i].GetComponent<MeshFilter>();
+                    MeshFilter meshFilter = null;
                     DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
+
+                    if (lootPile == null) // So lootPiles also have a MeshFilter component, so the way before was causing chests to always replace loot-piles, will want to fix this better eventually.
+                        meshFilter = validGos[i].GetComponent<MeshFilter>();
 
                     ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds);
                 }
             }
         }
 
-        public static void ReplaceWithCustomChest(MeshFilter meshFilter, DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds)
+        public static void ReplaceWithCustomChest(MeshFilter meshFilter, DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds, int buildQualMod = 0)
         {
-            int totalRoomValueMod = 0;
+            int totalRoomValueMod = 0 + buildQualMod;
             Transform goTransform = null;
             Vector3 pos = new Vector3(0, 0, 0);
 
@@ -594,13 +613,20 @@ namespace LockedLootContainers
 
                 UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
-                Destroy(meshFilter.gameObject); // Placing this up here, maybe with this destroyed first the "AlignBillboardToGround" will work better when generating the chest?
+                Destroy(meshFilter.gameObject);
 
                 // Set position
                 Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
                 chestParentObj.transform.position = pos;
-                chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
-                GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
+
+                // Cast ray down to find ground below
+                RaycastHit hit;
+                Ray ray = new Ray(chestParentObj.transform.position + new Vector3(0, 0.2f, 0), Vector3.down);
+                if (!Physics.Raycast(ray, out hit, 2))
+                    return;
+
+                // Position bottom just above ground by adjusting parent gameobject
+                chestParentObj.transform.position = new Vector3(hit.point.x, hit.point.y - dfBillboard.Summary.Size.y * 0.08f, hit.point.z); // Not perfect, but seems to work alright in most cases.
 
                 Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 

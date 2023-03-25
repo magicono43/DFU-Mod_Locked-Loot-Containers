@@ -31,9 +31,11 @@ namespace LockedLootContainers
                 Transform closedChestTransform = ChestObjRef.transform;
                 Vector3 pos = ChestObjRef.transform.position;
 
+                IsThisACrime(ChestInteractionType.Magic_Lockpick);
+
                 if (closedChestData.IsLockJammed)
                 {
-                    DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 4f);
+                    DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 2f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.AudioSource.PlayOneShot(GetMagicLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                 }
@@ -45,7 +47,7 @@ namespace LockedLootContainers
                     Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
                     // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText("The lock effortlessly unlatches through use of magic...", 4f);
+                    DaggerfallUI.AddHUDText("The lock effortlessly unlatches through use of magic...", 3f);
                     if (dfAudioSource != null)
                         AudioSource.PlayClipAtPoint(GetMagicLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -59,13 +61,13 @@ namespace LockedLootContainers
 
                     if (DoesLockJam(closedChestData, mechDamDealt))
                     {
-                        DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 4f);
+                        DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 3f);
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetMagicLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                     else
                     {
-                        DaggerfallUI.AddHUDText("The unlock attempt failed...", 4f);
+                        DaggerfallUI.AddHUDText("The unlock attempt failed...", 2f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                             dfAudioSource.AudioSource.PlayOneShot(GetMagicLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                     }
@@ -73,7 +75,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
             }
 
             openEffect.CancelEffect();
@@ -188,6 +190,7 @@ namespace LockedLootContainers
                     return false;
 
                 chest.HasBeenBashed = true;
+                IsThisACrime(ChestInteractionType.Magic_Bash);
 
                 for (int i = 0; i < damOrDisin.Length; i++)
                 {
@@ -249,7 +252,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 5f);
+                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
             }
             return false;
         }

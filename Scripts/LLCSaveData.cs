@@ -264,8 +264,6 @@ namespace LockedLootContainers
             Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
             chestBillboard.SetMaterial(4733, 0);
             chestBillboard.transform.position = go.transform.position;
-            chestBillboard.transform.position += new Vector3(0, chestBillboard.Summary.Size.y / 2, 0);
-            GameObjectHelper.AlignBillboardToGround(go, chestBillboard.Summary.Size);
         }
 
         public static void AddOpenChestToSceneFromSave(OpenChestData data)

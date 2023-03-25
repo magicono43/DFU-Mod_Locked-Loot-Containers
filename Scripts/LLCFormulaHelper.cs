@@ -8,6 +8,8 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Guilds;
+using DaggerfallConnect.Arena2;
+using DaggerfallWorkshop.Utility;
 
 namespace LockedLootContainers
 {
@@ -274,7 +276,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static void IsThisACrimeCheck(ChestInteractionType interactionType)
+        public static void IsThisACrime(ChestInteractionType interactionType)
         {
             if (IsValidCrimeLocation())
             {
@@ -284,17 +286,18 @@ namespace LockedLootContainers
                 switch (interactionType)
                 {
                     case ChestInteractionType.Lockpick:
+                        GameManager.Instance.PlayerEntity.TallyCrimeGuildRequirements(true, 1);
                         if (LockpickDetectionCheck(buildingData, buildingType))
-                            sdsdfds; // Register crime and potential rep loses and such if detected, will work on this part tomorrow.
+                            RegisterDetectedPunishment(buildingData, buildingType);
                         break;
                     case ChestInteractionType.Magic_Lockpick:
+                        GameManager.Instance.PlayerEntity.TallyCrimeGuildRequirements(true, 1);
                         if (MagicLockpickDetectionCheck(buildingData, buildingType))
-                            sdsdfds; // Register crime and potential rep loses and such if detected, will work on this part tomorrow.
+                            RegisterDetectedPunishment(buildingData, buildingType);
                         break;
                     case ChestInteractionType.Bash:
                     case ChestInteractionType.Magic_Bash:
-                        // Register crime and potential rep loses and such if detected, will work on this part tomorrow.
-                        // Right now will always be detected when trying these forms of bashing, don't really think it would work out trying to bash open a chest "undetected."
+                        RegisterDetectedPunishment(buildingData, buildingType);
                         break;
                     default:
                         break;
@@ -312,7 +315,7 @@ namespace LockedLootContainers
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
             {
                 if (IsValidShop(bT) || bT == DFLocation.BuildingTypes.Tavern || bT == DFLocation.BuildingTypes.Temple || bT == DFLocation.BuildingTypes.GuildHall ||
-                    bT == DFLocation.BuildingTypes.AnyHouse || bT == DFLocation.BuildingTypes.Palace)
+                    IsValidTownHouse(bT) || bT == DFLocation.BuildingTypes.Palace)
                 {
                     return true;
                 }
@@ -349,6 +352,67 @@ namespace LockedLootContainers
                 return true;
         }
 
+        public static void RegisterDetectedPunishment(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes bT)
+        {
+            PlayerEntity playerEntity = GameManager.Instance.PlayerEntity;
+
+            if (playerEntity != null)
+            {
+                if (IsValidShop(bT) || bT == DFLocation.BuildingTypes.Tavern || IsValidTownHouse(bT) || bT == DFLocation.BuildingTypes.Palace)
+                {
+                    DaggerfallUI.AddHUDText("You were detected...", 2f);
+                    playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
+                    playerEntity.SpawnCityGuards(true);
+                }
+                else if (bT == DFLocation.BuildingTypes.Temple)
+                {
+                    int factionID = buildingData.factionID;
+                    FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
+                    string factionName = factionData.name;
+                    DaggerfallUI.AddHUDText("You were detected, " + factionName + " disproves of this transgression...", 3f);
+                    playerEntity.FactionData.ChangeReputation(factionID, -2, true);
+                    playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
+                    playerEntity.SpawnCityGuards(true);
+                }
+                else if (bT == DFLocation.BuildingTypes.GuildHall)
+                {
+                    int factionID = buildingData.factionID;
+
+                    if (factionID == (int)FactionFile.FactionIDs.The_Mages_Guild || factionID == (int)FactionFile.FactionIDs.The_Fighters_Guild || OwnedByKnightlyOrder(factionID))
+                    {
+                        FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
+                        string factionName = factionData.name;
+                        DaggerfallUI.AddHUDText("You were detected, " + factionName + " disproves of this transgression...", 3f);
+                        playerEntity.FactionData.ChangeReputation(factionID, -2, true);
+                        playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
+                        playerEntity.SpawnCityGuards(true);
+                    }
+                    else if (factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild)
+                    {
+                        DaggerfallUI.AddHUDText("You were detected, bad thieves bring shame to the entire guild...", 3f);
+                        playerEntity.FactionData.ChangeReputation(factionID, -4, true);
+                        FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
+                        if (factionData.rep < 0)
+                        {
+                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Rogue, 2, 3, 8); // Make 2 instances so maybe they will spawn more quickly?
+                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Rogue, 2, 3, 8);
+                        }
+                    }
+                    else if (factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood)
+                    {
+                        DaggerfallUI.AddHUDText("You were detected, The Dark Brotherhood does not approve stealing from your own kin...", 3f);
+                        playerEntity.FactionData.ChangeReputation(factionID, -4, true);
+                        FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
+                        if (factionData.rep < 0)
+                        {
+                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Assassin, 2, 3, 8); // Make 2 instances so maybe they will spawn more quickly?
+                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Assassin, 2, 3, 8);
+                        }
+                    }
+                }
+            }
+        }
+
         public static bool BuildingOpenCheck(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes buildingType)
         {
             /*
@@ -379,6 +443,50 @@ namespace LockedLootContainers
                 return hour < 6 || hour > 18 ? false : true;
             else
                 return true;
+        }
+
+        public static bool OwnedByKnightlyOrder(int factionID)
+        {
+            switch (factionID)
+            {
+                case (int)FactionFile.FactionIDs.The_Host_of_the_Horn:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Dragon:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Flame:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Hawk:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Owl:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Rose:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Wheel:
+                case (int)FactionFile.FactionIDs.The_Order_of_the_Candle:
+                case (int)FactionFile.FactionIDs.The_Order_of_the_Raven:
+                case (int)FactionFile.FactionIDs.The_Order_of_the_Scarab:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsValidTownHouse(DFLocation.BuildingTypes buildingType)
+        {
+            switch (buildingType) // Just including basically everything that I don't know what they represent, just in-case, can remove some if necessary when I do know more.
+            {
+                case DFLocation.BuildingTypes.AnyHouse:
+                case DFLocation.BuildingTypes.Town4:
+                case DFLocation.BuildingTypes.Town23:
+                case DFLocation.BuildingTypes.HouseForSale:
+                case DFLocation.BuildingTypes.Special1:
+                case DFLocation.BuildingTypes.Special2:
+                case DFLocation.BuildingTypes.Special3:
+                case DFLocation.BuildingTypes.Special4:
+                case DFLocation.BuildingTypes.House1:
+                case DFLocation.BuildingTypes.House2:
+                case DFLocation.BuildingTypes.House3:
+                case DFLocation.BuildingTypes.House4:
+                case DFLocation.BuildingTypes.House5:
+                case DFLocation.BuildingTypes.House6:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static bool HandleDestroyingLootItem(LLCObject chest, DaggerfallUnityItem item, DaggerfallUnityItem bashingWep, int wepSkillID) // Handles most of the "work" part of breaking/destroying loot items, removing the item and adding the respective "waste" item in its place.
