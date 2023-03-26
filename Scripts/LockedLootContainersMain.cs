@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/24/2023, 9:45 PM
+// Last Edit:		3/25/2023, 8:00 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -48,6 +48,11 @@ namespace LockedLootContainers
         // Mod Textures
         public Texture2D ChestChoiceMenuTexture;
         public Texture2D InspectionInfoGUITexture;
+
+        // Mod Prefabs?
+        public GameObject TestClosed3DChestPrefab;
+        public GameObject TestOpen3DChestPrefab;
+        public GameObject TestCoins3DChestPrefab;
 
         #region Mod Sound Variables
 
@@ -128,6 +133,8 @@ namespace LockedLootContainers
             PlayerActivate.RegisterCustomActivation(mod, 41811, DoNothingActivation);
             PlayerActivate.RegisterCustomActivation(mod, 41812, DoNothingActivation);
             PlayerActivate.RegisterCustomActivation(mod, 41813, DoNothingActivation);
+
+            PlayerActivate.RegisterCustomActivation(mod, 47330, ChestActivation);
 
             PlayerEnterExit.OnTransitionInterior += AddChests_OnTransitionInterior;
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
@@ -352,6 +359,10 @@ namespace LockedLootContainers
 
             success &= modManager.TryGetAsset("Chest_Choice_Menu", false, out ChestChoiceMenuTexture);
             success &= modManager.TryGetAsset("Inspection_Info_GUI", false, out InspectionInfoGUITexture);
+
+            success &= modManager.TryGetAsset("chest_close", false, out TestClosed3DChestPrefab);
+            success &= modManager.TryGetAsset("chest_open", false, out TestOpen3DChestPrefab);
+            success &= modManager.TryGetAsset("coins", false, out TestCoins3DChestPrefab);
 
             if (!success)
                 throw new Exception("LockedLootContainers: Missing texture asset");

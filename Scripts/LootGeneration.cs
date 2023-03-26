@@ -17,6 +17,8 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
+        public static int LastMaterialCreated { get; set; }
+
         public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] dungTypeMiscOdds, int[] dungTypeItemOdds)
         {
             int[] miscGroupOdds = (int[])dungTypeMiscOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.
@@ -37,6 +39,7 @@ namespace LockedLootContainers
                 }
             }
 
+            LastMaterialCreated = -1;
             float lowOddsMod = 0f;
             float midOddsMod = 0f;
             float highOddsMod = 0f;
@@ -503,16 +506,19 @@ namespace LockedLootContainers
 
             if (mod <= 1.8f)
             {
-                lootOdds = new float[] { 240*mod, 222*(mod*0.9f), 168*(mod*0.8f), 150*(mod*0.7f), 96*(mod*0.5f), 84*(mod*0.4f), 60*(mod*0.3f), 48*(mod*0.25f), 36*(mod*0.2f), 24*(mod*0.1f) };
+                lootOdds = new float[] { 100 * mod, 92 * (mod * 0.95f), 84 * (mod * 0.9f), 76 * (mod * 0.85f), 68 * (mod * 0.8f), 60 * (mod * 0.75f), 52 * (mod * 0.7f), 44 * (mod * 0.65f), 36 * (mod * 0.6f), 28 * (mod * 0.5f) };
             }
             else if (mod <= 3.1f)
             {
-                lootOdds = new float[] { 240*(mod*0.1f), 222*(mod*0.2f), 168*(mod*0.3f), 150*(mod*0.4f), 96*mod, 84*(mod*0.9f), 60*(mod*0.8f), 48*(mod*0.7f), 36*(mod*0.6f), 24*(mod*0.5f) };
+                lootOdds = new float[] { 100 * (mod * 0.6f), 92 * (mod * 0.65f), 84 * (mod * 0.7f), 76 * (mod * 0.75f), 68 * mod, 60 * (mod * 0.95f), 52 * (mod * 0.9f), 44 * (mod * 0.85f), 36 * (mod * 0.8f), 28 * (mod * 0.75f) };
             }
             else
             {
-                lootOdds = new float[] { 240*(mod*0.05f), 222*(mod*0.1f), 168*(mod*0.2f), 150*(mod*0.3f), 96*(mod*0.45f), 84*(mod*0.6f), 60*(mod*0.7f), 48*(mod*0.8f), 36*(mod*0.9f), 24*mod };
+                lootOdds = new float[] { 100 * (mod * 0.5f), 92 * (mod * 0.6f), 84 * (mod * 0.65f), 76 * (mod * 0.7f), 68 * (mod * 0.75f), 60 * (mod * 0.8f), 52 * (mod * 0.9f), 44 * (mod * 1.1f), 36 * (mod * 1.4f), 28 * (mod * 1.6f) };
             }
+
+            if (LastMaterialCreated >= 0)
+                lootOdds[LastMaterialCreated] = (int)Mathf.Floor(lootOdds[LastMaterialCreated] / 2); // This is here to reduce the odds of multiple of the same material loot showing up.
 
             for (int i = 0; i < lootOdds.Length; i++)
             {
@@ -546,6 +552,8 @@ namespace LockedLootContainers
                     index = i;
                 }
             }
+
+            LastMaterialCreated = index;
 
             if (isWeapon)
             {

@@ -59,65 +59,135 @@ namespace LockedLootContainers
                     switch (buildingType) // I'll deal with filling out the "loot-tables" for each later when I confirm that interior chest spawning actually works at all.
                     {
                         case DFLocation.BuildingTypes.Alchemist:
+                            allowedMats = new bool[] { true, true, true, false, true, true, false, false };
+                            baseChestOdds = 15;
+                            miscGroupOdds = new int[] { 15, 1, 20, 150, 750, 1500, 25, 0, 35, 0, 0, 0, 80, 25 };
+                            itemGroupOdds = new int[] { 15, 0, 0, 0, 0, 0, 0, 0, 25, 25, 10, 25, 5, 0, 0, 5, 0, 5, 60, 45, 45, 25, 15, 7, 40, 35 };
+                            break;
                         case DFLocation.BuildingTypes.Armorer:
+                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                            baseChestOdds = 25;
+                            miscGroupOdds = new int[] { 20, 1, 60, 400, 1500, 3500, 0, 0, 0, 0, 0, 0, 90, 40 };
+                            itemGroupOdds = new int[] { 1, 30, 30, 30, 30, 10, 10, 10, 25, 25, 0, 10, 5, 20, 5, 15, 0, 5, 0, 0, 0, 0, 0, 0, 0, 25 };
+                            break;
                         case DFLocation.BuildingTypes.WeaponSmith:
+                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                            baseChestOdds = 25;
+                            miscGroupOdds = new int[] { 20, 1, 60, 400, 1500, 3500, 0, 0, 0, 0, 0, 0, 90, 40 };
+                            itemGroupOdds = new int[] { 1, 10, 10, 10, 20, 35, 35, 35, 25, 25, 0, 10, 5, 15, 5, 15, 0, 5, 0, 0, 0, 0, 0, 0, 0, 20 };
+                            break;
                         case DFLocation.BuildingTypes.GeneralStore:
+                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                            baseChestOdds = 25;
+                            miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
+                            itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
+                            break;
                         case DFLocation.BuildingTypes.PawnShop:
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                            baseChestOdds = 35;
+                            miscGroupOdds = new int[] { 20, 1, 30, 500, 1000, 2250, 0, 6, 0, 20, 0, 4, 70, 25 };
+                            itemGroupOdds = new int[] { 2, 5, 5, 5, 5, 5, 5, 5, 25, 25, 10, 15, 15, 0, 5, 5, 10, 20, 0, 0, 0, 0, 0, 0, 0, 15 };
+                            break;
                         case DFLocation.BuildingTypes.GemStore:
+                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                            baseChestOdds = 30;
+                            miscGroupOdds = new int[] { 20, 1, 30, 650, 1500, 3000, 0, 0, 0, 0, 0, 0, 80, 35 };
+                            itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 25, 25, 0, 50, 50, 0, 0, 5, 0, 10, 0, 0, 0, 0, 0, 0, 0, 35 };
+                            break;
                         case DFLocation.BuildingTypes.ClothingStore:
+                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                            baseChestOdds = 15;
+                            miscGroupOdds = new int[] { 20, 1, 35, 550, 850, 1850, 0, 0, 0, 0, 0, 0, 90, 55 };
+                            itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 125, 125, 0, 5, 15, 0, 0, 5, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0 };
+                            break;
                         case DFLocation.BuildingTypes.Bookseller:
                         case DFLocation.BuildingTypes.Library:
+                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                            baseChestOdds = 15;
+                            miscGroupOdds = new int[] { 10, 1, 15, 250, 500, 1000, 0, 20, 20, 1, 0, 0, 70, 30 };
+                            itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 0, 0, 0, 30, 30, 75, 5, 5, 0, 10, 40, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
+                            break;
                         case DFLocation.BuildingTypes.Bank:
+                            allowedMats = new bool[] { false, false, true, true, false, true, true, true };
+                            baseChestOdds = 40;
+                            miscGroupOdds = new int[] { 50, 10, 200, 950, 3000, 7000, 0, 0, 0, 1, 0, 0, 70, 30 };
+                            itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 25, 25, 5, 5, 5, 0, 10, 20, 0, 5, 0, 0, 0, 0, 0, 0, 0, 25 };
+                            break;
                         default:
-                            allowedMats = PermittedMaterials_All;
+                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
                             baseChestOdds = 25;
-                            miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                            itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                            miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
+                            itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
                             break;
                     }
                 }
                 else if (buildingType == DFLocation.BuildingTypes.Tavern)
                 {
-                    allowedMats = PermittedMaterials_All;
-                    baseChestOdds = 25;
-                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                    allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                    baseChestOdds = 35;
+                    miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 3, 2, 0, 0, 1, 65, 20 };
+                    itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 40, 40, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 0, 0, 0, 0, 5 };
                 }
                 else if (buildingType == DFLocation.BuildingTypes.Palace)
                 {
-                    allowedMats = PermittedMaterials_All;
-                    baseChestOdds = 25;
-                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                    allowedMats = new bool[] { false, true, true, true, true, true, true, true };
+                    baseChestOdds = 50;
+                    miscGroupOdds = new int[] { 50, 3, 200, 800, 2000, 5500, 10, 2, 0, 8, 1, 2, 75, 35 };
+                    itemGroupOdds = new int[] { 5, 15, 15, 15, 15, 15, 15, 15, 45, 45, 10, 10, 10, 5, 5, 5, 3, 5, 0, 0, 0, 0, 0, 0, 0, 20 };
                 }
                 else if (IsValidTownHouse(buildingType))
                 {
-                    allowedMats = PermittedMaterials_All;
-                    baseChestOdds = 25;
-                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                    allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                    baseChestOdds = 30;
+                    miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 2, 1, 1, 1, 1, 70, 25 };
+                    itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 35, 35, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 10, 5, 2, 5, 5 };
                 }
                 else if (buildingType == DFLocation.BuildingTypes.Temple)
                 {
-                    allowedMats = PermittedMaterials_All;
-                    baseChestOdds = 25;
-                    miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                    itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                    allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                    baseChestOdds = 20;
+                    miscGroupOdds = new int[] { 40, 1, 100, 900, 550, 1300, 15, 0, 5, 1, 1, 2, 75, 30 };
+                    itemGroupOdds = new int[] { 3, 5, 5, 5, 5, 5, 5, 5, 25, 25, 10, 10, 10, 0, 5, 5, 10, 35, 15, 15, 15, 15, 8, 3, 10, 10 };
                 }
                 else if (buildingType == DFLocation.BuildingTypes.GuildHall)
                 {
                     switch (buildingData.factionID)
                     {
                         case (int)FactionFile.FactionIDs.The_Mages_Guild:
+                            allowedMats = new bool[] { false, false, false, false, true, true, true, true };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 15, 1, 15, 300, 750, 1650, 10, 1, 3, 0, 3, 15, 65, 25 };
+                            itemGroupOdds = new int[] { 3, 0, 0, 0, 0, 10, 0, 0, 25, 25, 25, 0, 5, 0, 10, 10, 0, 0, 10, 10, 10, 10, 8, 3, 10, 10 };
+                            break;
                         case (int)FactionFile.FactionIDs.The_Fighters_Guild:
+                            allowedMats = new bool[] { false, true, true, true, false, false, false, false };
+                            baseChestOdds = 30;
+                            miscGroupOdds = new int[] { 30, 1, 40, 500, 800, 1750, 5, 5, 0, 0, 0, 1, 85, 35 };
+                            itemGroupOdds = new int[] { 3, 15, 15, 15, 25, 30, 30, 30, 20, 20, 0, 0, 5, 10, 10, 25, 0, 5, 0, 0, 0, 10, 0, 0, 0, 10 };
+                            break;
                         case (int)FactionFile.FactionIDs.Generic_Knightly_Order: // Will have to test if this one actually works for all the knightly orders or not, will see.
+                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                            baseChestOdds = 30;
+                            miscGroupOdds = new int[] { 20, 1, 30, 350, 700, 1500, 5, 5, 0, 0, 0, 1, 90, 45 };
+                            itemGroupOdds = new int[] { 1, 30, 30, 30, 35, 20, 20, 20, 25, 25, 5, 5, 5, 5, 5, 15, 3, 10, 0, 0, 0, 5, 0, 0, 0, 5 };
+                            break;
                         case (int)FactionFile.FactionIDs.The_Thieves_Guild:
+                            allowedMats = new bool[] { true, true, false, false, false, true, false, false };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 25, 0, 10, 200, 0, 0, 0, 0, 0, 3, 0, 2, 60, 20 };
+                            itemGroupOdds = new int[] { 15, 35, 35, 0, 10, 40, 15, 0, 20, 20, 0, 15, 15, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 15 };
+                            break;
                         case (int)FactionFile.FactionIDs.The_Dark_Brotherhood:
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 435, 1, 75, 750, 1000, 3000, 25, 3, 10, 0, 4, 1, 70, 25 };
+                            itemGroupOdds = new int[] { 5, 25, 25, 5, 5, 50, 25, 5, 20, 20, 5, 5, 10, 0, 0, 10, 0, 7, 7, 7, 7, 20, 15, 5, 15, 10 };
+                            break;
                         default:
-                            allowedMats = PermittedMaterials_All;
-                            baseChestOdds = 25;
-                            miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                            itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 3, 2, 0, 0, 1, 65, 20 };
+                            itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 40, 40, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 0, 0, 0, 0, 5 };
                             break;
                     }
                 }
@@ -574,9 +644,13 @@ namespace LockedLootContainers
                 Transform oldModelTransform = meshFilter.transform;
                 Vector3 pos = meshFilter.transform.position;
 
-                GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldModelTransform.parent.parent);
+                //GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldModelTransform.parent.parent);
 
-                LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
+                GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestClosed3DChestPrefab, GameObjectHelper.GetGoModelName(47330), oldModelTransform.parent.parent, pos);
+                Collider col = chestGo.AddComponent<BoxCollider>();
+                col.isTrigger = true;
+
+                LLCObject llcObj = chestGo.AddComponent<LLCObject>();
                 llcObj.AttachedLoot = new ItemCollection();
                 llcObj.LoadID = newLoadID;
 
@@ -616,6 +690,7 @@ namespace LockedLootContainers
                 Destroy(meshFilter.gameObject);
 
                 // Set position
+                /*
                 Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
                 chestParentObj.transform.position = pos;
 
@@ -627,8 +702,9 @@ namespace LockedLootContainers
 
                 // Position bottom just above ground by adjusting parent gameobject
                 chestParentObj.transform.position = new Vector3(hit.point.x, hit.point.y - dfBillboard.Summary.Size.y * 0.08f, hit.point.z); // Not perfect, but seems to work alright in most cases.
+                */
 
-                Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
+                //Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
                 // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
 
@@ -645,9 +721,13 @@ namespace LockedLootContainers
                     Transform oldLootPileTransform = lootPile.transform;
                     Vector3 pos = lootPile.transform.position;
 
-                    GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldLootPileTransform.parent.parent);
+                    //GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldLootPileTransform.parent.parent);
 
-                    LLCObject llcObj = chestParentObj.AddComponent<LLCObject>();
+                    GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestClosed3DChestPrefab, GameObjectHelper.GetGoModelName(47330), oldLootPileTransform.parent.parent, pos);
+                    Collider col = chestGo.AddComponent<BoxCollider>();
+                    col.isTrigger = true;
+
+                    LLCObject llcObj = chestGo.AddComponent<LLCObject>();
                     llcObj.Oldloot = oldPileLoot;
                     llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
                     llcObj.LoadID = newLoadID;
@@ -686,12 +766,14 @@ namespace LockedLootContainers
                     UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
                     // Set position
+                    /*
                     Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
                     chestParentObj.transform.position = pos;
                     chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
                     GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
+                    */
 
-                    Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
+                    //Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
                     lootPile.Items.Clear(); // Likely not necessary, but doing it just in case.
                     Destroy(lootPile.gameObject);
