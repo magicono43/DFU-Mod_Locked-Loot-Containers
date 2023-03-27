@@ -165,16 +165,17 @@
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Audio/Magic_Lockpicking/Lockpick_Successful_Magic_6.wav",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Audio/Bash_Open_Chest/WoW_Bomb_Explode_Pumpkin_3.wav",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/LLCSaveData.cs",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/chest_close.prefab",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/chest_open.FBX",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/chest_open.prefab",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/coins.prefab",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/Materials/gold.mat",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/coins.FBX",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/Materials/chest_simple.mat",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/chest_close.FBX",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/Textures/coins.png",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/FreeUnityAssetChest/Textures/chest_simple.png"
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_open_full.prefab",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/coins.FBX",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Textures/chest_simple.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Materials/chest_simple.mat",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/coins.prefab",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Textures/coins.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_open_empty.prefab",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_close.FBX",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Materials/gold.mat",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_close.prefab",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_open.FBX"
     ],
     "Dependencies": []
 }

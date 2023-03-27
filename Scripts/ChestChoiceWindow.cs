@@ -134,10 +134,24 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 {
                     chest.PicksAttempted++;
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
-                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
-                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
-                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-                    GameObject.Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                    //DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
+                    //openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
+                    //openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                    //GameObject.Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+
+                    GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestOpenFull3DChestPrefab, GameObjectHelper.GetGoModelName(47331), closedChestTransform.parent, pos);
+                    chestGo.transform.rotation = chest.gameObject.transform.rotation;
+                    Collider col = chestGo.AddComponent<BoxCollider>();
+                    DaggerfallLoot openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                    if (openChestLoot)
+                    {
+                        // Set as house container (private furniture) and assign load id
+                        openChestLoot.ContainerType = LootContainerTypes.Nothing;
+                        openChestLoot.ContainerImage = InventoryContainerImages.Chest;
+                        openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                        //openChestLoot.TextureRecord = (int)obj.ModelIdNum % 100;
+                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                    }
 
                     // Show success and play unlock sound
                     DaggerfallUI.AddHUDText("The lock clicks open...", 3f);

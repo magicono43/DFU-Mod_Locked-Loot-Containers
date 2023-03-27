@@ -648,7 +648,7 @@ namespace LockedLootContainers
 
                 GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestClosed3DChestPrefab, GameObjectHelper.GetGoModelName(47330), oldModelTransform.parent.parent, pos);
                 Collider col = chestGo.AddComponent<BoxCollider>();
-                col.isTrigger = true;
+                chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
 
                 LLCObject llcObj = chestGo.AddComponent<LLCObject>();
                 llcObj.AttachedLoot = new ItemCollection();
@@ -725,7 +725,7 @@ namespace LockedLootContainers
 
                     GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestClosed3DChestPrefab, GameObjectHelper.GetGoModelName(47330), oldLootPileTransform.parent.parent, pos);
                     Collider col = chestGo.AddComponent<BoxCollider>();
-                    col.isTrigger = true;
+                    chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
 
                     LLCObject llcObj = chestGo.AddComponent<LLCObject>();
                     llcObj.Oldloot = oldPileLoot;

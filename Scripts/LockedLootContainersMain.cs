@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/25/2023, 8:00 PM
+// Last Edit:		3/26/2023, 11:10 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -39,6 +39,8 @@ namespace LockedLootContainers
         public static GameObject MainCamera { get; set; }
         public static int PlayerLayerMask { get; set; }
         public static AudioClip LastSoundPlayed { get { return lastSoundPlayed; } set { lastSoundPlayed = value; } }
+        public static IUserInterfaceWindow LastUIWindow { get; set; }
+        public static DaggerfallLoot LastLootedChest { get; set; }
         public static PlayerEntity Player { get { return GameManager.Instance.PlayerEntity; } }
         public static PlayerActivateModes CurrentMode { get { return GameManager.Instance.PlayerActivate.CurrentMode; } }
         public static WeaponManager WepManager { get { return GameManager.Instance.WeaponManager; } }
@@ -51,8 +53,8 @@ namespace LockedLootContainers
 
         // Mod Prefabs?
         public GameObject TestClosed3DChestPrefab;
-        public GameObject TestOpen3DChestPrefab;
-        public GameObject TestCoins3DChestPrefab;
+        public GameObject TestOpenFull3DChestPrefab;
+        public GameObject TestOpenEmpty3DChestPrefab;
 
         #region Mod Sound Variables
 
@@ -138,6 +140,7 @@ namespace LockedLootContainers
 
             PlayerEnterExit.OnTransitionInterior += AddChests_OnTransitionInterior;
             PlayerEnterExit.OnTransitionDungeonInterior += AddChests_OnTransitionDungeonInterior;
+            DaggerfallUI.UIManager.OnWindowChange += UIManager_ChangeChestGraphicOnInventoryWindowClosed;
 
             // Load Resources
             LoadTextures();
@@ -361,14 +364,12 @@ namespace LockedLootContainers
             success &= modManager.TryGetAsset("Inspection_Info_GUI", false, out InspectionInfoGUITexture);
 
             success &= modManager.TryGetAsset("chest_close", false, out TestClosed3DChestPrefab);
-            success &= modManager.TryGetAsset("chest_open", false, out TestOpen3DChestPrefab);
-            success &= modManager.TryGetAsset("coins", false, out TestCoins3DChestPrefab);
+            success &= modManager.TryGetAsset("chest_open_full", false, out TestOpenFull3DChestPrefab);
+            success &= modManager.TryGetAsset("chest_open_empty", false, out TestOpenEmpty3DChestPrefab);
 
             if (!success)
                 throw new Exception("LockedLootContainers: Missing texture asset");
         }
-
-        // For Testing Custom Windows
 
         public static void RegisterLLCCommands()
         {
@@ -589,7 +590,68 @@ namespace LockedLootContainers
             }
         }
 
-        // For Testing Custom Windows
+        // Triggered when the DaggerfallInventoryWindow UI window is closed
+        public static void UIManager_ChangeChestGraphicOnInventoryWindowClosed(object sender, EventArgs e)
+        {
+            if (!GameManager.Instance.StateManager.GameInProgress)
+                return;
+
+            if (GameManager.Instance.StateManager.LastState == StateManager.StateTypes.Game || GameManager.Instance.StateManager.LastState == StateManager.StateTypes.UI)
+            {
+                if (DaggerfallUI.Instance.UserInterfaceManager.TopWindow is DaggerfallInventoryWindow)
+                    LastLootedChest = DaggerfallUI.Instance.InventoryWindow.LootTarget;
+
+                if (DaggerfallUI.UIManager.WindowCount > 0)
+                    LastUIWindow = DaggerfallUI.Instance.UserInterfaceManager.TopWindow;
+
+                if (DaggerfallUI.UIManager.WindowCount == 0 && LastUIWindow is DaggerfallInventoryWindow)
+                {
+                    if (LastLootedChest != null)
+                    {
+                        if (LastLootedChest.ContainerType == LootContainerTypes.Nothing && LastLootedChest.ContainerImage == InventoryContainerImages.Chest)
+                        {
+                            if (LastLootedChest.Items.Count == 0)
+                            {
+                                GameObject emptyChestGo = GameObjectHelper.InstantiatePrefab(Instance.TestOpenEmpty3DChestPrefab, GameObjectHelper.GetGoModelName(47332), LastLootedChest.gameObject.transform.parent, LastLootedChest.gameObject.transform.position);
+                                emptyChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
+                                Collider col = emptyChestGo.AddComponent<BoxCollider>();
+                                DaggerfallLoot chestLoot = emptyChestGo.AddComponent<DaggerfallLoot>();
+                                if (chestLoot)
+                                {
+                                    // Set as house container (private furniture) and assign load id
+                                    chestLoot.ContainerType = LootContainerTypes.Nothing;
+                                    chestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                    chestLoot.LoadID = LastLootedChest.LoadID;
+                                    //openChestLoot.TextureRecord = (int)obj.ModelIdNum % 100;
+                                    chestLoot.Items.TransferAll(LastLootedChest.Items);
+                                }
+                                Destroy(LastLootedChest.gameObject);
+                            }
+                            else
+                            {
+                                GameObject filledChestGo = GameObjectHelper.InstantiatePrefab(Instance.TestOpenFull3DChestPrefab, GameObjectHelper.GetGoModelName(47331), LastLootedChest.gameObject.transform.parent, LastLootedChest.gameObject.transform.position);
+                                filledChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
+                                Collider col = filledChestGo.AddComponent<BoxCollider>();
+                                DaggerfallLoot chestLoot = filledChestGo.AddComponent<DaggerfallLoot>();
+                                if (chestLoot)
+                                {
+                                    // Set as house container (private furniture) and assign load id
+                                    chestLoot.ContainerType = LootContainerTypes.Nothing;
+                                    chestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                    chestLoot.LoadID = LastLootedChest.LoadID;
+                                    //openChestLoot.TextureRecord = (int)obj.ModelIdNum % 100;
+                                    chestLoot.Items.TransferAll(LastLootedChest.Items);
+                                }
+                                Destroy(LastLootedChest.gameObject);
+                            }
+                        }
+                    }
+
+                    LastUIWindow = null;
+                    LastLootedChest = null;
+                }
+            }
+        }
 
         private static void DoNothingActivation(RaycastHit hit)
         {
@@ -650,10 +712,24 @@ namespace LockedLootContainers
                         {
                             closedChestData.PicksAttempted++;
                             ApplyLockPickAttemptCosts();
-                            DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
-                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
-                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-                            Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                            //DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
+                            //openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
+                            //openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            //Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+
+                            GameObject chestGo = GameObjectHelper.InstantiatePrefab(Instance.TestOpenFull3DChestPrefab, GameObjectHelper.GetGoModelName(47331), closedChestTransform.parent, pos);
+                            chestGo.transform.rotation = closedChestData.gameObject.transform.rotation;
+                            Collider col = chestGo.AddComponent<BoxCollider>();
+                            DaggerfallLoot openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            if (openChestLoot)
+                            {
+                                // Set as house container (private furniture) and assign load id
+                                openChestLoot.ContainerType = LootContainerTypes.Nothing;
+                                openChestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                                //openChestLoot.TextureRecord = (int)obj.ModelIdNum % 100;
+                                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            }
 
                             // Show success and play unlock sound
                             DaggerfallUI.AddHUDText("The lock clicks open...", 3f);

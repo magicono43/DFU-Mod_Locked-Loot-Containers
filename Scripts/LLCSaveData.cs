@@ -70,7 +70,7 @@ namespace LockedLootContainers
 
         public object GetSaveData()
         {
-            Dictionary<ulong, ClosedChestData> closedChestEntries = new Dictionary<ulong, ClosedChestData>();
+            Dictionary<ulong, ClosedChestData> closedChestEntries = new Dictionary<ulong, ClosedChestData>(); // Tomorrow work on getting the save-data to work for the 3D chest models and such, etc.
             Dictionary<ulong, OpenChestData> openChestEntries = new Dictionary<ulong, OpenChestData>();
             LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
 
