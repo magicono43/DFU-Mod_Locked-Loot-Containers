@@ -18,6 +18,7 @@ namespace LockedLootContainers
     {
         public ulong loadID;
         public Vector3 currentPosition;
+        public Quaternion currentRotation;
         public int[] recentInspectValues;
         public bool isLockJammed;
         public bool hasBeenBashed;
@@ -44,6 +45,7 @@ namespace LockedLootContainers
     {
         public ulong loadID;
         public Vector3 currentPosition;
+        public Quaternion currentRotation;
         public int textureArchive;
         public int textureRecord;
         public ItemData_v1[] items;
@@ -70,7 +72,7 @@ namespace LockedLootContainers
 
         public object GetSaveData()
         {
-            Dictionary<ulong, ClosedChestData> closedChestEntries = new Dictionary<ulong, ClosedChestData>(); // Tomorrow work on getting the save-data to work for the 3D chest models and such, etc.
+            Dictionary<ulong, ClosedChestData> closedChestEntries = new Dictionary<ulong, ClosedChestData>();
             Dictionary<ulong, OpenChestData> openChestEntries = new Dictionary<ulong, OpenChestData>();
             LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
 
@@ -85,6 +87,7 @@ namespace LockedLootContainers
                     {
                         loadID = closedChests[i].LoadID,
                         currentPosition = closedChests[i].transform.position,
+                        currentRotation = closedChests[i].transform.rotation,
                         recentInspectValues = closedChests[i].RecentInspectValues,
                         isLockJammed = closedChests[i].IsLockJammed,
                         hasBeenBashed = closedChests[i].HasBeenBashed,
@@ -130,6 +133,7 @@ namespace LockedLootContainers
                     {
                         loadID = openChestList[i].LoadID,
                         currentPosition = openChestList[i].transform.position,
+                        currentRotation = openChestList[i].transform.rotation,
                         textureArchive = openChestList[i].TextureArchive,
                         textureRecord = openChestList[i].TextureRecord,
                         items = openChestList[i].Items.SerializeItems()
@@ -232,10 +236,23 @@ namespace LockedLootContainers
             if (data.loadID <= 0)
                 return;
 
-            GameObject go = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, GameObjectHelper.GetBestParent());
-            LLCObject chest = go.AddComponent<LLCObject>();
+            GameObject go = null;
+            LLCObject chest = null;
+            if (ChestGraphic == 0) // Use sprite based graphics for chests
+            {
+                go = GameObjectHelper.CreateDaggerfallBillboardGameObject(LockedLootContainersMain.ClosedChestSpriteID, 0, GameObjectHelper.GetBestParent());
+                chest = go.AddComponent<LLCObject>();
+            }
+            else // Use 3D models for chests
+            {
+                GameObject usedModelPrefab = (ChestGraphic == 1) ? LockedLootContainersMain.Instance.LowPolyClosedChestPrefab : LockedLootContainersMain.Instance.HighPolyClosedChestPrefab;
+                go = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(LockedLootContainersMain.ClosedChestModelID), GameObjectHelper.GetBestParent(), new Vector3(0, 0, 0));
+                chest = go.AddComponent<LLCObject>();
+                Collider col = go.AddComponent<BoxCollider>();
+            }
 
             go.transform.position = data.currentPosition;
+            go.transform.rotation = data.currentRotation;
             ItemCollection loot = new ItemCollection();
             loot.DeserializeItems(data.attachedLoot);
 
@@ -261,9 +278,12 @@ namespace LockedLootContainers
             chest.LockMechCurrentHP = data.lockMechCurrentHP;
             chest.AttachedLoot = loot;
 
-            Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
-            chestBillboard.SetMaterial(4733, 0);
-            chestBillboard.transform.position = go.transform.position;
+            if (ChestGraphic == 0) // Use sprite based graphics for chests
+            {
+                Billboard chestBillboard = go.GetComponent<DaggerfallBillboard>();
+                chestBillboard.SetMaterial(LockedLootContainersMain.ClosedChestSpriteID, 0);
+                chestBillboard.transform.position = go.transform.position;
+            }
         }
 
         public static void AddOpenChestToSceneFromSave(OpenChestData data)
@@ -271,10 +291,56 @@ namespace LockedLootContainers
             if (data.loadID <= 0)
                 return;
 
-            DaggerfallLoot openChest = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, data.currentPosition, GameObjectHelper.GetBestParent(), data.textureArchive, data.textureRecord, data.loadID, null, false);
-            openChest.gameObject.name = GameObjectHelper.GetGoFlatName(data.textureArchive, data.textureRecord);
-            openChest.Items.DeserializeItems(data.items);
-            GameObject.Destroy(openChest.GetComponent<SerializableLootContainer>());
+            if (data.items.Length == 0)
+            {
+                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                {
+                    DaggerfallLoot openChest = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, data.currentPosition, GameObjectHelper.GetBestParent(), data.textureArchive, data.textureRecord, data.loadID, null, false);
+                    openChest.gameObject.name = GameObjectHelper.GetGoFlatName(data.textureArchive, data.textureRecord);
+                    openChest.Items.DeserializeItems(data.items);
+                    GameObject.Destroy(openChest.GetComponent<SerializableLootContainer>());
+                }
+                else // Use 3D models for chests
+                {
+                    GameObject usedModelPrefab = (ChestGraphic == 1) ? LockedLootContainersMain.Instance.LowPolyOpenEmptyChestPrefab : LockedLootContainersMain.Instance.HighPolyOpenEmptyChestPrefab;
+                    GameObject go = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(LockedLootContainersMain.OpenEmptyChestModelID), GameObjectHelper.GetBestParent(), data.currentPosition);
+                    go.transform.rotation = data.currentRotation;
+                    Collider col = go.AddComponent<BoxCollider>();
+                    DaggerfallLoot chestLoot = go.AddComponent<DaggerfallLoot>();
+                    if (chestLoot)
+                    {
+                        chestLoot.ContainerType = LootContainerTypes.Nothing;
+                        chestLoot.ContainerImage = InventoryContainerImages.Chest;
+                        chestLoot.LoadID = data.loadID;
+                        chestLoot.Items.DeserializeItems(data.items);
+                    }
+                }
+            }
+            else
+            {
+                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                {
+                    DaggerfallLoot openChest = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, data.currentPosition, GameObjectHelper.GetBestParent(), data.textureArchive, data.textureRecord, data.loadID, null, false);
+                    openChest.gameObject.name = GameObjectHelper.GetGoFlatName(data.textureArchive, data.textureRecord);
+                    openChest.Items.DeserializeItems(data.items);
+                    GameObject.Destroy(openChest.GetComponent<SerializableLootContainer>());
+                }
+                else // Use 3D models for chests
+                {
+                    GameObject usedModelPrefab = (ChestGraphic == 1) ? LockedLootContainersMain.Instance.LowPolyOpenFullChestPrefab : LockedLootContainersMain.Instance.HighPolyOpenFullChestPrefab;
+                    GameObject go = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(LockedLootContainersMain.OpenFullChestModelID), GameObjectHelper.GetBestParent(), data.currentPosition);
+                    go.transform.rotation = data.currentRotation;
+                    Collider col = go.AddComponent<BoxCollider>();
+                    DaggerfallLoot chestLoot = go.AddComponent<DaggerfallLoot>();
+                    if (chestLoot)
+                    {
+                        chestLoot.ContainerType = LootContainerTypes.Nothing;
+                        chestLoot.ContainerImage = InventoryContainerImages.Chest;
+                        chestLoot.LoadID = data.loadID;
+                        chestLoot.Items.DeserializeItems(data.items);
+                    }
+                }
+            }
         }
     }
 }

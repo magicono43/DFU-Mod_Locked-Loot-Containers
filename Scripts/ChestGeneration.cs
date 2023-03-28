@@ -637,22 +637,27 @@ namespace LockedLootContainers
             if (permitMatsCount <= 0)
                 return;
 
-            ulong newLoadID = DaggerfallUnity.NextUID;
-
             if (meshFilter) // For right now, just assuming the model is detecting one of the "useless" vanilla chest models and nothing else that might have a loot-pile component attached.
             {
                 Transform oldModelTransform = meshFilter.transform;
                 Vector3 pos = meshFilter.transform.position;
 
-                //GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldModelTransform.parent.parent);
-
-                GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestClosed3DChestPrefab, GameObjectHelper.GetGoModelName(47330), oldModelTransform.parent.parent, pos);
-                Collider col = chestGo.AddComponent<BoxCollider>();
-                chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                GameObject chestGo = null;
+                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                {
+                    chestGo = GameObjectHelper.CreateDaggerfallBillboardGameObject(ClosedChestSpriteID, 0, oldModelTransform.parent.parent);
+                }
+                else // Use 3D models for chests
+                {
+                    GameObject usedModelPrefab = (ChestGraphic == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
+                    chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldModelTransform.parent.parent, pos);
+                    Collider col = chestGo.AddComponent<BoxCollider>();
+                    chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                }
 
                 LLCObject llcObj = chestGo.AddComponent<LLCObject>();
                 llcObj.AttachedLoot = new ItemCollection();
-                llcObj.LoadID = newLoadID;
+                llcObj.LoadID = DaggerfallUnity.NextUID;
 
                 // Creates random seed for determining chest material value
                 string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();
@@ -689,20 +694,21 @@ namespace LockedLootContainers
 
                 Destroy(meshFilter.gameObject);
 
-                // Set position
-                /*
-                Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
-                chestParentObj.transform.position = pos;
+                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                {
+                    // Set position
+                    Billboard dfBillboard = chestGo.GetComponent<Billboard>();
+                    chestGo.transform.position = pos;
 
-                // Cast ray down to find ground below
-                RaycastHit hit;
-                Ray ray = new Ray(chestParentObj.transform.position + new Vector3(0, 0.2f, 0), Vector3.down);
-                if (!Physics.Raycast(ray, out hit, 2))
-                    return;
+                    // Cast ray down to find ground below
+                    RaycastHit hit;
+                    Ray ray = new Ray(chestGo.transform.position + new Vector3(0, 0.2f, 0), Vector3.down);
+                    if (!Physics.Raycast(ray, out hit, 2))
+                        return;
 
-                // Position bottom just above ground by adjusting parent gameobject
-                chestParentObj.transform.position = new Vector3(hit.point.x, hit.point.y - dfBillboard.Summary.Size.y * 0.08f, hit.point.z); // Not perfect, but seems to work alright in most cases.
-                */
+                    // Position bottom just above ground by adjusting parent gameobject
+                    chestGo.transform.position = new Vector3(hit.point.x, hit.point.y - dfBillboard.Summary.Size.y * 0.08f, hit.point.z); // Not perfect, but seems to work alright in most cases.
+                }
 
                 //Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 
@@ -721,16 +727,23 @@ namespace LockedLootContainers
                     Transform oldLootPileTransform = lootPile.transform;
                     Vector3 pos = lootPile.transform.position;
 
-                    //GameObject chestParentObj = GameObjectHelper.CreateDaggerfallBillboardGameObject(4733, 0, oldLootPileTransform.parent.parent);
-
-                    GameObject chestGo = GameObjectHelper.InstantiatePrefab(LockedLootContainersMain.Instance.TestClosed3DChestPrefab, GameObjectHelper.GetGoModelName(47330), oldLootPileTransform.parent.parent, pos);
-                    Collider col = chestGo.AddComponent<BoxCollider>();
-                    chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                    GameObject chestGo = null;
+                    if (ChestGraphic == 0) // Use sprite based graphics for chests
+                    {
+                        chestGo = GameObjectHelper.CreateDaggerfallBillboardGameObject(ClosedChestSpriteID, 0, oldLootPileTransform.parent.parent);
+                    }
+                    else // Use 3D models for chests
+                    {
+                        GameObject usedModelPrefab = (ChestGraphic == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
+                        chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldLootPileTransform.parent.parent, pos);
+                        Collider col = chestGo.AddComponent<BoxCollider>();
+                        chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                    }
 
                     LLCObject llcObj = chestGo.AddComponent<LLCObject>();
                     llcObj.Oldloot = oldPileLoot;
                     llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
-                    llcObj.LoadID = newLoadID;
+                    llcObj.LoadID = DaggerfallUnity.NextUID;
 
                     // Creates random seed for determining chest material value
                     string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();
@@ -765,13 +778,14 @@ namespace LockedLootContainers
 
                     UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
-                    // Set position
-                    /*
-                    Billboard dfBillboard = chestParentObj.GetComponent<Billboard>();
-                    chestParentObj.transform.position = pos;
-                    chestParentObj.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
-                    GameObjectHelper.AlignBillboardToGround(chestParentObj, dfBillboard.Summary.Size);
-                    */
+                    if (ChestGraphic == 0) // Use sprite based graphics for chests
+                    {
+                        // Set position
+                        Billboard dfBillboard = chestGo.GetComponent<Billboard>();
+                        chestGo.transform.position = pos;
+                        chestGo.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
+                        GameObjectHelper.AlignBillboardToGround(chestGo, dfBillboard.Summary.Size);
+                    }
 
                     //Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
 

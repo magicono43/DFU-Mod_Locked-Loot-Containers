@@ -145,7 +145,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     DaggerfallLoot openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
                     if (openChestLoot)
                     {
-                        // Set as house container (private furniture) and assign load id
                         openChestLoot.ContainerType = LootContainerTypes.Nothing;
                         openChestLoot.ContainerImage = InventoryContainerImages.Chest;
                         openChestLoot.LoadID = DaggerfallUnity.NextUID;
