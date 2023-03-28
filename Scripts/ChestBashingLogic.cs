@@ -32,10 +32,31 @@ namespace LockedLootContainers
                     {
                         // Lock was hit with bash and is now broken, so chest loot is accessible.
                         BashingOpenChestDamagesLoot(chest, weapon, false);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, DaggerfallUnity.NextUID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-                        Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+
+                        DaggerfallLoot openChestLoot = null;
+                        if (ChestGraphicType == 0) // Use sprite based graphics for chests
+                        {
+                            openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, OpenFullChestSpriteID, 0, DaggerfallUnity.NextUID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(OpenFullChestSpriteID, 0);
+                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                        }
+                        else // Use 3D models for chests
+                        {
+                            GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyOpenFullChestPrefab : Instance.HighPolyOpenFullChestPrefab;
+                            GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(OpenFullChestModelID), closedChestTransform.parent, pos);
+                            chestGo.transform.rotation = chest.gameObject.transform.rotation;
+                            Collider col = chestGo.AddComponent<BoxCollider>();
+                            openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            if (openChestLoot)
+                            {
+                                openChestLoot.ContainerType = LootContainerTypes.Nothing;
+                                openChestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                                openChestLoot.TextureRecord = OpenFullChestModelID;
+                                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            }
+                        }
 
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 3f); // Will possibly change text later on depending on many factors, will see.
@@ -60,10 +81,31 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged greatly most likely.)
                         BashingOpenChestDamagesLoot(chest, weapon, true);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, DaggerfallUnity.NextUID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-                        Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+
+                        DaggerfallLoot openChestLoot = null;
+                        if (ChestGraphicType == 0) // Use sprite based graphics for chests
+                        {
+                            openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, SmashedChestSpriteID, 0, DaggerfallUnity.NextUID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(SmashedChestSpriteID, 0);
+                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                        }
+                        else // Use 3D models for chests
+                        {
+                            GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolySmashedChestPrefab : Instance.HighPolySmashedChestPrefab;
+                            GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(SmashedChestModelID), closedChestTransform.parent, pos);
+                            chestGo.transform.rotation = chest.gameObject.transform.rotation;
+                            Collider col = chestGo.AddComponent<BoxCollider>();
+                            openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            if (openChestLoot)
+                            {
+                                openChestLoot.ContainerType = LootContainerTypes.Nothing;
+                                openChestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                                openChestLoot.TextureRecord = SmashedChestModelID;
+                                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            }
+                        }
 
                         // Show success and play unlock sound
                         DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 3f); // Will possibly change text later on depending on many factors, will see.
@@ -112,10 +154,31 @@ namespace LockedLootContainers
                     {
                         // Chest body has been smashed open and contents are accessible (but damaged significantly.)
                         BashingOpenChestWithArrowsDamagesLoot(chest);
-                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4735, 0, DaggerfallUnity.NextUID, null, false);
-                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4735, 0);
-                        openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-                        Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+
+                        DaggerfallLoot openChestLoot = null;
+                        if (ChestGraphicType == 0) // Use sprite based graphics for chests
+                        {
+                            openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, SmashedChestSpriteID, 0, DaggerfallUnity.NextUID, null, false);
+                            openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(SmashedChestSpriteID, 0);
+                            openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                        }
+                        else // Use 3D models for chests
+                        {
+                            GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolySmashedChestPrefab : Instance.HighPolySmashedChestPrefab;
+                            GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(SmashedChestModelID), closedChestTransform.parent, pos);
+                            chestGo.transform.rotation = chest.gameObject.transform.rotation;
+                            Collider col = chestGo.AddComponent<BoxCollider>();
+                            openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            if (openChestLoot)
+                            {
+                                openChestLoot.ContainerType = LootContainerTypes.Nothing;
+                                openChestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                                openChestLoot.TextureRecord = SmashedChestModelID;
+                                openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                            }
+                        }
 
                         // Show success and play smash open sound
                         DaggerfallUI.AddHUDText("The arrow smashes a large hole in the chest, granting access to its contents...", 3f); // Will possibly change text later on depending on many factors, will see.

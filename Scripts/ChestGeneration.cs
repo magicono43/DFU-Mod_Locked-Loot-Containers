@@ -643,13 +643,13 @@ namespace LockedLootContainers
                 Vector3 pos = meshFilter.transform.position;
 
                 GameObject chestGo = null;
-                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                if (ChestGraphicType == 0) // Use sprite based graphics for chests
                 {
                     chestGo = GameObjectHelper.CreateDaggerfallBillboardGameObject(ClosedChestSpriteID, 0, oldModelTransform.parent.parent);
                 }
                 else // Use 3D models for chests
                 {
-                    GameObject usedModelPrefab = (ChestGraphic == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
+                    GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
                     chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldModelTransform.parent.parent, pos);
                     Collider col = chestGo.AddComponent<BoxCollider>();
                     chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
@@ -694,7 +694,7 @@ namespace LockedLootContainers
 
                 Destroy(meshFilter.gameObject);
 
-                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                if (ChestGraphicType == 0) // Use sprite based graphics for chests
                 {
                     // Set position
                     Billboard dfBillboard = chestGo.GetComponent<Billboard>();
@@ -728,13 +728,13 @@ namespace LockedLootContainers
                     Vector3 pos = lootPile.transform.position;
 
                     GameObject chestGo = null;
-                    if (ChestGraphic == 0) // Use sprite based graphics for chests
+                    if (ChestGraphicType == 0) // Use sprite based graphics for chests
                     {
                         chestGo = GameObjectHelper.CreateDaggerfallBillboardGameObject(ClosedChestSpriteID, 0, oldLootPileTransform.parent.parent);
                     }
                     else // Use 3D models for chests
                     {
-                        GameObject usedModelPrefab = (ChestGraphic == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
+                        GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
                         chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldLootPileTransform.parent.parent, pos);
                         Collider col = chestGo.AddComponent<BoxCollider>();
                         chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
@@ -778,7 +778,7 @@ namespace LockedLootContainers
 
                     UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
-                    if (ChestGraphic == 0) // Use sprite based graphics for chests
+                    if (ChestGraphicType == 0) // Use sprite based graphics for chests
                     {
                         // Set position
                         Billboard dfBillboard = chestGo.GetComponent<Billboard>();

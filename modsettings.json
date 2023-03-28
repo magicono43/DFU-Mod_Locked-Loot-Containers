@@ -1,19 +1,22 @@
 {
-    "Version": "1.0",
+    "Version": "1.00",
     "Sections": [
-        {
-            "Name": "Options",
-            "Description": "Options And Preferences For This Mod.",
+	{
+            "Name": "GraphicsSettings",
+            "Description": "Related To Graphical Settings For Mod Assets",
             "IsAdvanced": false,
             "Keys": [
-                {
-                    "Min": 1,
-                    "Max": 100,
-                    "Value": 12,
-                    "Name": "TimeScale",
-                    "Description": "Default = 12 || 1 = Each Minute Equals 1 Real-life Minute || 60 = Each Minute Equals 1 Real-life Second",
+				{
+                    "Options": [
+                        "2D Sprite",
+                        "3D Low-Poly",
+						"3D High-Poly"
+                    ],
+                    "Value": 1,
+                    "Name": "ChestGraphicType",
+                    "Description": "How Chests Will Look.",
                     "$version": "v1",
-                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.MultipleChoiceKey"
                 }
             ],
             "$version": "v1"

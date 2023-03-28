@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/27/2023, 11:35 PM
+// Last Edit:		3/28/2023, 5:00 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -24,6 +24,7 @@ using DaggerfallWorkshop.Game.Utility;
 using Wenzil.Console;
 using System;
 using DaggerfallWorkshop.Game.Serialization;
+using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 
 namespace LockedLootContainers
 {
@@ -33,6 +34,9 @@ namespace LockedLootContainers
         public static LLCSaveData ModSaveData = new LLCSaveData();
 
         static Mod mod;
+
+        // Options
+        public static int ChestGraphicType { get; set; }
 
         // Global Variables
         public static GameObject ChestObjRef { get; set; }
@@ -73,6 +77,8 @@ namespace LockedLootContainers
         public const int ClosedChestModelID = 47330;
         public const int OpenFullChestModelID = 47331;
         public const int OpenEmptyChestModelID = 47332;
+        public const int SmashedChestModelID = 47333;
+        public const int DisintegratedChestModelID = 47334;
 
         #region Mod Sound Variables
 
@@ -121,6 +127,8 @@ namespace LockedLootContainers
 
             go.AddComponent<LLCObject>();
 
+            mod.LoadSettingsCallback = LoadSettings; // To enable use of the "live settings changes" feature in-game.
+
             mod.IsReady = true;
         }
 
@@ -131,6 +139,8 @@ namespace LockedLootContainers
             Instance = this;
 
             mod.SaveDataInterface = ModSaveData;
+
+            mod.LoadSettings();
 
             MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
@@ -212,6 +222,15 @@ namespace LockedLootContainers
             // However, looking at the DaggerfallMissile.cs code under the "DoAreaOfEffect" method, I have a feeling without a PR, I won't be able to do a clean/easy
             // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal all other successes considered.
         }
+
+        #region Settings
+
+        static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
+        {
+            ChestGraphicType = mod.GetSettings().GetValue<int>("GraphicsSettings", "ChestGraphicType");
+        }
+
+        #endregion
 
         #region Load Audio Clips
 
@@ -645,60 +664,82 @@ namespace LockedLootContainers
                     {
                         if (LastLootedChest.ContainerType == LootContainerTypes.Nothing && LastLootedChest.ContainerImage == InventoryContainerImages.Chest)
                         {
-                            if (LastLootedChest.Items.Count == 0)
+                            if (LastLootedChest.TextureArchive == SmashedChestSpriteID || LastLootedChest.TextureArchive == DisintegratedChestSpriteID || LastLootedChest.TextureRecord == SmashedChestModelID || LastLootedChest.TextureRecord == DisintegratedChestModelID)
                             {
-                                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                                // Do Nothing, since sprite or model won't need to be changed if they are the smashed or disintegrated versions
+                            }
+                            else if (LastLootedChest.Items.Count == 0)
+                            {
+                                if (ChestGraphicType == 0) // Use sprite based graphics for chests
                                 {
-                                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, LastLootedChest.gameObject.transform.position, LastLootedChest.gameObject.transform.parent, OpenEmptyChestSpriteID, 0, LastLootedChest.LoadID, null, false);
-                                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(OpenEmptyChestSpriteID, 0);
-                                    openChestLoot.Items.TransferAll(LastLootedChest.Items); // Transfers items from closed chest's items to the new open chest's item collection.
-                                    Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
-                                    Destroy(LastLootedChest.gameObject);
+                                    if (LastLootedChest.TextureArchive == OpenEmptyChestSpriteID) { } // Do Nothing, since sprite is already this value.
+                                    else
+                                    {
+                                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, LastLootedChest.gameObject.transform.position, LastLootedChest.gameObject.transform.parent, OpenEmptyChestSpriteID, 0, LastLootedChest.LoadID, null, false);
+                                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(OpenEmptyChestSpriteID, 0);
+                                        openChestLoot.Items.TransferAll(LastLootedChest.Items); // Transfers items from closed chest's items to the new open chest's item collection.
+                                        Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                                        Destroy(LastLootedChest.gameObject);
+                                    }
                                 }
                                 else // Use 3D models for chests
                                 {
-                                    GameObject usedModelPrefab = (ChestGraphic == 1) ? Instance.LowPolyOpenEmptyChestPrefab : Instance.HighPolyOpenEmptyChestPrefab;
-                                    GameObject emptyChestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(OpenEmptyChestModelID), LastLootedChest.gameObject.transform.parent, LastLootedChest.gameObject.transform.position);
-                                    emptyChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
-                                    Collider col = emptyChestGo.AddComponent<BoxCollider>();
-                                    DaggerfallLoot chestLoot = emptyChestGo.AddComponent<DaggerfallLoot>();
-                                    if (chestLoot)
+                                    if (LastLootedChest.TextureRecord == OpenEmptyChestModelID) { } // Do Nothing, since current model is already this value.
+                                    else
                                     {
-                                        // Set as house container (private furniture) and assign load id
-                                        chestLoot.ContainerType = LootContainerTypes.Nothing;
-                                        chestLoot.ContainerImage = InventoryContainerImages.Chest;
-                                        chestLoot.LoadID = LastLootedChest.LoadID;
-                                        chestLoot.Items.TransferAll(LastLootedChest.Items);
+                                        GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyOpenEmptyChestPrefab : Instance.HighPolyOpenEmptyChestPrefab;
+                                        GameObject emptyChestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(OpenEmptyChestModelID), LastLootedChest.gameObject.transform.parent, LastLootedChest.gameObject.transform.position);
+                                        emptyChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
+                                        Collider col = emptyChestGo.AddComponent<BoxCollider>();
+                                        DaggerfallLoot chestLoot = emptyChestGo.AddComponent<DaggerfallLoot>();
+                                        if (chestLoot)
+                                        {
+                                            // Set as house container (private furniture) and assign load id
+                                            chestLoot.ContainerType = LootContainerTypes.Nothing;
+                                            chestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                            chestLoot.LoadID = LastLootedChest.LoadID;
+                                            chestLoot.TextureRecord = OpenEmptyChestModelID;
+                                            chestLoot.Items.TransferAll(LastLootedChest.Items);
+                                        }
+                                        Destroy(LastLootedChest.gameObject);
                                     }
-                                    Destroy(LastLootedChest.gameObject);
                                 }
                             }
                             else
                             {
-                                if (ChestGraphic == 0) // Use sprite based graphics for chests
+                                if (ChestGraphicType == 0) // Use sprite based graphics for chests
                                 {
-                                    DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, LastLootedChest.gameObject.transform.position, LastLootedChest.gameObject.transform.parent, OpenFullChestSpriteID, 0, LastLootedChest.LoadID, null, false);
-                                    openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(OpenFullChestSpriteID, 0);
-                                    openChestLoot.Items.TransferAll(LastLootedChest.Items); // Transfers items from closed chest's items to the new open chest's item collection.
-                                    Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
-                                    Destroy(LastLootedChest.gameObject);
+                                    if (LastLootedChest.TextureArchive == OpenFullChestSpriteID) { } // Do Nothing, since sprite is already this value.
+                                    else
+                                    {
+                                        DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, LastLootedChest.gameObject.transform.position, LastLootedChest.gameObject.transform.parent, OpenFullChestSpriteID, 0, LastLootedChest.LoadID, null, false);
+                                        openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(OpenFullChestSpriteID, 0);
+                                        openChestLoot.Items.TransferAll(LastLootedChest.Items); // Transfers items from closed chest's items to the new open chest's item collection.
+                                        Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                                        Destroy(LastLootedChest.gameObject);
+                                    }
                                 }
                                 else // Use 3D models for chests
                                 {
-                                    GameObject usedModelPrefab = (ChestGraphic == 1) ? Instance.LowPolyOpenFullChestPrefab : Instance.HighPolyOpenFullChestPrefab;
-                                    GameObject filledChestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(OpenFullChestModelID), LastLootedChest.gameObject.transform.parent, LastLootedChest.gameObject.transform.position);
-                                    filledChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
-                                    Collider col = filledChestGo.AddComponent<BoxCollider>();
-                                    DaggerfallLoot chestLoot = filledChestGo.AddComponent<DaggerfallLoot>();
-                                    if (chestLoot)
+                                    if (LastLootedChest.TextureRecord == OpenFullChestModelID) { } // Do Nothing, since current model is already this value.
+                                    else
                                     {
-                                        // Set as house container (private furniture) and assign load id
-                                        chestLoot.ContainerType = LootContainerTypes.Nothing;
-                                        chestLoot.ContainerImage = InventoryContainerImages.Chest;
-                                        chestLoot.LoadID = LastLootedChest.LoadID;
-                                        chestLoot.Items.TransferAll(LastLootedChest.Items);
+                                        GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyOpenFullChestPrefab : Instance.HighPolyOpenFullChestPrefab;
+                                        GameObject filledChestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(OpenFullChestModelID), LastLootedChest.gameObject.transform.parent, LastLootedChest.gameObject.transform.position);
+                                        filledChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
+                                        Collider col = filledChestGo.AddComponent<BoxCollider>();
+                                        DaggerfallLoot chestLoot = filledChestGo.AddComponent<DaggerfallLoot>();
+                                        if (chestLoot)
+                                        {
+                                            // Set as house container (private furniture) and assign load id
+                                            chestLoot.ContainerType = LootContainerTypes.Nothing;
+                                            chestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                            chestLoot.LoadID = LastLootedChest.LoadID;
+                                            chestLoot.TextureRecord = OpenFullChestModelID;
+                                            chestLoot.Items.TransferAll(LastLootedChest.Items);
+                                        }
+                                        Destroy(LastLootedChest.gameObject);
                                     }
-                                    Destroy(LastLootedChest.gameObject);
                                 }
                             }
                         }
@@ -769,21 +810,30 @@ namespace LockedLootContainers
                         {
                             closedChestData.PicksAttempted++;
                             ApplyLockPickAttemptCosts();
-                            //DaggerfallLoot openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, 4734, 0, DaggerfallUnity.NextUID, null, false);
-                            //openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(4734, 0);
-                            //openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
-                            //Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
 
-                            GameObject chestGo = GameObjectHelper.InstantiatePrefab(Instance.TestOpenFull3DChestPrefab, GameObjectHelper.GetGoModelName(47331), closedChestTransform.parent, pos);
-                            chestGo.transform.rotation = closedChestData.gameObject.transform.rotation;
-                            Collider col = chestGo.AddComponent<BoxCollider>();
-                            DaggerfallLoot openChestLoot = chestGo.AddComponent<DaggerfallLoot>(); // Finish this up tomorrow for the other sections that create new chest and loot-pile objects, etc.
-                            if (openChestLoot)
+                            DaggerfallLoot openChestLoot = null;
+                            if (ChestGraphicType == 0) // Use sprite based graphics for chests
                             {
-                                openChestLoot.ContainerType = LootContainerTypes.Nothing;
-                                openChestLoot.ContainerImage = InventoryContainerImages.Chest;
-                                openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                                openChestLoot = GameObjectHelper.CreateLootContainer(LootContainerTypes.Nothing, InventoryContainerImages.Chest, pos, closedChestTransform.parent, OpenFullChestSpriteID, 0, DaggerfallUnity.NextUID, null, false);
+                                openChestLoot.gameObject.name = GameObjectHelper.GetGoFlatName(OpenFullChestSpriteID, 0);
                                 openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                                Destroy(openChestLoot.GetComponent<SerializableLootContainer>());
+                            }
+                            else // Use 3D models for chests
+                            {
+                                GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyOpenFullChestPrefab : Instance.HighPolyOpenFullChestPrefab;
+                                GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(OpenFullChestModelID), closedChestTransform.parent, pos);
+                                chestGo.transform.rotation = closedChestData.gameObject.transform.rotation;
+                                Collider col = chestGo.AddComponent<BoxCollider>();
+                                openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                                if (openChestLoot)
+                                {
+                                    openChestLoot.ContainerType = LootContainerTypes.Nothing;
+                                    openChestLoot.ContainerImage = InventoryContainerImages.Chest;
+                                    openChestLoot.LoadID = DaggerfallUnity.NextUID;
+                                    openChestLoot.TextureRecord = OpenFullChestModelID;
+                                    openChestLoot.Items.TransferAll(closedChestLoot); // Transfers items from closed chest's items to the new open chest's item collection.
+                                }
                             }
 
                             // Show success and play unlock sound
