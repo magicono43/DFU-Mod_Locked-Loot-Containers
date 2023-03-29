@@ -1045,6 +1045,32 @@ namespace LockedLootContainers
             }
         }
 
+        public static void CloneLLCObjectProperties(LLCObject newObj, LLCObject oldObj) // Will have to remember to add to this when I add more properties/features later on.
+        {
+            newObj.LoadID = oldObj.LoadID;
+            newObj.RecentInspectValues = oldObj.RecentInspectValues;
+            newObj.IsLockJammed = oldObj.IsLockJammed;
+            newObj.HasBeenBashed = oldObj.HasBeenBashed;
+            newObj.HasBeenInspected = oldObj.HasBeenInspected;
+            newObj.ChestMaterial = oldObj.ChestMaterial;
+            newObj.ChestSturdiness = oldObj.ChestSturdiness;
+            newObj.ChestMagicResist = oldObj.ChestMagicResist;
+            newObj.ChestStartHP = oldObj.ChestStartHP;
+            newObj.ChestCurrentHP = oldObj.ChestCurrentHP;
+            newObj.LockMaterial = oldObj.LockMaterial;
+            newObj.LockSturdiness = oldObj.LockSturdiness;
+            newObj.LockMagicResist = oldObj.LockMagicResist;
+            newObj.LockComplexity = oldObj.LockComplexity;
+            newObj.JamResist = oldObj.JamResist;
+            newObj.LockStartHP = oldObj.LockStartHP;
+            newObj.LockCurrentHP = oldObj.LockCurrentHP;
+            newObj.PicksAttempted = oldObj.PicksAttempted;
+            newObj.LockMechStartHP = oldObj.LockMechStartHP;
+            newObj.LockMechCurrentHP = oldObj.LockMechCurrentHP;
+            newObj.AttachedLoot = new ItemCollection();
+            newObj.AttachedLoot.TransferAll(oldObj.AttachedLoot);
+        }
+
         public static AudioClip RollRandomAudioClip(AudioClip[] clips)
         {
             int randChoice = UnityEngine.Random.Range(0, clips.Length);

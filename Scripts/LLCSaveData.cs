@@ -74,10 +74,10 @@ namespace LockedLootContainers
         {
             Dictionary<ulong, ClosedChestData> closedChestEntries = new Dictionary<ulong, ClosedChestData>();
             Dictionary<ulong, OpenChestData> openChestEntries = new Dictionary<ulong, OpenChestData>();
-            LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
 
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon || GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
             {
+                LLCObject[] closedChests = GameObject.FindObjectsOfType<LLCObject>();
                 for (int i = 0; i < closedChests.Length; i++)
                 {
                     if (closedChests[i].LoadID <= 0)
