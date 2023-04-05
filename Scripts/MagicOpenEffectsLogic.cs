@@ -35,7 +35,7 @@ namespace LockedLootContainers
 
                 if (closedChestData.IsLockJammed)
                 {
-                    DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 2f);
+                    DaggerfallUI.AddHUDText(GetMagicLockAlreadyJammedText(), 2f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.AudioSource.PlayOneShot(GetMagicLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                 }
@@ -69,7 +69,7 @@ namespace LockedLootContainers
                     }
 
                     // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText("The lock effortlessly unlatches through use of magic...", 3f);
+                    DaggerfallUI.AddHUDText(GetMagicLockPickSuccessText(), 3f);
                     if (dfAudioSource != null)
                         AudioSource.PlayClipAtPoint(GetMagicLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -83,13 +83,13 @@ namespace LockedLootContainers
 
                     if (DoesLockJam(closedChestData, mechDamDealt))
                     {
-                        DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 3f);
+                        DaggerfallUI.AddHUDText(GetMagicJammedLockText(), 3f);
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetMagicLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                     else
                     {
-                        DaggerfallUI.AddHUDText("The unlock attempt failed...", 2f);
+                        DaggerfallUI.AddHUDText(GetMagicLockPickAttemptText(), 2f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                             dfAudioSource.AudioSource.PlayOneShot(GetMagicLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                     }
@@ -249,7 +249,7 @@ namespace LockedLootContainers
                             }
 
                             // Show success and play disintegrate sound
-                            DaggerfallUI.AddHUDText("The spell causes the chest to disintegrate into an unrecognizable pile, granting access to whatever is left...", 4f); // Will possibly change text later on depending on many factors, will see.
+                            DaggerfallUI.AddHUDText(GetChestDisintegratedBySpellText(), 4f); // Will possibly change text later on depending on many factors, will see.
                             if (dfAudioSource)
                             {
                                 if (dfAudioSource != null)
@@ -296,7 +296,7 @@ namespace LockedLootContainers
                                 }
 
                                 // Show success and play explosion type sound
-                                DaggerfallUI.AddHUDText("The spell causes the chest to erupt into a chaotic mess, granting access to its contents...", 4f); // Will possibly change text later on depending on many factors, will see.
+                                DaggerfallUI.AddHUDText(GetChestBlownOpenBySpellText(), 4f); // Will possibly change text later on depending on many factors, will see.
                                 if (dfAudioSource)
                                 {
                                     if (dfAudioSource != null)

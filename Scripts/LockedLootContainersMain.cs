@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		3/29/2023, 12:30 AM
+// Last Edit:		4/4/2023, 11:55 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -922,7 +922,7 @@ namespace LockedLootContainers
 
                         if (closedChestData.IsLockJammed)
                         {
-                            DaggerfallUI.AddHUDText("The lock is jammed and inoperable...", 2f);
+                            DaggerfallUI.AddHUDText(GetLockAlreadyJammedText(), 2f);
                             if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                                 dfAudioSource.AudioSource.PlayOneShot(GetLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                         }
@@ -957,7 +957,7 @@ namespace LockedLootContainers
                             }
 
                             // Show success and play unlock sound
-                            DaggerfallUI.AddHUDText("The lock clicks open...", 3f);
+                            DaggerfallUI.AddHUDText(GetLockPickSuccessText(), 3f);
                             if (dfAudioSource != null)
                                 AudioSource.PlayClipAtPoint(GetLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -972,13 +972,13 @@ namespace LockedLootContainers
 
                             if (DoesLockJam(closedChestData, mechDamDealt))
                             {
-                                DaggerfallUI.AddHUDText("You jammed the lock, now brute force is the only option.", 3f);
+                                DaggerfallUI.AddHUDText(GetJammedLockText(), 3f);
                                 if (dfAudioSource != null)
                                     AudioSource.PlayClipAtPoint(GetLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                             }
                             else
                             {
-                                DaggerfallUI.AddHUDText("You fail to pick the lock...", 2f);
+                                DaggerfallUI.AddHUDText(GetLockPickAttemptText(), 2f);
                                 if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                                     dfAudioSource.AudioSource.PlayOneShot(GetLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                             }

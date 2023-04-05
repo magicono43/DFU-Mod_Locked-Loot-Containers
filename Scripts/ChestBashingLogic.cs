@@ -59,7 +59,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("With use of brute force, the lock finally breaks open...", 3f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText(GetBashedLockOffText(), 3f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetLockBashAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -108,7 +108,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText("You smash a large hole in the body of the chest, granting access to its contents...", 3f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText(GetBashedOpenChestText(), 3f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, critBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -181,7 +181,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play smash open sound
-                        DaggerfallUI.AddHUDText("The arrow smashes a large hole in the chest, granting access to its contents...", 3f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText(GetArrowSmashedOpenChestText(), 3f); // Will possibly change text later on depending on many factors, will see.
                         if (dfAudioSource)
                         {
                             if (dfAudioSource != null)
