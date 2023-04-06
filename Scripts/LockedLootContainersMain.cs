@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/4/2023, 11:55 PM
+// Last Edit:		4/5/2023, 10:50 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -333,9 +333,9 @@ namespace LockedLootContainers
 
                             GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName((uint)spriteOrModelID), oldLootPile.gameObject.transform.parent, oldLootPile.gameObject.transform.position);
                             chestGo.transform.rotation = oldLootPile.gameObject.transform.rotation;
+                            if (spriteOrModelID == SmashedChestModelID| spriteOrModelID == DisintegratedChestModelID) { if (oldLootPile.transform.rotation.x != 0) { RotateBackToZero(chestGo.transform); } }
+                            else { if (oldLootPile.transform.rotation.x == 0) { chestGo.transform.Rotate(-90f, 0f, UnityEngine.Random.Range(0, 9) * 45f); } }
                             Collider col = chestGo.AddComponent<BoxCollider>();
-                            if (oldLootPile.transform.rotation.x == 0)
-                                chestGo.transform.Rotate(-90f, 0f, UnityEngine.Random.Range(0, 9) * 45f); // Will likely need to change this if using non-chest models like the piles of junk, etc.
                             DaggerfallLoot chestLoot = chestGo.AddComponent<DaggerfallLoot>();
                             if (chestLoot)
                             {
@@ -534,14 +534,14 @@ namespace LockedLootContainers
 			success &= modManager.TryGetAsset("chest_close", false, out LowPolyClosedChestPrefab);
             success &= modManager.TryGetAsset("chest_open_full", false, out LowPolyOpenFullChestPrefab);
             success &= modManager.TryGetAsset("chest_open_empty", false, out LowPolyOpenEmptyChestPrefab);
-            success &= modManager.TryGetAsset("chest_open_full", false, out LowPolySmashedChestPrefab);
-            success &= modManager.TryGetAsset("chest_open_full", false, out LowPolyDisintegratedChestPrefab);
+            success &= modManager.TryGetAsset("BrokenChestPilePrefab1", false, out LowPolySmashedChestPrefab);
+            success &= modManager.TryGetAsset("DisintegratedChestPilePrefab1", false, out LowPolyDisintegratedChestPrefab);
 
             success &= modManager.TryGetAsset("chest_close", false, out HighPolyClosedChestPrefab);
             success &= modManager.TryGetAsset("chest_open_full", false, out HighPolyOpenFullChestPrefab);
             success &= modManager.TryGetAsset("chest_open_empty", false, out HighPolyOpenEmptyChestPrefab);
-            success &= modManager.TryGetAsset("chest_open_full", false, out HighPolySmashedChestPrefab);
-            success &= modManager.TryGetAsset("chest_open_full", false, out HighPolyDisintegratedChestPrefab);
+            success &= modManager.TryGetAsset("BrokenChestPilePrefab1", false, out HighPolySmashedChestPrefab);
+            success &= modManager.TryGetAsset("DisintegratedChestPilePrefab1", false, out HighPolyDisintegratedChestPrefab);
 
             if (!success)
                 throw new Exception("LockedLootContainers: Missing prefab/model asset");

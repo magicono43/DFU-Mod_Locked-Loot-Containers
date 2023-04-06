@@ -1045,6 +1045,19 @@ namespace LockedLootContainers
             }
         }
 
+        public static void RotateBackToZero(Transform goTransform) // Rotates the transform of this gameobject back to the "0, 0, 0" positions.
+        {
+            float oriX = goTransform.rotation.x;
+            float oriY = goTransform.rotation.y;
+            float oriZ = goTransform.rotation.z;
+
+            float corrX = oriX < 0 ? Mathf.Abs(oriX) : oriX * -1f;
+            float corrY = oriY < 0 ? Mathf.Abs(oriY) : oriY * -1f;
+            float corrZ = oriZ < 0 ? Mathf.Abs(oriZ) : oriZ * -1f;
+
+            goTransform.Rotate(oriX + corrX, oriY + corrY, oriZ + corrZ);
+        }
+
         public static void CloneLLCObjectProperties(LLCObject newObj, LLCObject oldObj) // Will have to remember to add to this when I add more properties/features later on.
         {
             newObj.LoadID = oldObj.LoadID;

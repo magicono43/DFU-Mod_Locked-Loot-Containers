@@ -177,7 +177,15 @@
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_open_full.prefab",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/chest_close.FBX",
         "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Materials/chest_simple.mat",
-        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Textures/coins.png"
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/HighPolyChest/Textures/coins.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/DisintegratedChestPilePrefab1.prefab",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/LowPolyPile1.fbx",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/BrokenChestPilePrefab1.prefab",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/Materials/BrokenChestPileMats1.mat",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/Materials/DisintegratedChestPileMats1.mat",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/Textures/BrokenChestPileTexture1.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Models/DestroyedHighPolyChest/Textures/Black_Powder_Texture_1.png",
+        "Assets/Game/Mods/DFU-Mod_Locked-Loot-Containers/Scripts/ChestInteractionTextHolder.cs"
     ],
     "Dependencies": []
 }

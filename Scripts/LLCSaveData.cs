@@ -310,6 +310,7 @@ namespace LockedLootContainers
 
                     GameObject go = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName((uint)data.textureRecord), GameObjectHelper.GetBestParent(), data.currentPosition);
                     go.transform.rotation = data.currentRotation;
+                    LockedLootContainersMain.RotateBackToZero(go.transform);
                     Collider col = go.AddComponent<BoxCollider>();
                     DaggerfallLoot chestLoot = go.AddComponent<DaggerfallLoot>();
                     if (chestLoot)
@@ -317,7 +318,10 @@ namespace LockedLootContainers
                         chestLoot.ContainerType = LootContainerTypes.Nothing;
                         chestLoot.ContainerImage = InventoryContainerImages.Chest;
                         chestLoot.LoadID = data.loadID;
-                        chestLoot.TextureRecord = LockedLootContainersMain.OpenEmptyChestModelID;
+                        if (data.textureArchive == LockedLootContainersMain.SmashedChestSpriteID || data.textureRecord == LockedLootContainersMain.SmashedChestModelID)
+                            chestLoot.TextureRecord = LockedLootContainersMain.SmashedChestModelID;
+                        else
+                            chestLoot.TextureRecord = LockedLootContainersMain.DisintegratedChestModelID;
                         chestLoot.Items.DeserializeItems(data.items);
                     }
                 }

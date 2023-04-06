@@ -94,7 +94,6 @@ namespace LockedLootContainers
                         {
                             GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolySmashedChestPrefab : Instance.HighPolySmashedChestPrefab;
                             GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(SmashedChestModelID), closedChestTransform.parent, pos);
-                            chestGo.transform.rotation = chest.gameObject.transform.rotation;
                             Collider col = chestGo.AddComponent<BoxCollider>();
                             openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
                             if (openChestLoot)
@@ -167,7 +166,6 @@ namespace LockedLootContainers
                         {
                             GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolySmashedChestPrefab : Instance.HighPolySmashedChestPrefab;
                             GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(SmashedChestModelID), closedChestTransform.parent, pos);
-                            chestGo.transform.rotation = chest.gameObject.transform.rotation;
                             Collider col = chestGo.AddComponent<BoxCollider>();
                             openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
                             if (openChestLoot)

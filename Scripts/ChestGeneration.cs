@@ -653,6 +653,7 @@ namespace LockedLootContainers
                     chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldModelTransform.parent.parent, pos);
                     Collider col = chestGo.AddComponent<BoxCollider>();
                     chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                    chestGo.transform.position = new Vector3(chestGo.transform.position.x, chestGo.transform.position.y - 0.32f, chestGo.transform.position.z);
                 }
 
                 LLCObject llcObj = chestGo.AddComponent<LLCObject>();
@@ -738,6 +739,7 @@ namespace LockedLootContainers
                         chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldLootPileTransform.parent.parent, pos);
                         Collider col = chestGo.AddComponent<BoxCollider>();
                         chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                        chestGo.transform.position = new Vector3(chestGo.transform.position.x, chestGo.transform.position.y - 0.32f, chestGo.transform.position.z);
                     }
 
                     LLCObject llcObj = chestGo.AddComponent<LLCObject>();
