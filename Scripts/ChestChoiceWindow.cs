@@ -150,6 +150,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                         chestGo.transform.rotation = chest.gameObject.transform.rotation;
                         Collider col = chestGo.AddComponent<BoxCollider>();
                         openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                        LockedLootContainersMain.ToggleChestShadowsOrCollision(chestGo);
                         if (openChestLoot)
                         {
                             openChestLoot.ContainerType = LootContainerTypes.Nothing;

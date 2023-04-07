@@ -1045,6 +1045,24 @@ namespace LockedLootContainers
             }
         }
 
+        public static void ToggleChestShadowsOrCollision(GameObject chestGo)
+        {
+            Collider coll = chestGo.GetComponent<Collider>();
+            MeshRenderer meshR = chestGo.GetComponent<MeshRenderer>();
+
+            if (coll != null)
+            {
+                if (AllowChestCollision) { coll.isTrigger = false; }
+                else { coll.isTrigger = true; }
+            }
+
+            if (meshR != null)
+            {
+                if (AllowChestShadows) { meshR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On; }
+                else { meshR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
+            }
+        }
+
         public static void RotateBackToZero(Transform goTransform) // Rotates the transform of this gameobject back to the "0, 0, 0" positions.
         {
             float oriX = goTransform.rotation.x;

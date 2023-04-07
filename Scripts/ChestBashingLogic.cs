@@ -48,6 +48,7 @@ namespace LockedLootContainers
                             chestGo.transform.rotation = chest.gameObject.transform.rotation;
                             Collider col = chestGo.AddComponent<BoxCollider>();
                             openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            ToggleChestShadowsOrCollision(chestGo);
                             if (openChestLoot)
                             {
                                 openChestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -96,6 +97,7 @@ namespace LockedLootContainers
                             GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(SmashedChestModelID), closedChestTransform.parent, pos);
                             Collider col = chestGo.AddComponent<BoxCollider>();
                             openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            ToggleChestShadowsOrCollision(chestGo);
                             if (openChestLoot)
                             {
                                 openChestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -168,6 +170,7 @@ namespace LockedLootContainers
                             GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(SmashedChestModelID), closedChestTransform.parent, pos);
                             Collider col = chestGo.AddComponent<BoxCollider>();
                             openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            ToggleChestShadowsOrCollision(chestGo);
                             if (openChestLoot)
                             {
                                 openChestLoot.ContainerType = LootContainerTypes.Nothing;

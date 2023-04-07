@@ -249,6 +249,7 @@ namespace LockedLootContainers
                 go = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(LockedLootContainersMain.ClosedChestModelID), GameObjectHelper.GetBestParent(), new Vector3(0, 0, 0));
                 chest = go.AddComponent<LLCObject>();
                 Collider col = go.AddComponent<BoxCollider>();
+                LockedLootContainersMain.ToggleChestShadowsOrCollision(go);
             }
 
             go.transform.position = data.currentPosition;
@@ -313,6 +314,7 @@ namespace LockedLootContainers
                     LockedLootContainersMain.RotateBackToZero(go.transform);
                     Collider col = go.AddComponent<BoxCollider>();
                     DaggerfallLoot chestLoot = go.AddComponent<DaggerfallLoot>();
+                    LockedLootContainersMain.ToggleChestShadowsOrCollision(go);
                     if (chestLoot)
                     {
                         chestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -342,6 +344,7 @@ namespace LockedLootContainers
                     go.transform.rotation = data.currentRotation;
                     Collider col = go.AddComponent<BoxCollider>();
                     DaggerfallLoot chestLoot = go.AddComponent<DaggerfallLoot>();
+                    LockedLootContainersMain.ToggleChestShadowsOrCollision(go);
                     if (chestLoot)
                     {
                         chestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -368,6 +371,7 @@ namespace LockedLootContainers
                     go.transform.rotation = data.currentRotation;
                     Collider col = go.AddComponent<BoxCollider>();
                     DaggerfallLoot chestLoot = go.AddComponent<DaggerfallLoot>();
+                    LockedLootContainersMain.ToggleChestShadowsOrCollision(go);
                     if (chestLoot)
                     {
                         chestLoot.ContainerType = LootContainerTypes.Nothing;

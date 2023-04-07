@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/5/2023, 10:50 PM
+// Last Edit:		4/6/2023, 8:00 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -37,6 +37,8 @@ namespace LockedLootContainers
 
         // Options
         public static int ChestGraphicType { get; set; }
+        public static bool AllowChestCollision { get; set; }
+        public static bool AllowChestShadows { get; set; }
 
         // Global Variables
         public static GameObject ChestObjRef { get; set; }
@@ -228,6 +230,8 @@ namespace LockedLootContainers
         private static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
         {
             ChestGraphicType = mod.GetSettings().GetValue<int>("GraphicsSettings", "ChestGraphicType");
+            AllowChestCollision = mod.GetSettings().GetValue<bool>("GraphicsSettings", "ChestCollisionToggle");
+            AllowChestShadows = mod.GetSettings().GetValue<bool>("GraphicsSettings", "ChestShadowsToggle");
 
             RefreshChestGraphics();
         }
@@ -236,8 +240,6 @@ namespace LockedLootContainers
         {
             if (!GameManager.Instance.StateManager.GameInProgress)
                 return;
-
-            // Still need toggle shadows logic for 3D mesh renderer atleast. Mess with this stuff tomorrow, it's very late right now to continue...
 
             if (GameManager.Instance.StateManager.LastState == StateManager.StateTypes.Game || GameManager.Instance.StateManager.LastState == StateManager.StateTypes.UI)
             {
@@ -269,6 +271,7 @@ namespace LockedLootContainers
                             GameObject chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), oldChest.transform.parent, oldChest.transform.position);
                             chestGo.transform.rotation = oldChest.gameObject.transform.rotation;
                             Collider col = chestGo.AddComponent<BoxCollider>();
+                            ToggleChestShadowsOrCollision(chestGo);
                             if (oldChest.transform.rotation.x == 0)
                                 chestGo.transform.Rotate(-90f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
 
@@ -337,6 +340,7 @@ namespace LockedLootContainers
                             else { if (oldLootPile.transform.rotation.x == 0) { chestGo.transform.Rotate(-90f, 0f, UnityEngine.Random.Range(0, 9) * 45f); } }
                             Collider col = chestGo.AddComponent<BoxCollider>();
                             DaggerfallLoot chestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                            ToggleChestShadowsOrCollision(chestGo);
                             if (chestLoot)
                             {
                                 chestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -814,6 +818,7 @@ namespace LockedLootContainers
                                         emptyChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
                                         Collider col = emptyChestGo.AddComponent<BoxCollider>();
                                         DaggerfallLoot chestLoot = emptyChestGo.AddComponent<DaggerfallLoot>();
+                                        ToggleChestShadowsOrCollision(emptyChestGo);
                                         if (chestLoot)
                                         {
                                             chestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -850,6 +855,7 @@ namespace LockedLootContainers
                                         filledChestGo.transform.rotation = LastLootedChest.gameObject.transform.rotation;
                                         Collider col = filledChestGo.AddComponent<BoxCollider>();
                                         DaggerfallLoot chestLoot = filledChestGo.AddComponent<DaggerfallLoot>();
+                                        ToggleChestShadowsOrCollision(filledChestGo);
                                         if (chestLoot)
                                         {
                                             chestLoot.ContainerType = LootContainerTypes.Nothing;
@@ -946,6 +952,7 @@ namespace LockedLootContainers
                                 chestGo.transform.rotation = closedChestData.gameObject.transform.rotation;
                                 Collider col = chestGo.AddComponent<BoxCollider>();
                                 openChestLoot = chestGo.AddComponent<DaggerfallLoot>();
+                                ToggleChestShadowsOrCollision(chestGo);
                                 if (openChestLoot)
                                 {
                                     openChestLoot.ContainerType = LootContainerTypes.Nothing;
