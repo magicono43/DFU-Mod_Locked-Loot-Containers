@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/6/2023, 8:00 PM
+// Last Edit:		4/7/2023, 11:20 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -39,6 +39,16 @@ namespace LockedLootContainers
         public static int ChestGraphicType { get; set; }
         public static bool AllowChestCollision { get; set; }
         public static bool AllowChestShadows { get; set; }
+
+        // Mod Compatibility Check Values
+        public static bool RepairToolsCheck { get; set; }
+        public static bool JewelryAdditionsCheck { get; set; }
+        public static bool ClimatesAndCaloriesCheck { get; set; }
+        public static bool SkillBooksCheck { get; set; }
+        public static bool RolePlayRealismLootRebalanceCheck { get; set; }
+        public static bool RolePlayRealismBandagingCheck { get; set; }
+        public static bool RolePlayRealismNewWeaponCheck { get; set; }
+        public static bool RolePlayRealismNewArmorCheck { get; set; }
 
         // Global Variables
         public static GameObject ChestObjRef { get; set; }
@@ -144,6 +154,8 @@ namespace LockedLootContainers
 
             mod.LoadSettings();
 
+            ModCompatibilityChecking();
+
             MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             PlayerLayerMask = ~(1 << LayerMask.NameToLayer("Player"));
 
@@ -159,6 +171,8 @@ namespace LockedLootContainers
             DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemClumpofPlantMatter.templateIndex, ItemGroups.UselessItems1, typeof(ItemClumpofPlantMatter));
             DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemGlobofGore.templateIndex, ItemGroups.UselessItems1, typeof(ItemGlobofGore));
             DaggerfallUnity.Instance.ItemHelper.RegisterCustomItem(ItemUselessRefuse.templateIndex, ItemGroups.UselessItems1, typeof(ItemUselessRefuse));
+
+            DaggerfallWorkshop.Game.Formulas.FormulaHelper.RegisterOverride(mod, "IsItemStackable", (Func<DaggerfallUnityItem, bool>)LLCItemBuilder.IsItemStackable); // To make vanilla blank parchment items stackable.
 
             PlayerActivate.RegisterCustomActivation(mod, ClosedChestSpriteID, 0, ChestActivation);
             PlayerActivate.RegisterCustomActivation(mod, 41811, DoNothingActivation);
@@ -357,6 +371,31 @@ namespace LockedLootContainers
         }
 
         #endregion
+
+        private void ModCompatibilityChecking()
+        {
+            Mod repairTools = ModManager.Instance.GetMod("RepairTools");
+            RepairToolsCheck = repairTools != null ? true : false;
+
+            Mod jewelryAdditions = ModManager.Instance.GetMod("JewelryAdditions");
+            JewelryAdditionsCheck = jewelryAdditions != null ? true : false;
+
+            Mod climatesAndCalories = ModManager.Instance.GetMod("Climates & Calories");
+            ClimatesAndCaloriesCheck = climatesAndCalories != null ? true : false;
+
+            Mod skillBooks = ModManager.Instance.GetMod("Skill Books");
+            SkillBooksCheck = skillBooks != null ? true : false;
+
+            Mod roleplayRealismItems = ModManager.Instance.GetMod("RoleplayRealism-Items");
+            if (roleplayRealismItems != null)
+            {
+                ModSettings rolePlayRealismSettings = roleplayRealismItems.GetSettings();
+                RolePlayRealismLootRebalanceCheck = rolePlayRealismSettings.GetBool("Modules", "lootRebalance");
+                RolePlayRealismBandagingCheck = rolePlayRealismSettings.GetBool("Modules", "bandaging");
+                RolePlayRealismNewWeaponCheck = rolePlayRealismSettings.GetBool("Modules", "newWeapons");
+                RolePlayRealismNewArmorCheck = rolePlayRealismSettings.GetBool("Modules", "newArmor");
+            }
+        }
 
         #region Load Audio Clips
 

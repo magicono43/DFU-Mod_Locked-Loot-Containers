@@ -725,7 +725,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static bool RemoveOrDamageBasedOnCondition(LLCObject chest, DaggerfallUnityItem item, int damAmount) // Mainly here to reduce repetition in code of parent method a bit.
+        public static bool RemoveOrDamageBasedOnCondition(LLCObject chest, DaggerfallUnityItem item, int damAmount)
         {
             DaggerfallUnityItem wasteItem;
             int wasteAmount;
@@ -786,7 +786,38 @@ namespace LockedLootContainers
             }
             else // Modded Item Templates
             {
-                return LootItemSturdiness.Unbreakable; // Will change eventually, placeholder value for now.
+                if (RepairToolsCheck && item.TemplateIndex >= 800 && item.TemplateIndex <= 805)
+                {
+                    if (item.TemplateIndex == (int)Tools.Whetstone) { return LootItemSturdiness.Solid; }
+                    else if (item.TemplateIndex == (int)Tools.Sewing_Kit) { return LootItemSturdiness.Fragile; }
+                    else if (item.TemplateIndex == (int)Tools.Armorers_Hammer) { return LootItemSturdiness.Solid; }
+                    else if (item.TemplateIndex == (int)Tools.Jewelers_Pliers) { return LootItemSturdiness.Solid; }
+                    else if (item.TemplateIndex == (int)Tools.Epoxy_Glue) { return LootItemSturdiness.Very_Fragile; }
+                    else if (item.TemplateIndex == (int)Tools.Charging_Powder) { return LootItemSturdiness.Fragile; }
+                    else { return LootItemSturdiness.Unbreakable; }
+                }
+                else if (JewelryAdditionsCheck && item.TemplateIndex >= 4700 && item.TemplateIndex <= 4714)
+                {
+                    if (item.TemplateIndex >= 4700 && item.TemplateIndex <= 4707) { return LootItemSturdiness.Fragile; }
+                    else { return LootItemSturdiness.Solid; }
+                }
+                else if (ClimatesAndCaloriesCheck && item.TemplateIndex == (int)Supplies.Rations)
+                {
+                    return LootItemSturdiness.Fragile;
+                }
+                else if (SkillBooksCheck && item.TemplateIndex >= 551 && item.TemplateIndex <= 554)
+                {
+                    return LootItemSturdiness.Fragile;
+                }
+                else if (RolePlayRealismNewWeaponCheck && (item.TemplateIndex == (int)SmallWeapons.Archers_Axe || item.TemplateIndex == (int)SmallWeapons.Light_Flail))
+                {
+                    return LootItemSturdiness.Solid;
+                }
+                else if (RolePlayRealismNewArmorCheck && item.TemplateIndex >= 515 && item.TemplateIndex <= 526)
+                {
+                    return LootItemSturdiness.Resilient;
+                }
+                else { return LootItemSturdiness.Unbreakable; }
             }
         }
 
@@ -849,7 +880,38 @@ namespace LockedLootContainers
             }
             else // Modded Item Templates
             {
-                wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return;
+                if (RepairToolsCheck && item.TemplateIndex >= 800 && item.TemplateIndex <= 805)
+                {
+                    if (item.TemplateIndex == (int)Tools.Whetstone) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Sewing_Kit) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Armorers_Hammer) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Jewelers_Pliers) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Epoxy_Glue) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Charging_Powder) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
+                    else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                }
+                else if (JewelryAdditionsCheck && item.TemplateIndex >= 4700 && item.TemplateIndex <= 4714)
+                {
+                    if (item.TemplateIndex >= 4700 && item.TemplateIndex <= 4707) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemDestroyedJewelry.templateIndex); return; }
+                    else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
+                }
+                else if (ClimatesAndCaloriesCheck && item.TemplateIndex == (int)Supplies.Rations)
+                {
+                    wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return;
+                }
+                else if (SkillBooksCheck && item.TemplateIndex >= 551 && item.TemplateIndex <= 554)
+                {
+                    wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); wasteAmount = UnityEngine.Random.Range(3, 10 + 1); return;
+                }
+                else if (RolePlayRealismNewWeaponCheck && (item.TemplateIndex == (int)SmallWeapons.Archers_Axe || item.TemplateIndex == (int)SmallWeapons.Light_Flail))
+                {
+                    wasteItem = LLCItemBuilder.CreateScrapMaterial((WeaponMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return;
+                }
+                else if (RolePlayRealismNewArmorCheck && item.TemplateIndex >= 515 && item.TemplateIndex <= 526)
+                {
+                    wasteItem = LLCItemBuilder.CreateScrapMaterial(WeaponMaterialTypes.None, (ArmorMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return;
+                }
+                else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
             }
         }
 
@@ -884,6 +946,24 @@ namespace LockedLootContainers
                         return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(18f * luckMod) + 1));
                     case (int)Armor.Tower_Shield:
                         return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(25f * luckMod) + 1));
+                    case (int)MediumArmor.Hauberk:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(10f * luckMod) + 1));
+                    case (int)MediumArmor.Chausses:
+                    case (int)MediumArmor.Left_Spaulders:
+                    case (int)MediumArmor.Right_Spaulders:
+                    case (int)MediumArmor.Sollerets:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(5f * luckMod) + 1));
+                    case (int)LightArmor.Jerkin:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(6f * luckMod) + 1));
+                    case (int)LightArmor.Cuisse:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(4f * luckMod) + 1));
+                    case (int)LightArmor.Helmet:
+                    case (int)LightArmor.Boots:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(3f * luckMod) + 1));
+                    case (int)LightArmor.Gloves:
+                    case (int)LightArmor.Left_Vambrace:
+                    case (int)LightArmor.Right_Vambrace:
+                        return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(2f * luckMod) + 1));
                     default:
                         return 1;
                 }
@@ -899,6 +979,8 @@ namespace LockedLootContainers
                     case (int)Weapons.Staff:
                     case (int)Weapons.Shortsword:
                     case (int)Weapons.Wakazashi:
+                    case (int)SmallWeapons.Archers_Axe:
+                    case (int)SmallWeapons.Light_Flail:
                         return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(6f * luckMod) + 1));
                     case (int)Weapons.Broadsword:
                         return Mathf.Max(1, UnityEngine.Random.Range(1, Mathf.RoundToInt(13f * luckMod) + 1));

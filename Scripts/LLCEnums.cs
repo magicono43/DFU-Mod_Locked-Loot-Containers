@@ -414,6 +414,8 @@ namespace LockedLootContainers
         Bandage = 249,
         Oil = 252,
         Parchment = 279,
+        // Modded supply items such as from my "Climates & Calories" mod.
+        Rations = 531,
     }
 
     /// <summary>

@@ -273,6 +273,22 @@ namespace LockedLootContainers
 
     public static class LLCItemBuilder
     {
+        public static bool IsItemStackable(DaggerfallUnityItem item) // Hopefully this does not break anything like quest letters, will see.
+        {
+            if (item.IsOfTemplate(ItemGroups.UselessItems2, (int)UselessItems2.Bandage))
+            {
+                return true;
+            }
+            else if (item.IsOfTemplate(ItemGroups.UselessItems2, (int)UselessItems2.Parchment))
+            {
+                if (item.IsQuestItem || item.message != 0 || item.IsEnchanted)
+                    return false;
+                else
+                    return true;
+            }
+            return false;
+        }
+
         public static DaggerfallUnityItem CreateScrapMaterial(WeaponMaterialTypes wepMat = WeaponMaterialTypes.None, ArmorMaterialTypes armMat = ArmorMaterialTypes.None)
         {
             int scrapMat = 0;

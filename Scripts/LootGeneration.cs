@@ -139,14 +139,14 @@ namespace LockedLootContainers
                     case 0: // Add Gold
                         amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(miscGroupOdds[2], miscGroupOdds[3] + 1) : 0;
                         if (amount > 0)
-                            chestItems.AddItem(ItemBuilder.CreateGoldPieces(amount));
+                            chestItems.AddItem(ItemBuilder.CreateGoldPieces(RolePlayRealismLootRebalanceCheck ? Mathf.CeilToInt(amount / 3f) : amount));
                         break;
                     case 1: // Add Letter of Credit
                         amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(miscGroupOdds[4], miscGroupOdds[5] + 1) : 0;
                         if (amount > 0)
                         {
                             item = ItemBuilder.CreateItem(ItemGroups.MiscItems, (int)MiscItems.Letter_of_credit);
-                            item.value = amount;
+                            item.value = RolePlayRealismLootRebalanceCheck ? Mathf.CeilToInt(amount / 3f) : amount;
                             chestItems.AddItem(item);
                         }
                         break;
@@ -173,7 +173,7 @@ namespace LockedLootContainers
                             chestItems.AddItem(item);
                         }
                         break;
-                    case 9: // Add Painting, no idea if this CreateItem will work, nor if it is properly given a random painting value, etc.
+                    case 9: // Add Painting, no idea if this CreateItem will work, nor if it is properly given a random painting value, etc. Fix this at some point.
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             item = ItemBuilder.CreateItem(ItemGroups.Paintings, (int)Paintings.Painting);
@@ -268,25 +268,12 @@ namespace LockedLootContainers
                     return null;
                 case (int)ChestLootItemGroups.Drugs:
                     return ItemBuilder.CreateRandomDrug(); // Just vanilla selection for now.
-                case (int)ChestLootItemGroups.LightArmor: // Will take modded/custom items into consideration later, after this works for the vanilla stuff atleast, for all item groups here.
-                    enumArray = Enum.GetValues(typeof(HeavyArmor));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Leather); // Will need testing to see if casting to vanilla enum works here.
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
+                case (int)ChestLootItemGroups.LightArmor:
+                    return GenerateLightArmor(gender, race, oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.MediumArmor:
-                    enumArray = Enum.GetValues(typeof(HeavyArmor));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), ArmorMaterialTypes.Chain); // Will need testing to see if casting to vanilla enum works here.
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
+                    return GenerateMediumArmor(gender, race, oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.HeavyArmor:
-                    enumArray = Enum.GetValues(typeof(HeavyArmor));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    ArmorMaterialTypes plateType = (ArmorMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod, false); // Will have materials be determined based on other factors later, placeholder for now.
-                    item = ItemBuilder.CreateArmor(gender, race, (Armor)enumArray.GetValue(enumIndex), plateType); // Will need testing to see if casting to vanilla enum works here.
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
+                    return GenerateHeavyArmor(gender, race, oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.Shields:
                     enumArray = Enum.GetValues(typeof(Shields));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
@@ -294,11 +281,7 @@ namespace LockedLootContainers
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.SmallWeapons:
-                    enumArray = Enum.GetValues(typeof(SmallWeapons));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 2);
-                    item = (enumIndex >= 0 && enumIndex <= 3) ? ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod)) : ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)Jewellery.Wand);
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
+                    return GenerateSmallWeapon(oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.MediumWeapons:
                     enumArray = Enum.GetValues(typeof(MediumWeapons));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
@@ -337,31 +320,21 @@ namespace LockedLootContainers
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.Books:
-                    item = ItemBuilder.CreateRandomBook(); // Will need alot of work later if wanting to take into consideration book topic, and modded skill books, etc.
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
+                    return GenerateRandomBook(conditionMod);
                 case (int)ChestLootItemGroups.Gems:
-                    return ItemBuilder.CreateRandomGem(); // Once again, will need work later to take into consideration modded gems and such.
+                    return GenerateRandomGem();
                 case (int)ChestLootItemGroups.Jewelry:
-                    enumArray = Enum.GetValues(typeof(Jewelry));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length - 8);
-                    item = ItemBuilder.CreateItem(ItemGroups.Jewellery, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
-                case (int)ChestLootItemGroups.Tools: // Will deal with this when mod compatibility stuff is taken into account, later.
-                    return null;
+                    return GenerateRandomJewelry(conditionMod);
+                case (int)ChestLootItemGroups.Tools:
+                    return GenerateRandomTool(conditionMod);
                 case (int)ChestLootItemGroups.Lights:
                     enumArray = Enum.GetValues(typeof(Lights));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex));
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.Supplies:
-                    enumArray = Enum.GetValues(typeof(Supplies));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(2, 6); // Might want to change values later, but fine for time being.
-                    return (item.IsStackable()) ? item : null; // So just for now, instead of checking other mods that make these "supplies" useful, just checking for stackability and spawn based on that.
+                    return GenerateRandomSupplies();
                 case (int)ChestLootItemGroups.BlessedItems:
                     enumArray = Enum.GetValues(typeof(BlessedItems));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
@@ -371,26 +344,26 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.ReligiousStuff:
                     enumArray = Enum.GetValues(typeof(ReligiousStuff));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
+                    item = ItemBuilder.CreateItem(ItemGroups.ReligiousItems, (int)enumArray.GetValue(enumIndex));
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.GenericPlants:
                     enumArray = Enum.GetValues(typeof(GenericPlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 7); // Might want to change values later, but fine for time being.
+                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex));
+                    item.stackCount = UnityEngine.Random.Range(1, 7);
                     return item;
                 case (int)ChestLootItemGroups.ColdClimatePlants:
                     enumArray = Enum.GetValues(typeof(ColdClimatePlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 7); // Might want to change values later, but fine for time being.
+                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients1, (int)enumArray.GetValue(enumIndex));
+                    item.stackCount = UnityEngine.Random.Range(1, 7);
                     return item;
                 case (int)ChestLootItemGroups.WarmClimatePlants:
                     enumArray = Enum.GetValues(typeof(WarmClimatePlants));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients2, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 7); // Might want to change values later, but fine for time being.
+                    item = ItemBuilder.CreateItem(ItemGroups.PlantIngredients2, (int)enumArray.GetValue(enumIndex));
+                    item.stackCount = UnityEngine.Random.Range(1, 7);
                     return item;
                 case (int)ChestLootItemGroups.CommonCreatureParts:
                     enumArray = Enum.GetValues(typeof(CommonCreatureParts));
@@ -460,14 +433,14 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.LiquidSolvents:
                     enumArray = Enum.GetValues(typeof(LiquidSolvents));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 4); // Might want to change values later, but fine for time being.
+                    item = ItemBuilder.CreateItem(ItemGroups.MiscellaneousIngredients1, (int)enumArray.GetValue(enumIndex));
+                    item.stackCount = UnityEngine.Random.Range(1, 4);
                     return item;
                 case (int)ChestLootItemGroups.TraceMetals:
                     enumArray = Enum.GetValues(typeof(TraceMetals));
                     enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.MetalIngredients, (int)enumArray.GetValue(enumIndex)); // Not sure if this int casting to the "GetValue" will work, have to test and see.
-                    item.stackCount = UnityEngine.Random.Range(1, 4); // Might want to change values later, but fine for time being.
+                    item = ItemBuilder.CreateItem(ItemGroups.MetalIngredients, (int)enumArray.GetValue(enumIndex));
+                    item.stackCount = UnityEngine.Random.Range(1, 4);
                     return item;
             }
         }
@@ -490,7 +463,7 @@ namespace LockedLootContainers
             else
             {
                 totalRoomValueMod = Mathf.CeilToInt(UnityEngine.Random.Range(totalRoomValueMod * 0.2f, totalRoomValueMod * 1.2f));
-                roomMod = Mathf.Abs(totalRoomValueMod / 100f); // Work more on this loot and material generation stuff tomorrow, try getting similar to chest generation stuff, that being a better place.
+                roomMod = Mathf.Abs(totalRoomValueMod / 100f);
                 mod = (oddsAverage + roomMod) / 2f;
             }
 
