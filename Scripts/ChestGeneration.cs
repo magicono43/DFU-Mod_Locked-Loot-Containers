@@ -14,6 +14,7 @@ using System;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallConnect.Arena2;
+using System.Linq;
 
 namespace LockedLootContainers
 {
@@ -195,6 +196,18 @@ namespace LockedLootContainers
                 {
                     return;
                 }
+
+                // Change RNG Seed Here.
+                // Mostly Copy/Pasted from this post: https://stackoverflow.com/questions/72418725/rngcryptoserviceprovider-is-obsolete
+                var randomNumber = new byte[4];
+                int seedNum = 1;
+
+                using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(randomNumber);
+                    seedNum = BitConverter.ToInt32(randomNumber, 0);
+                }
+                UnityEngine.Random.InitState(seedNum);
 
                 // Make list of loot-piles currently in the interior "scene."
                 List<GameObject> goList = new List<GameObject>();
@@ -394,6 +407,18 @@ namespace LockedLootContainers
                         itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
                         break;
                 }
+
+                // Change RNG Seed Here.
+                // Mostly Copy/Pasted from this post: https://stackoverflow.com/questions/72418725/rngcryptoserviceprovider-is-obsolete
+                var randomNumber = new byte[4];
+                int seedNum = 1;
+
+                using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(randomNumber);
+                    seedNum = BitConverter.ToInt32(randomNumber, 0);
+                }
+                UnityEngine.Random.InitState(seedNum);
 
                 // Make list of loot-piles currently in the dungeon "scene."
                 List<GameObject> goList = new List<GameObject>();
@@ -660,22 +685,7 @@ namespace LockedLootContainers
                 llcObj.AttachedLoot = new ItemCollection();
                 llcObj.LoadID = DaggerfallUnity.NextUID;
 
-                // Creates random seed for determining chest material value
-                string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();
-                string truncText = (combinedText.Length > 9) ? combinedText.Substring(0, 9) : combinedText; // Might get index out of range, but will see.
-                Debug.LogFormat("Attempting to parse value for chest seed: {0}", truncText);
-                int seed = int.Parse(truncText);
-                UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
-
                 llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod);
-
-                // Creates random seed for determining lock material value and other values
-                string jumbledText = truncText.Substring(5) + UnityEngine.Random.Range(333, 99999).ToString();
-                truncText = (jumbledText.Length > 9) ? jumbledText.Substring(0, 9) : jumbledText;
-                Debug.LogFormat("Attempting to parse value for lock & others seed: {0}", truncText);
-                seed = int.Parse(truncText);
-                UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
-
                 llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
 
                 llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, meshFilter.transform.parent.parent.name, totalRoomValueMod);
@@ -690,8 +700,6 @@ namespace LockedLootContainers
                 llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
                 llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
                 SetLockMechanismHitPoints(llcObj);
-
-                UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
                 Destroy(meshFilter.gameObject);
 
@@ -752,22 +760,7 @@ namespace LockedLootContainers
                     llcObj.AttachedLoot = llcObj.Oldloot; // Will change this later, but placeholder for testing.
                     llcObj.LoadID = DaggerfallUnity.NextUID;
 
-                    // Creates random seed for determining chest material value
-                    string combinedText = llcObj.LoadID.ToString().Substring(4) + UnityEngine.Random.Range(333, 99999).ToString();
-                    string truncText = (combinedText.Length > 9) ? combinedText.Substring(0, 9) : combinedText; // Might get index out of range, but will see.
-                    Debug.LogFormat("Attempting to parse value for chest seed: {0}", truncText);
-                    int seed = int.Parse(truncText);
-                    UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
-
                     llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod);
-
-                    // Creates random seed for determining lock material value and other values
-                    string jumbledText = truncText.Substring(5) + UnityEngine.Random.Range(333, 99999).ToString();
-                    truncText = (jumbledText.Length > 9) ? jumbledText.Substring(0, 9) : jumbledText;
-                    Debug.LogFormat("Attempting to parse value for lock & others seed: {0}", truncText);
-                    seed = int.Parse(truncText);
-                    UnityEngine.Random.InitState(seed); // This is to attempt to combat patterns in generation due to this all happening in a small period of time with a similar system-time seed by default.
-
                     llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
 
                     llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, lootPile.transform.parent.parent.name, totalRoomValueMod);
@@ -782,8 +775,6 @@ namespace LockedLootContainers
                     llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
                     llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
                     SetLockMechanismHitPoints(llcObj);
-
-                    UnityEngine.Random.InitState((int)DateTime.Now.Ticks); // Here to try and reset the random generation seed value back to the "default" for what Unity normally uses in most operations.
 
                     if (ChestGraphicType == 0) // Use sprite based graphics for chests
                     {
@@ -811,49 +802,49 @@ namespace LockedLootContainers
             }
         }
 
-        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
+        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod) // Trying out new method here, will see if it comes out any better.
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            // int[] rarity = { 180, 162, 126, 84, 108, 66, 48, 24 };
-            float[] odds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            float mod = roomValueMod;
+            List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f};
 
-            odds = new float[] { 180-(mod*1.75f), 162-(mod*0.75f), 126-(mod*0.25f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
+            float mod = roomValueMod * 0.2f;
 
-            for (int i = 0; i < odds.Length; i++)
+            odds = new List<float>() { 26.0f-(mod*1.5f), 21.4f-(mod*0.75f), 15.6f-(mod*0.5f), 9.1f+(mod*0.5f), 13.0f-(mod*0.5f), 7.1f+(mod*0.25f), 5.2f+(mod*0.5f), 2.6f+(mod*0.75f) };
+
+            // Makes sure any odds value can't go below 0.5f at the lowest.
+            for (int i = 0; i < odds.Count; i++)
+            {
+                if (odds[i] < 0.5f) { odds[i] = 0.5f; }
+            }
+            
+            // Make some materials have an odds value of 0, since that material is not allowed in this context.
+            for (int i = 0; i < odds.Count; i++)
             {
                 if (!allowedMats[i])
+                {
+                    odds[i] = 0f;
                     continue;
-
-                int randomModifier = UnityEngine.Random.Range(0, Mathf.RoundToInt(odds[i]) + 1);
-                matRolls[i] = randomModifier;
+                }
             }
 
-            int max = matRolls[0];
-            int index = 0;
-
-            for (int i = 0; i < matRolls.Length; i++)
+            // Normalize odds values to ensure they all add up to 100.
+            float totalOddsSum = odds.Sum();
+            for (int i = 0; i < odds.Count; i++)
             {
-                if (index == i)
-                    continue;
+                odds[i] = (odds[i] / totalOddsSum) * 100f;
+            }
 
-                if (max == matRolls[i])
+            // Choose a material using the weighted random selection algorithm.
+            float randomValue = UnityEngine.Random.Range(0f, 101f);
+            float cumulativeOdds = 0f;
+            int index = 0;
+            for (int i = 0; i < odds.Count; i++)
+            {
+                cumulativeOdds += odds[i];
+                if (randomValue < cumulativeOdds)
                 {
-                    if (CoinFlip())
-                        continue;
-                    else
-                    {
-                        max = matRolls[i];
-                        index = i;
-                        continue;
-                    }
-                }
-
-                if (max < matRolls[i])
-                {
-                    max = matRolls[i];
-                    index = i;
+                    index = i; // Material i is chosen
+                    break;
                 }
             }
 
@@ -861,55 +852,59 @@ namespace LockedLootContainers
             return (ChestMaterials)index;
         }
 
-        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats)
+        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats) // Trying out new method here, will see if it comes out any better.
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            // int[] rarity = { 180, 162, 126, 84, 108, 66, 48, 24 };
-            float[] odds = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            int[] matRolls = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            float mod = roomValueMod;
+            List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f};
 
-            odds = new float[] { 180-(mod*1.75f), 162-(mod*0.75f), 126-(mod*0.25f), 84+(mod*0.5f), 108-(mod*0.25f), 66+(mod*0.25f), 48+(mod*0.5f), 24+(mod*0.75f) };
+            float mod = roomValueMod * 0.2f;
 
-            for (int i = 0; i < odds.Length; i++)
+            odds = new List<float>() { 26.0f-(mod*1.5f), 21.4f-(mod*0.75f), 15.6f-(mod*0.5f), 9.1f+(mod*0.5f), 13.0f-(mod*0.5f), 7.1f+(mod*0.25f), 5.2f+(mod*0.5f), 2.6f+(mod*0.75f) };
+
+            // This is here to attempt to make having the same material chest and lock less likely, giving the dupe material a lower value.
+            for (int i = 0; i < odds.Count; i++)
             {
-                if (!allowedMats[i])
-                    continue;
-
                 if (i < (int)chestMats - 3 || i >= (int)chestMats + 3)
                     continue;
 
                 if (i == (int)chestMats - 1)
-                    odds[i] = (int)Mathf.Floor(odds[i] / 3); // This is here to attempt to make having the same material chest and lock less likely, giving the dupe material a lower value.
-
-                int randomModifier = UnityEngine.Random.Range(0, Mathf.RoundToInt(odds[i]) + 1);
-                matRolls[i] = randomModifier;
+                    odds[i] = odds[i] / 2f;
             }
 
-            int max = matRolls[0];
-            int index = 0;
-
-            for (int i = 0; i < matRolls.Length; i++)
+            // Makes sure any odds value can't go below 0.5f at the lowest.
+            for (int i = 0; i < odds.Count; i++)
             {
-                if (index == i)
+                if (odds[i] < 0.5f) { odds[i] = 0.5f; }
+            }
+            
+            // Make some materials have an odds value of 0, since that material is not allowed in this context.
+            for (int i = 0; i < odds.Count; i++)
+            {
+                if (!allowedMats[i])
+                {
+                    odds[i] = 0f;
                     continue;
-
-                if (max == matRolls[i])
-                {
-                    if (CoinFlip())
-                        continue;
-                    else
-                    {
-                        max = matRolls[i];
-                        index = i;
-                        continue;
-                    }
                 }
+            }
 
-                if (max < matRolls[i])
+            // Normalize odds values to ensure they all add up to 100.
+            float totalOddsSum = odds.Sum();
+            for (int i = 0; i < odds.Count; i++)
+            {
+                odds[i] = (odds[i] / totalOddsSum) * 100f;
+            }
+
+            // Choose a material using the weighted random selection algorithm.
+            float randomValue = UnityEngine.Random.Range(0f, 101f);
+            float cumulativeOdds = 0f;
+            int index = 0;
+            for (int i = 0; i < odds.Count; i++)
+            {
+                cumulativeOdds += odds[i];
+                if (randomValue < cumulativeOdds)
                 {
-                    max = matRolls[i];
-                    index = i;
+                    index = i; // Material i is chosen
+                    break;
                 }
             }
 
