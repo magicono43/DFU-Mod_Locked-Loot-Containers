@@ -18,12 +18,11 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        public static int LastMaterialCreated { get; set; }
-
-        public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] dungTypeMiscOdds, int[] dungTypeItemOdds)
+        public static void PopulateChestLoot(LLCObject llcObj, int totalRoomValueMod, int[] dungTypeMiscOdds, int[] dungTypeItemOdds, int[] dungTypeItemBlacklist)
         {
             int[] miscGroupOdds = (int[])dungTypeMiscOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.
             int[] itemGroupOdds = (int[])dungTypeItemOdds.Clone();
+            int[] itemBlacklist = (int[])dungTypeItemBlacklist.Clone();
             llcObj.AttachedLoot.ReplaceAll(llcObj.Oldloot);
             ItemCollection chestItems = llcObj.AttachedLoot;
             int initialItemCount = chestItems.Count;
@@ -40,7 +39,6 @@ namespace LockedLootContainers
                 }
             }
 
-            LastMaterialCreated = -1;
             float oddsAverage = 0f;
 
             switch (llcObj.ChestMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen.
@@ -223,8 +221,12 @@ namespace LockedLootContainers
                 if (itemChance <= 0)
                     continue;
 
+                int failedRegenAttempts = 0;
                 while (Dice100.SuccessRoll(itemChance))
                 {
+                    if (failedRegenAttempts >= 8) // Allow item-groups that failed to create an item due to being blacklisted, have 8 tries before forcing their generation loop to stop.
+                        break;
+
                     if (itemChance >= 60) // This is to try and reduce certain items basically always appearing due to the multiplication of odds, will see if it makes things better or worse.
                     {
                         if (Dice100.SuccessRoll(20))
@@ -243,7 +245,15 @@ namespace LockedLootContainers
                     item = DetermineLootItem(i, conditionMod, oddsAverage, totalRoomValueMod);
 
                     if (item != null) // To prevent null object reference errors if item could not be created for whatever reason by DetermineLootItem method.
+                    {
+                        if (CheckIfBlacklistedItem(item, itemBlacklist)) // Prevent blacklisted items from being created.
+                        {
+                            failedRegenAttempts++;
+                            continue;
+                        }
+
                         chestItems.AddItem(item);
+                    }
 
                     itemChance -= 100;
                 }
@@ -324,9 +334,9 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.Tools:
                     return GenerateRandomTool(conditionMod);
                 case (int)ChestLootItemGroups.Lights:
-                    enumArray = Enum.GetValues(typeof(Lights));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)enumArray.GetValue(enumIndex));
+                    if (Dice100.SuccessRoll(15)) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)UselessItems2.Lantern); }
+                    else if (Dice100.SuccessRoll(60)) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)UselessItems2.Torch); }
+                    else { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)UselessItems2.Candle); }
                     item.currentCondition = (int)(item.maxCondition * conditionMod);
                     return item;
                 case (int)ChestLootItemGroups.Supplies:
@@ -480,9 +490,6 @@ namespace LockedLootContainers
                     matOdds = new List<float>() { 4.3f-(cMod*2f), 6.5f-(cMod*1.5f), 7.8f-cMod, 10.4f+(cMod*0.4f), 11.6f+(cMod*0.7f), 12.2f+cMod, 12.9f+(cMod*1.3f), 15.0f+(cMod*1.6f), 10.8f+(cMod*1.8f), 8.5f+(cMod*2f) };
             }
 
-            if (LastMaterialCreated >= 0)
-                matOdds[LastMaterialCreated] = matOdds[LastMaterialCreated] / 2f; // This is here to reduce the odds of multiple of the same material loot showing up.
-
             // Makes sure any matOdds value can't go below 0.5f at the lowest.
             for (int i = 0; i < matOdds.Count; i++)
             {
@@ -510,8 +517,6 @@ namespace LockedLootContainers
                 }
             }
 
-            LastMaterialCreated = index;
-
             if (isWeapon)
             {
                 return index;
@@ -520,6 +525,16 @@ namespace LockedLootContainers
             {
                 return 0x0200 + index;
             }
+        }
+
+        public static bool CheckIfBlacklistedItem(DaggerfallUnityItem item, int[] itemBlacklist)
+        {
+            for (int i = 0; i < itemBlacklist.Length; i++)
+            {
+                if (item.TemplateIndex == itemBlacklist[i])
+                    return true;
+            }
+            return false;
         }
     }
 }
