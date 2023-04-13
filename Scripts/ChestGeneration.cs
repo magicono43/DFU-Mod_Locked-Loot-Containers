@@ -842,7 +842,7 @@ namespace LockedLootContainers
         public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod) // Trying out new method here, will see if it comes out any better.
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f};
+            List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f };
 
             float mod = roomValueMod * 0.1f;
 

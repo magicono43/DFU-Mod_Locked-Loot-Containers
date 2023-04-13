@@ -88,6 +88,23 @@ namespace LockedLootContainers
     }
 
     /// <summary>
+    /// A list of all the body-parts/equip-slots that can be used to determine the parts needed when generating an "equipment set" as loot.
+    /// </summary>
+    public enum EquipSetSlots
+    {
+        Head = 0,
+        RightArm = 1,
+        LeftArm = 2,
+        Chest = 3,
+        Hands = 4,
+        Legs = 5,
+        Feet = 6,
+        MainHand = 7,
+        OffHand = 8,
+        BothHands = 9,
+    }
+
+    /// <summary>
     /// The vanilla item groups that this mod will be checking for and caring about during loot generation, share the same values with the vanilla groups to be used later on.
     /// </summary>
     public enum ChestLootItemGroups

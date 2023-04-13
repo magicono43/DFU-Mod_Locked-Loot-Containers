@@ -221,6 +221,31 @@ namespace LockedLootContainers
                 if (itemChance <= 0)
                     continue;
 
+                // 4/13/2023: This equipment set stuff still needs to be tested, will do that tomorrow and hopefully it works alright.
+                int armorSetOdds = 0;
+                if (itemGroupOdds[i] == 1)
+                {
+                    for (int s = 0; s < 7; s++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
+                    {
+                        armorSetOdds += itemGroupOdds[s + 1];
+                    }
+
+                    if (armorSetOdds >= 200 && Dice100.SuccessRoll(armorSetOdds / 10))
+                    {
+                        DaggerfallUnityItem[] equipmentSet = RetrieveEquipmentSet(oddsAverage, totalRoomValueMod, conditionMod);
+                        for (int g = 0; g < equipmentSet.Length; g++) // No blacklist checking/filtering for now, but whatever, not a big deal.
+                        {
+                            if (equipmentSet[g] != null)
+                                chestItems.AddItem(equipmentSet[g]);
+                        }
+
+                        for (int h = 0; h < 7; h++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
+                        {
+                            itemGroupOdds[h + 1] = 0; // When equipment set is generated, set associated group value odds to 0, so no more can generate in this chest.
+                        }
+                    }
+                }
+
                 int failedRegenAttempts = 0;
                 while (Dice100.SuccessRoll(itemChance))
                 {
@@ -289,26 +314,9 @@ namespace LockedLootContainers
                 case (int)ChestLootItemGroups.SmallWeapons:
                     return GenerateSmallWeapon(oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.MediumWeapons:
-                    enumArray = Enum.GetValues(typeof(MediumWeapons));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    if (enumIndex >= 8) // Arrows
-                    {
-                        item = ItemBuilder.CreateWeapon(Weapons.Arrow, WeaponMaterialTypes.Steel);
-                        item.stackCount = UnityEngine.Random.Range(8, 36);
-                        return item;
-                    }
-                    else // Other Medium Sized Weapons
-                    {
-                        item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod));
-                        item.currentCondition = (int)(item.maxCondition * conditionMod);
-                        return item;
-                    }
+                    return GenerateMediumWeapon(oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.LargeWeapons:
-                    enumArray = Enum.GetValues(typeof(LargeWeapons));
-                    enumIndex = UnityEngine.Random.Range(0, enumArray.Length);
-                    item = ItemBuilder.CreateWeapon((Weapons)enumArray.GetValue(enumIndex), (WeaponMaterialTypes)RollWeaponOrArmorMaterial(oddsAverage, totalRoomValueMod));
-                    item.currentCondition = (int)(item.maxCondition * conditionMod);
-                    return item;
+                    return GenerateLargeWeapon(oddsAverage, totalRoomValueMod, conditionMod);
                 case (int)ChestLootItemGroups.MensClothing:
                     if (gender == Genders.Female)
                         return null;
