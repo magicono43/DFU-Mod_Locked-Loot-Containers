@@ -39,82 +39,118 @@ namespace LockedLootContainers
                 }
             }
 
+            // Start trying to rework loot odds modifier stuff here.
+
+            int[] modifItemGroupOdds = (int[])itemGroupOdds.Clone();
+            int[] modifMiscGroupOdds = (int[])miscGroupOdds.Clone();
             float oddsAverage = 0f;
+            int chestModCommon = 0;
+            int chestModUncommon = 0;
+            int chestModRare = 0;
 
-            switch (llcObj.ChestMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen.
+            int lockModCommon = 0;
+            int lockModUncommon = 0;
+            int lockModRare = 0;
+
+            int compModCommon = 0;
+            int compModUncommon = 0;
+            int compModRare = 0;
+
+            int roomModCommon = Mathf.FloorToInt(totalRoomValueMod / 10f);
+            int roomModUncommon = Mathf.FloorToInt(totalRoomValueMod / 20f);
+            int roomModRare = Mathf.FloorToInt(totalRoomValueMod / 50f);
+
+            for (int i = 0; i < 2; i++)
             {
-                default:
-                case ChestMaterials.Wood:
-                    oddsAverage += 0.25f; break;
-                case ChestMaterials.Iron:
-                    oddsAverage += 0.5f; break;
-                case ChestMaterials.Steel:
-                    oddsAverage += 1.25f; break;
-                case ChestMaterials.Orcish:
-                    oddsAverage += 2.75f; break;
-                case ChestMaterials.Mithril:
-                    oddsAverage += 1.5f; break;
-                case ChestMaterials.Dwarven:
-                    oddsAverage += 2.0f; break;
-                case ChestMaterials.Adamantium:
-                    oddsAverage += 3.0f; break;
-                case ChestMaterials.Daedric:
-                    oddsAverage += 4.25f; break;
+                int matIndex = 0;
+                if (i == 0) { matIndex = (int)llcObj.ChestMaterial; }
+                else { matIndex = (int)llcObj.LockMaterial; }
+
+                switch (matIndex)
+                {
+                    default:
+                    case (int)ChestMaterials.Wood:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(-15, 1); chestModUncommon = UnityEngine.Random.Range(-7, 1); chestModRare = UnityEngine.Random.Range(-3, 1); }
+                        else { lockModCommon = UnityEngine.Random.Range(-15, 1); lockModUncommon = UnityEngine.Random.Range(-7, 1); lockModRare = UnityEngine.Random.Range(-3, 1); }
+                        oddsAverage += 0.5f; break;
+                    case (int)ChestMaterials.Iron:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(0, 11); chestModUncommon = UnityEngine.Random.Range(0, 6); chestModRare = UnityEngine.Random.Range(0, 3); }
+                        else { lockModCommon = UnityEngine.Random.Range(0, 11); lockModUncommon = UnityEngine.Random.Range(0, 6); lockModRare = UnityEngine.Random.Range(0, 3); }
+                        oddsAverage += 0.75f; break;
+                    case (int)ChestMaterials.Steel:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(8, 20); chestModUncommon = UnityEngine.Random.Range(4, 11); chestModRare = UnityEngine.Random.Range(2, 5); }
+                        else { lockModCommon = UnityEngine.Random.Range(8, 20); lockModUncommon = UnityEngine.Random.Range(4, 11); lockModRare = UnityEngine.Random.Range(2, 5); }
+                        oddsAverage += 1.5f; break;
+                    case (int)ChestMaterials.Orcish:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(17, 29); chestModUncommon = UnityEngine.Random.Range(9, 17); chestModRare = UnityEngine.Random.Range(8, 11); }
+                        else { lockModCommon = UnityEngine.Random.Range(17, 29); lockModUncommon = UnityEngine.Random.Range(9, 17); lockModRare = UnityEngine.Random.Range(8, 11); }
+                        oddsAverage += 3.0f; break;
+                    case (int)ChestMaterials.Mithril:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(11, 22); chestModUncommon = UnityEngine.Random.Range(5, 13); chestModRare = UnityEngine.Random.Range(3, 6); }
+                        else { lockModCommon = UnityEngine.Random.Range(11, 22); lockModUncommon = UnityEngine.Random.Range(5, 13); lockModRare = UnityEngine.Random.Range(3, 6); }
+                        oddsAverage += 1.75f; break;
+                    case (int)ChestMaterials.Dwarven:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(12, 23); chestModUncommon = UnityEngine.Random.Range(6, 14); chestModRare = UnityEngine.Random.Range(5, 8); }
+                        else { lockModCommon = UnityEngine.Random.Range(12, 23); lockModUncommon = UnityEngine.Random.Range(6, 14); lockModRare = UnityEngine.Random.Range(5, 8); }
+                        oddsAverage += 2.25f; break;
+                    case (int)ChestMaterials.Adamantium:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(18, 30); chestModUncommon = UnityEngine.Random.Range(12, 20); chestModRare = UnityEngine.Random.Range(11, 14); }
+                        else { lockModCommon = UnityEngine.Random.Range(18, 30); lockModUncommon = UnityEngine.Random.Range(12, 20); lockModRare = UnityEngine.Random.Range(11, 14); }
+                        oddsAverage += 3.25f; break;
+                    case (int)ChestMaterials.Daedric:
+                        if (i == 0) { chestModCommon = UnityEngine.Random.Range(28, 42); chestModUncommon = UnityEngine.Random.Range(23, 34); chestModRare = UnityEngine.Random.Range(17, 22); }
+                        else { lockModCommon = UnityEngine.Random.Range(28, 42); lockModUncommon = UnityEngine.Random.Range(23, 34); lockModRare = UnityEngine.Random.Range(17, 22); }
+                        oddsAverage += 4.5f; break;
+                }
             }
 
-            switch (llcObj.LockMaterial) // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen.
-            {
-                default:
-                case LockMaterials.Wood:
-                    oddsAverage += 0.25f; break;
-                case LockMaterials.Iron:
-                    oddsAverage += 0.5f; break;
-                case LockMaterials.Steel:
-                    oddsAverage += 1.25f; break;
-                case LockMaterials.Orcish:
-                    oddsAverage += 2.75f; break;
-                case LockMaterials.Mithril:
-                    oddsAverage += 1.5f; break;
-                case LockMaterials.Dwarven:
-                    oddsAverage += 2.0f; break;
-                case LockMaterials.Adamantium:
-                    oddsAverage += 3.0f; break;
-                case LockMaterials.Daedric:
-                    oddsAverage += 4.25f; break;
-            }
+            if (llcObj.LockComplexity < 0 || (llcObj.LockComplexity >= 0 && llcObj.LockComplexity <= 19)) { compModCommon = UnityEngine.Random.Range(-5, 1); compModUncommon = UnityEngine.Random.Range(-3, 1); compModRare = UnityEngine.Random.Range(-1, 1); }
+            else if (llcObj.LockComplexity >= 20 && llcObj.LockComplexity <= 39) { compModCommon = UnityEngine.Random.Range(2, 8); compModUncommon = UnityEngine.Random.Range(0, 3); compModRare = UnityEngine.Random.Range(0, 2); }
+            else if (llcObj.LockComplexity >= 40 && llcObj.LockComplexity <= 59) { compModCommon = UnityEngine.Random.Range(5, 13); compModUncommon = UnityEngine.Random.Range(2, 6); compModRare = UnityEngine.Random.Range(1, 4); }
+            else if (llcObj.LockComplexity >= 60 && llcObj.LockComplexity <= 79) { compModCommon = UnityEngine.Random.Range(8, 16); compModUncommon = UnityEngine.Random.Range(3, 8); compModRare = UnityEngine.Random.Range(2, 6); }
+            else { compModCommon = UnityEngine.Random.Range(12, 20); compModUncommon = UnityEngine.Random.Range(7, 12); compModRare = UnityEngine.Random.Range(4, 9); }
 
-            // For now, these are intended to be the modifier each "lootOdds" value is going to be multipled by the end before item generation rolls happen, still placeholder.
-            if (llcObj.LockComplexity < 0 || (llcObj.LockComplexity >= 0 && llcObj.LockComplexity <= 19)) { oddsAverage += 0f; }
-            else if (llcObj.LockComplexity >= 20 && llcObj.LockComplexity <= 39) { oddsAverage += 0.25f; }
-            else if (llcObj.LockComplexity >= 40 && llcObj.LockComplexity <= 59) { oddsAverage += 0.5f; }
-            else if (llcObj.LockComplexity >= 60 && llcObj.LockComplexity <= 79) { oddsAverage += 0.75f; }
-            else { oddsAverage += 1.0f; }
+            int totalModsCommon = chestModCommon + lockModCommon + compModCommon + roomModCommon;
+            int totalModsUncommon = chestModUncommon + lockModUncommon + compModUncommon + roomModUncommon;
+            int totalModsRare = chestModRare + lockModRare + compModRare + roomModRare;
 
-            for (int i = 0; i < miscGroupOdds.Length; i++) // Heavily placeholder for now, but don't feel like going too deep into this right now.
-            {
-                if (i <= 0 || i == 12 || i == 13)
-                    continue;
-                else
-                    miscGroupOdds[i] = (int)Mathf.Round(miscGroupOdds[i] * ((oddsAverage) / 6f));
-            }
-
-            for (int i = 0; i < itemGroupOdds.Length; i++) // Odds are modified in this loop for each item group within the "itemGroupOdds" array.
+            // Apply the chest and lock material odds modifiers to the "modifItemGroupOdds" values based on the base itemGroupOdds rarity values.
+            for (int i = 0; i < modifItemGroupOdds.Length; i++)
             {
                 if (itemGroupOdds[i] <= 0)
                     continue;
-                else if (itemGroupOdds[i] > 0 && itemGroupOdds[i] <= 15)
-                    itemGroupOdds[i] = (int)Mathf.Round((itemGroupOdds[i] + (totalRoomValueMod / 12f)) * (oddsAverage / 2f));
-                else if (itemGroupOdds[i] > 15 && itemGroupOdds[i] <= 50)
-                    itemGroupOdds[i] = (int)Mathf.Round((itemGroupOdds[i] + (totalRoomValueMod / 4f)) * (oddsAverage / 2f));
-                else
-                    itemGroupOdds[i] = (int)Mathf.Round((itemGroupOdds[i] + (totalRoomValueMod / 2f)) * (oddsAverage / 2f));
+
+                if (itemGroupOdds[i] >= 1 && itemGroupOdds[i] <= 15) { modifItemGroupOdds[i] += totalModsRare; } // Rare
+                else if (itemGroupOdds[i] >= 16 && itemGroupOdds[i] <= 36) { modifItemGroupOdds[i] += totalModsUncommon; } // Uncommon
+                else { modifItemGroupOdds[i] += totalModsCommon; } // Common
+
+                if (modifItemGroupOdds[i] < 0) // Any values that were reduced below 0 will be brought back up to 1 to atleast give them some chance of spawning.
+                    modifItemGroupOdds[i] = 1;
             }
+
+            // Apply the chest and lock material odds modifiers to the "modifMiscGroupOdds" values based on the base miscGroupOdds rarity values.
+            for (int i = 0; i < modifMiscGroupOdds.Length; i++)
+            {
+                if (miscGroupOdds[i] <= 0 || (i >= 2 && i <= 5) || i == 12 || i == 13)
+                    continue;
+
+                if (i == 0) { modifMiscGroupOdds[i] += totalModsCommon; }
+                else if (i == 1) { modifMiscGroupOdds[i] += Mathf.RoundToInt(totalModsRare / 3f); }
+                else if (i == 6) { modifMiscGroupOdds[i] += Mathf.RoundToInt(totalModsUncommon / 2f); }
+                else if (i >= 7 && i <= 11) { modifMiscGroupOdds[i] += Mathf.RoundToInt(totalModsRare / 3f); }
+
+                if (modifMiscGroupOdds[i] < 0) // Any values that were reduced below 0 will be brought back up to 1 to atleast give them some chance of spawning.
+                    modifMiscGroupOdds[i] = 1;
+            }
+
+            // End trying to rework loot odds modifier stuff here.
+            // Made good progress on this loot odds reworking stuff today, but I'm tired so I'll continue working on it tomorrow, from here.
 
             // Debug log string creator, for testing purposes only.
             string baseString = "";
-            for (int i = 0; i < miscGroupOdds.Length; i++)
+            for (int i = 0; i < modifMiscGroupOdds.Length; i++)
             {
-                string valueString = "[" + miscGroupOdds[i].ToString() + "]";
+                string valueString = "[" + modifMiscGroupOdds[i].ToString() + "]";
                 baseString = baseString + ", " + valueString;
             }
             Debug.LogFormat("Misc Group Odds For Chest: {0}", baseString);
@@ -220,28 +256,39 @@ namespace LockedLootContainers
 
                 if (itemChance <= 0)
                     continue;
-
-                // 4/13/2023: This equipment set stuff still needs to be tested, will do that tomorrow and hopefully it works alright.
+                
                 int armorSetOdds = 0;
-                if (itemGroupOdds[i] == 1)
+                if (i == 1)
                 {
-                    for (int s = 0; s < 7; s++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
+                    bool armorWepsCanBeTogether = false;
+                    int armorSum = 0;
+                    int wepSum = 0;
+                    for (int p = 0; p < 4; p++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
                     {
-                        armorSetOdds += itemGroupOdds[s + 1];
+                        armorSum += itemGroupOdds[p + 1];
+                    }
+                    for (int n = 0; n < 3; n++)
+                    {
+                        wepSum += itemGroupOdds[n + 5];
                     }
 
-                    if (armorSetOdds >= 200 && Dice100.SuccessRoll(armorSetOdds / 10))
+                    armorSetOdds = armorSum + wepSum;
+                    armorWepsCanBeTogether = (armorSum * wepSum) == 0 ? false : true; // If either armor or weapon odds sum to 0, don't allow sets to be generated in this chest.
+                    if (armorWepsCanBeTogether)
                     {
-                        DaggerfallUnityItem[] equipmentSet = RetrieveEquipmentSet(oddsAverage, totalRoomValueMod, conditionMod);
-                        for (int g = 0; g < equipmentSet.Length; g++) // No blacklist checking/filtering for now, but whatever, not a big deal.
+                        if (armorSetOdds >= 200 && Dice100.SuccessRoll(armorSetOdds / 10))
                         {
-                            if (equipmentSet[g] != null)
-                                chestItems.AddItem(equipmentSet[g]);
-                        }
+                            DaggerfallUnityItem[] equipmentSet = RetrieveEquipmentSet(oddsAverage, totalRoomValueMod, conditionMod);
+                            for (int g = 0; g < equipmentSet.Length; g++) // No blacklist checking/filtering for now, but whatever, not a big deal.
+                            {
+                                if (equipmentSet[g] != null)
+                                    chestItems.AddItem(equipmentSet[g]);
+                            }
 
-                        for (int h = 0; h < 7; h++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
-                        {
-                            itemGroupOdds[h + 1] = 0; // When equipment set is generated, set associated group value odds to 0, so no more can generate in this chest.
+                            for (int h = 0; h < 7; h++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
+                            {
+                                itemGroupOdds[h + 1] = 0; // When equipment set is generated, set associated group value odds to 0, so no more can generate in this chest.
+                            }
                         }
                     }
                 }
