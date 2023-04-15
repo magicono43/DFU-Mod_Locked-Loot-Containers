@@ -143,11 +143,17 @@ namespace LockedLootContainers
                     modifMiscGroupOdds[i] = 1;
             }
 
-            // End trying to rework loot odds modifier stuff here.
-            // Made good progress on this loot odds reworking stuff today, but I'm tired so I'll continue working on it tomorrow, from here.
-
             // Debug log string creator, for testing purposes only.
             string baseString = "";
+            for (int i = 0; i < modifItemGroupOdds.Length; i++)
+            {
+                string valueString = "[" + modifItemGroupOdds[i].ToString() + "]";
+                baseString = baseString + ", " + valueString;
+            }
+            Debug.LogFormat("Item Group Odds For Chest: {0}", baseString);
+
+            // Debug log string creator, for testing purposes only.
+            baseString = "";
             for (int i = 0; i < modifMiscGroupOdds.Length; i++)
             {
                 string valueString = "[" + modifMiscGroupOdds[i].ToString() + "]";
@@ -155,10 +161,10 @@ namespace LockedLootContainers
             }
             Debug.LogFormat("Misc Group Odds For Chest: {0}", baseString);
 
-            for (int i = 0; i < miscGroupOdds.Length; i++) // Groups within "miscGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
+            for (int i = 0; i < modifMiscGroupOdds.Length; i++) // Groups within "miscGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             {
-                int itemChance = miscGroupOdds[i];
-                float conditionMod = (float)UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1) / 100f;
+                int itemChance = modifMiscGroupOdds[i];
+                float conditionMod = (float)UnityEngine.Random.Range(modifMiscGroupOdds[13], modifMiscGroupOdds[12] + 1) / 100f;
                 DaggerfallUnityItem item = null;
                 int amount = 0;
 
@@ -167,12 +173,14 @@ namespace LockedLootContainers
                     default:
                         break;
                     case 0: // Add Gold
-                        amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(miscGroupOdds[2], miscGroupOdds[3] + 1) : 0;
+                        int goldBonus = (modifMiscGroupOdds[0] - 50) > 0 ? (modifMiscGroupOdds[0] - 50) * UnityEngine.Random.Range(5, 31) : 0;
+                        amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(modifMiscGroupOdds[2], modifMiscGroupOdds[3] + 1) + goldBonus : 0;
                         if (amount > 0)
                             chestItems.AddItem(ItemBuilder.CreateGoldPieces(RolePlayRealismLootRebalanceCheck ? Mathf.CeilToInt(amount / 3f) : amount));
                         break;
                     case 1: // Add Letter of Credit
-                        amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(miscGroupOdds[4], miscGroupOdds[5] + 1) : 0;
+                        int locBonus = (modifMiscGroupOdds[0] - 5) > 0 ? (modifMiscGroupOdds[0] - 5) * UnityEngine.Random.Range(250, 2001) : 0;
+                        amount = (Dice100.SuccessRoll(itemChance)) ? UnityEngine.Random.Range(modifMiscGroupOdds[4], modifMiscGroupOdds[5] + 1) + locBonus : 0;
                         if (amount > 0)
                         {
                             item = ItemBuilder.CreateItem(ItemGroups.MiscItems, (int)MiscItems.Letter_of_credit);
@@ -183,80 +191,132 @@ namespace LockedLootContainers
                     case 6: // Add Potions
                         if (Dice100.SuccessRoll(itemChance))
                         {
-                            amount = UnityEngine.Random.Range(1, 5);
-                            for (int p = 0; p < amount; p++)
+                            int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            for (int s = 0; s < 1 + bonus; s++)
                             {
-                                chestItems.AddItem(ItemBuilder.CreateRandomPotion());
+                                amount = UnityEngine.Random.Range(1, 5);
+                                for (int p = 0; p < amount; p++)
+                                {
+                                    chestItems.AddItem(ItemBuilder.CreateRandomPotion());
+                                }
                             }
                         }
                         break;
                     case 7: // Add Map
                         if (Dice100.SuccessRoll(itemChance))
-                            chestItems.AddItem(new DaggerfallUnityItem(ItemGroups.MiscItems, 8));
+                        {
+                            int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            for (int s = 0; s < 1 + bonus; s++)
+                            {
+                                chestItems.AddItem(new DaggerfallUnityItem(ItemGroups.MiscItems, 8));
+                            }
+                        }
                         break;
                     case 8: // Add Potion Recipe
                         if (Dice100.SuccessRoll(itemChance))
                         {
-                            int recipeIdx = UnityEngine.Random.Range(0, DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys.Length);
-                            int recipeKey = DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys[recipeIdx];
-                            item = new DaggerfallUnityItem(ItemGroups.MiscItems, 4) { PotionRecipeKey = recipeKey };
-                            chestItems.AddItem(item);
+                            int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            for (int s = 0; s < 1 + bonus; s++)
+                            {
+                                int recipeIdx = UnityEngine.Random.Range(0, DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys.Length);
+                                int recipeKey = DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys[recipeIdx];
+                                item = new DaggerfallUnityItem(ItemGroups.MiscItems, 4) { PotionRecipeKey = recipeKey };
+                                chestItems.AddItem(item);
+                            }
                         }
                         break;
                     case 9: // Add Painting, no idea if this CreateItem will work, nor if it is properly given a random painting value, etc. Fix this at some point.
                         if (Dice100.SuccessRoll(itemChance))
                         {
-                            item = ItemBuilder.CreateItem(ItemGroups.Paintings, (int)Paintings.Painting);
-                            item.currentCondition = (int)(item.maxCondition * conditionMod);
-                            chestItems.AddItem(item);
+                            int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            for (int s = 0; s < 1 + bonus; s++)
+                            {
+                                item = ItemBuilder.CreateItem(ItemGroups.Paintings, (int)Paintings.Painting);
+                                item.currentCondition = (int)(item.maxCondition * conditionMod);
+                                chestItems.AddItem(item);
+                            }
                         }
                         break;
                     case 10: // Add Soul-gem
                         if (Dice100.SuccessRoll(itemChance))
                         {
-                            if (Dice100.FailedRoll(25))
+                            int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            for (int s = 0; s < 1 + bonus; s++)
                             {
-                                // Empty soul trap
-                                item = ItemBuilder.CreateItem(ItemGroups.MiscItems, (int)MiscItems.Soul_trap);
-                                item.value = 5000;
-                                item.TrappedSoulType = MobileTypes.None;
+                                if (Dice100.FailedRoll(25))
+                                {
+                                    // Empty soul trap
+                                    item = ItemBuilder.CreateItem(ItemGroups.MiscItems, (int)MiscItems.Soul_trap);
+                                    item.value = 5000;
+                                    item.TrappedSoulType = MobileTypes.None;
+                                }
+                                else
+                                {
+                                    // Filled soul trap
+                                    item = ItemBuilder.CreateRandomlyFilledSoulTrap();
+                                }
+                                chestItems.AddItem(item);
                             }
-                            else
-                            {
-                                // Filled soul trap
-                                item = ItemBuilder.CreateRandomlyFilledSoulTrap();
-                            }
-                            chestItems.AddItem(item);
                         }
                         break;
                     case 11: // Add Magic Item, it is unidentified when created.
                         if (Dice100.SuccessRoll(itemChance))
                         {
-                            item = ItemBuilder.CreateRandomMagicItem(UnityEngine.Random.Range(1, 22), GameManager.Instance.PlayerEntity.Gender, GameManager.Instance.PlayerEntity.Race);
-                            item.currentCondition = (int)(item.maxCondition * conditionMod);
-                            chestItems.AddItem(item);
+                            int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            for (int s = 0; s < 1 + bonus; s++)
+                            {
+                                item = ItemBuilder.CreateRandomMagicItem(UnityEngine.Random.Range(1, 22), GameManager.Instance.PlayerEntity.Gender, GameManager.Instance.PlayerEntity.Race);
+                                item.currentCondition = (int)(item.maxCondition * conditionMod);
+                                chestItems.AddItem(item);
+                            }
                         }
                         break;
                 }
             }
 
-            // Debug log string creator, for testing purposes only.
-            baseString = "";
-            for (int i = 0; i < itemGroupOdds.Length; i++)
+            // Each loop randomly pick an armor type, add type to list if it succeeds roll, each cycle reduce the values of all types until none are left basically.
+            List<int> chosenArmorTypes = new List<int>();
+            List<int> armTypes = new List<int>();
+            if (modifItemGroupOdds[1] > 0) { armTypes.Add(1); }
+            if (modifItemGroupOdds[2] > 0) { armTypes.Add(2); }
+            if (modifItemGroupOdds[3] > 0) { armTypes.Add(3); }
+            while ((modifItemGroupOdds[1] + modifItemGroupOdds[2] + modifItemGroupOdds[3]) >= 15)
             {
-                string valueString = "[" + itemGroupOdds[i].ToString() + "]";
-                baseString = baseString + ", " + valueString;
-            }
-            Debug.LogFormat("Item Group Odds For Chest: {0}", baseString);
+                int randType = armTypes[UnityEngine.Random.Range(0, armTypes.Count)];
+                if (randType == 1) { if (Dice100.SuccessRoll(modifItemGroupOdds[1])) { chosenArmorTypes.Add(1); } }
+                else if (randType == 2) { if (Dice100.SuccessRoll(modifItemGroupOdds[2])) { chosenArmorTypes.Add(2); } }
+                else if (randType == 3) { if (Dice100.SuccessRoll(modifItemGroupOdds[3])) { chosenArmorTypes.Add(3); } }
 
-            for (int i = 0; i < itemGroupOdds.Length; i++) // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
+                modifItemGroupOdds[1] /= 2; modifItemGroupOdds[2] /= 2; modifItemGroupOdds[3] /= 2;
+            }
+
+            // Each loop randomly pick a weapon type, add type to list if it succeeds roll, each cycle reduce the values of all types until none are left basically.
+            List<int> chosenWeaponTypes = new List<int>();
+            List<int> wepTypes = new List<int>();
+            if (modifItemGroupOdds[5] > 0) { wepTypes.Add(1); }
+            if (modifItemGroupOdds[6] > 0) { wepTypes.Add(2); }
+            if (modifItemGroupOdds[7] > 0) { wepTypes.Add(3); }
+            while ((modifItemGroupOdds[5] + modifItemGroupOdds[6] + modifItemGroupOdds[7]) >= 15)
             {
-                int itemChance = itemGroupOdds[i];
-                float conditionMod = (float)UnityEngine.Random.Range(miscGroupOdds[13], miscGroupOdds[12] + 1) / 100f;
+                int randType = wepTypes[UnityEngine.Random.Range(0, wepTypes.Count)];
+                if (randType == 1) { if (Dice100.SuccessRoll(modifItemGroupOdds[5])) { chosenWeaponTypes.Add(1); } }
+                else if (randType == 2) { if (Dice100.SuccessRoll(modifItemGroupOdds[6])) { chosenWeaponTypes.Add(2); } }
+                else if (randType == 3) { if (Dice100.SuccessRoll(modifItemGroupOdds[7])) { chosenWeaponTypes.Add(3); } }
+
+                modifItemGroupOdds[5] /= 2; modifItemGroupOdds[6] /= 2; modifItemGroupOdds[7] /= 2;
+            }
+
+            // End trying to rework loot odds modifier stuff here.
+
+            for (int i = 0; i < modifItemGroupOdds.Length; i++) // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
+            {
+                int itemChance = modifItemGroupOdds[i];
+                float conditionMod = (float)UnityEngine.Random.Range(modifMiscGroupOdds[13], modifMiscGroupOdds[12] + 1) / 100f;
 
                 if (itemChance <= 0)
                     continue;
-                
+
+                // Tomorrow, start modifying and refactoring the stuff around and below here to finish up these loot odds changes/method refactoring. Then test and such afterward.
                 int armorSetOdds = 0;
                 if (i == 1)
                 {
@@ -265,11 +325,11 @@ namespace LockedLootContainers
                     int wepSum = 0;
                     for (int p = 0; p < 4; p++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
                     {
-                        armorSum += itemGroupOdds[p + 1];
+                        armorSum += modifItemGroupOdds[p + 1];
                     }
                     for (int n = 0; n < 3; n++)
                     {
-                        wepSum += itemGroupOdds[n + 5];
+                        wepSum += modifItemGroupOdds[n + 5];
                     }
 
                     armorSetOdds = armorSum + wepSum;
@@ -287,7 +347,7 @@ namespace LockedLootContainers
 
                             for (int h = 0; h < 7; h++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
                             {
-                                itemGroupOdds[h + 1] = 0; // When equipment set is generated, set associated group value odds to 0, so no more can generate in this chest.
+                                modifItemGroupOdds[h + 1] = 0; // When equipment set is generated, set associated group value odds to 0, so no more can generate in this chest.
                             }
                         }
                     }
