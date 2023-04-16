@@ -307,21 +307,21 @@ namespace LockedLootContainers
                 {
                     case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
                         allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 25;
+                        baseChestOdds = 20;
                         miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
                         itemGroupOdds = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 50, 50, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
                         itemBlacklist = new int[] { (int)Supplies.Rations };
                         break;
                     case DFRegion.DungeonTypes.OrcStronghold:
                         allowedMats = new bool[] { false, true, true, true, true, false, false, false };
-                        baseChestOdds = 25;
+                        baseChestOdds = 20;
                         miscGroupOdds = new int[] { 75, 2, 75, 455, 600, 2500, 15, 6, 8, 1, 0, 3, 95, 40 };
                         itemGroupOdds = new int[] { 15, 10, 25, 75, 20, 20, 60, 60, 20, 20, 0, 10, 25, 30, 20, 60, 0, 20, 30, 30, 30, 20, 10, 5, 15, 30 };
                         itemBlacklist = new int[] { (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)SmallWeapons.Wand, (int)Jewelry.Tiara };
                         break;
                     case DFRegion.DungeonTypes.HumanStronghold:
                         allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 30;
+                        baseChestOdds = 25;
                         miscGroupOdds = new int[] { 85, 6, 50, 500, 750, 4000, 10, 5, 5, 8, 3, 5, 85, 35 };
                         itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
                         itemBlacklist = new int[] { (int)Jewelry.Crown };
@@ -335,7 +335,7 @@ namespace LockedLootContainers
                         break;
                     case DFRegion.DungeonTypes.DesecratedTemple: // Could even make these specific to some worshipped god and such, but that's just idea guy talking.
                         allowedMats = new bool[] { true, true, true, true, true, true, true, false };
-                        baseChestOdds = 25;
+                        baseChestOdds = 20;
                         miscGroupOdds = new int[] { 90, 7, 30, 525, 700, 4000, 25, 0, 15, 7, 3, 6, 75, 25 };
                         itemGroupOdds = new int[] { 5, 20, 20, 0, 0, 10, 30, 20, 75, 75, 40, 15, 40, 5, 30, 70, 60, 200, 30, 30, 30, 30, 20, 10, 30, 10 };
                         itemBlacklist = new int[] { (int)Tools.Armorers_Hammer, (int)Jewelry.Crown };
@@ -384,7 +384,7 @@ namespace LockedLootContainers
                         break;
                     case DFRegion.DungeonTypes.RuinedCastle:
                         allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 40;
+                        baseChestOdds = 35;
                         miscGroupOdds = new int[] { 50, 8, 70, 600, 1250, 6000, 2, 3, 0, 12, 0, 2, 60, 30 };
                         itemGroupOdds = new int[] { 5, 10, 30, 50, 20, 50, 50, 50, 20, 20, 30, 40, 50, 0, 15, 25, 0, 40, 0, 0, 0, 0, 0, 0, 0, 20 };
                         break;
@@ -404,7 +404,7 @@ namespace LockedLootContainers
                         break;
                     case DFRegion.DungeonTypes.DragonsDen:
                         allowedMats = PermittedMaterials_FireProof;
-                        baseChestOdds = 45;
+                        baseChestOdds = 40;
                         miscGroupOdds = new int[] { 90, 0, 150, 2500, 0, 0, 5, 7, 3, 10, 6, 12, 70, 25 };
                         itemGroupOdds = new int[] { 0, 10, 45, 90, 60, 30, 70, 70, 0, 0, 10, 100, 100, 0, 30, 30, 10, 40, 0, 0, 0, 40, 20, 70, 20, 80 };
                         itemBlacklist = new int[] { (int)Supplies.Parchment };
@@ -844,9 +844,9 @@ namespace LockedLootContainers
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f };
 
-            float mod = roomValueMod * 0.1f;
+            float mod = roomValueMod * 0.05f;
 
-            odds = new List<float>() { 26.0f-(mod*1.5f), 21.4f-(mod*0.75f), 15.6f-(mod*0.5f), 9.1f+(mod*0.5f), 13.0f-(mod*0.5f), 7.1f+(mod*0.25f), 5.2f+(mod*0.5f), 2.6f+(mod*0.75f) };
+            odds = new List<float>() { 25.4f-(mod*1.5f), 21.2f-(mod*0.75f), 15.4f-(mod*0.5f), 8.4f+(mod*0.5f), 12.0f-(mod*0.5f), 5.8f+(mod*0.25f), 4.4f+(mod*0.5f), 2.1f+(mod*0.75f) };
 
             // Makes sure any odds value can't go below 0.5f at the lowest.
             for (int i = 0; i < odds.Count; i++)
@@ -897,7 +897,7 @@ namespace LockedLootContainers
             bool[] validMatCombos = { true, true, true, true, true, true, true, true };
             float mod = roomValueMod * 0.1f;
 
-            odds = new List<float>() { 26.0f-(mod*1.5f), 21.4f-(mod*0.75f), 15.6f-(mod*0.5f), 9.1f+(mod*0.5f), 13.0f-(mod*0.5f), 7.1f+(mod*0.25f), 5.2f+(mod*0.5f), 2.6f+(mod*0.75f) };
+            odds = new List<float>() { 25.4f-(mod*1.5f), 21.2f-(mod*0.75f), 15.4f-(mod*0.5f), 8.4f+(mod*0.5f), 12.0f-(mod*0.5f), 5.8f+(mod*0.25f), 4.4f+(mod*0.5f), 2.1f+(mod*0.75f) };
 
             // Makes sure any odds value can't go below 0.5f at the lowest.
             for (int i = 0; i < odds.Count; i++)

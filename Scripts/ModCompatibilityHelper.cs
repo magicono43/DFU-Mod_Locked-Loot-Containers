@@ -167,16 +167,16 @@ namespace LockedLootContainers
             DaggerfallUnityItem item = null;
             if (SkillBooksCheck)
             {
-                if (Dice100.SuccessRoll(70)) // Create a vanilla book most of the time.
+                if (Dice100.SuccessRoll(75)) // Create a vanilla book most of the time.
                 {
                     item = ItemBuilder.CreateRandomBook();
                 }
                 else
                 {
                     int roll = UnityEngine.Random.Range(0, 101);
-                    if (roll > 90) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Tablet_of_Arcane_Knowledge); }
-                    else if (roll > 75) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Tomes_of_Arcane_Knowledge); }
-                    else if (roll > 45) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Advanced_Skill_Book); }
+                    if (roll > 95) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Tablet_of_Arcane_Knowledge); }
+                    else if (roll > 85) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Tomes_of_Arcane_Knowledge); }
+                    else if (roll > 60) { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Advanced_Skill_Book); }
                     else { item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, (int)Books.Basic_Skill_Book); }
                 }
             }
@@ -420,7 +420,7 @@ namespace LockedLootContainers
         {
             int chosenSet = -1;
             List<int> equipSlots = new List<int>();
-            List<float> odds = new List<float>() { 3.0f, 3.5f, 3.5f, 4.0f, 4.0f, 4.0f, 4.2f, 4.2f, 4.2f, 4.5f, 4.5f };
+            List<float> odds = new List<float>() { 1.2f, 2.1f, 2.1f, 3.5f, 3.5f, 3.5f, 5.2f, 5.2f, 5.2f, 6.3f, 6.3f };
 
             // Normalize odds values to ensure they all add up to 100.
             float totalOddsSum = odds.Sum();
