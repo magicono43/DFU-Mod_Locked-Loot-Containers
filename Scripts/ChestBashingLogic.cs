@@ -227,9 +227,9 @@ namespace LockedLootContainers
         {
             short skillUsed = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
             int wepSkill = Player.Skills.GetLiveSkillValue(skillUsed); // Might add accuracy modifier for weapon type, but for now just keep it more simple.
-            float accuracyCheck = Mathf.Round(wepSkill / 4) + Mathf.Round(Willp * .2f) + Mathf.Round(Agili * .5f) + Mathf.Round(Speed * .1f) + Mathf.Round(Luck * .3f);
+            float accuracyCheck = Mathf.Round(wepSkill / 5) + Mathf.Round(Willp * .1f) + Mathf.Round(Agili * .3f) + Mathf.Round(Luck * .2f);
 
-            if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(accuracyCheck, 4f, 65f))))
+            if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(accuracyCheck, 4f, 50f))))
             {
                 Player.TallySkill((DFCareer.Skills)skillUsed, 1);
                 return true;
@@ -439,7 +439,6 @@ namespace LockedLootContainers
 
         public static void ApplyBashingCostLogic(LLCObject chest, DaggerfallUnityItem weapon, bool hitLock = false, bool hitWood = false, bool critBash = false, int matDiff = -100) // Applies vitals damage to player and the weapon used during bash attempt.
         {
-            // Will have to consider later when doing the stuff for "bashing" with the bow, I.E. shooting arrows at a chest, and how to deal with that stuff, possibly different method entirely.
             int wepSkillID = (weapon != null) ? weapon.GetWeaponSkillIDAsShort() : (short)DFCareer.Skills.HandToHand;
             int wepSkill = Player.Skills.GetLiveSkillValue(wepSkillID); // Have not used this value yet, nor "matDiff" will see if I eventually do or not later.
             float bashHitMod = 1f;

@@ -84,8 +84,8 @@ namespace LockedLootContainers
             if (lockComp >= 0 && lockComp <= 19)
             {
                 int lockP = Mathf.CeilToInt(LockP * 1.7f);
-                float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.1f) + Mathf.Round(Agili * 0.7f) + Mathf.Round(Speed * 0.3f) + Mathf.Round(Luck * 0.2f);
-                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 10f, 100f))))
+                float successChance = (lockComp * -1.6f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.1f) + Mathf.Round(Agili * 0.7f) + Mathf.Round(Speed * 0.3f) + Mathf.Round(Luck * 0.2f);
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 7f, 100f))))
                 {
                     if (LockP >= 60) { } // Do nothing
                     else { Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(1 - attempts, 0, 1)); }
@@ -97,8 +97,8 @@ namespace LockedLootContainers
             else if (lockComp >= 20 && lockComp <= 39)
             {
                 int lockP = Mathf.CeilToInt(LockP * 1.7f);
-                float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.2f) + Mathf.Round(Agili * 0.6f) + Mathf.Round(Speed * 0.25f) + Mathf.Round(Luck * 0.2f);
-                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 7f, 100f))))
+                float successChance = (lockComp * -1.6f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.2f) + Mathf.Round(Agili * 0.6f) + Mathf.Round(Speed * 0.25f) + Mathf.Round(Luck * 0.2f);
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 5f, 95f))))
                 {
                     if (LockP >= 80) { } // Do nothing
                     else { Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(2 - attempts, 0, 2)); }
@@ -110,8 +110,8 @@ namespace LockedLootContainers
             else if (lockComp >= 40 && lockComp <= 59)
             {
                 int lockP = Mathf.CeilToInt(LockP * 1.7f);
-                float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.3f) + Mathf.Round(Agili * 0.5f) + Mathf.Round(Speed * 0.2f) + Mathf.Round(Luck * 0.2f);
-                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 5f, 95f))))
+                float successChance = (lockComp * -1.6f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.3f) + Mathf.Round(Agili * 0.5f) + Mathf.Round(Speed * 0.2f) + Mathf.Round(Luck * 0.2f);
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 3f, 90f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(3 - attempts, 0, 3));
                     return true;
@@ -122,8 +122,8 @@ namespace LockedLootContainers
             else if (lockComp >= 60 && lockComp <= 79)
             {
                 int lockP = Mathf.CeilToInt(LockP * 1.7f);
-                float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.4f) + Mathf.Round(Agili * 0.4f) + Mathf.Round(Speed * 0.15f) + Mathf.Round(Luck * 0.2f);
-                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 3f, 90f))))
+                float successChance = (lockComp * -1.6f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.4f) + Mathf.Round(Agili * 0.4f) + Mathf.Round(Speed * 0.15f) + Mathf.Round(Luck * 0.2f);
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 1f, 80f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(4 - attempts, 0, 4));
                     return true;
@@ -134,8 +134,8 @@ namespace LockedLootContainers
             else
             {
                 int lockP = Mathf.CeilToInt(LockP * 1.7f);
-                float successChance = (lockComp * -1.5f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.5f) + Mathf.Round(Agili * 0.3f) + Mathf.Round(Speed * 0.1f) + Mathf.Round(Luck * 0.2f);
-                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 1f, 80f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
+                float successChance = (lockComp * -1.6f) + lockP + Mathf.Round(PickP * 0.1f) + Mathf.Round(Intel * 0.5f) + Mathf.Round(Agili * 0.3f) + Mathf.Round(Speed * 0.1f) + Mathf.Round(Luck * 0.2f);
+                if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(successChance, 0f, 70f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
                 {
                     Player.TallySkill(DFCareer.Skills.Lockpicking, (short)Mathf.Clamp(5 - attempts, 0, 5));
                     return true;

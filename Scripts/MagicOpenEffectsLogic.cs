@@ -117,8 +117,8 @@ namespace LockedLootContainers
             if (magicResist >= 0 && magicResist <= 19)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.2f) + mysti + Mathf.Round(Intel * 0.5f) + Mathf.Round(Willp * 1f) + Mathf.Round(Luck * 0.3f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 6f, 100f))))
+                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.5f) + Mathf.Round(Willp * 1f) + Mathf.Round(Luck * 0.3f);
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 7f, 100f))))
                     return true;
                 else
                     return false;
@@ -126,7 +126,7 @@ namespace LockedLootContainers
             else if (magicResist >= 20 && magicResist <= 39)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.2f) + mysti + Mathf.Round(Intel * 0.6f) + Mathf.Round(Willp * 0.9f) + Mathf.Round(Luck * 0.3f);
+                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.6f) + Mathf.Round(Willp * 0.9f) + Mathf.Round(Luck * 0.3f);
                 if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 5f, 95f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 1);
@@ -138,8 +138,8 @@ namespace LockedLootContainers
             else if (magicResist >= 40 && magicResist <= 59)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.2f) + mysti + Mathf.Round(Intel * 0.7f) + Mathf.Round(Willp * 0.8f) + Mathf.Round(Luck * 0.3f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 4f, 90f))))
+                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.7f) + Mathf.Round(Willp * 0.8f) + Mathf.Round(Luck * 0.3f);
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 2);
                     return true;
@@ -150,8 +150,8 @@ namespace LockedLootContainers
             else if (magicResist >= 60 && magicResist <= 79)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.2f) + mysti + Mathf.Round(Intel * 0.8f) + Mathf.Round(Willp * 0.7f) + Mathf.Round(Luck * 0.3f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 3f, 85f))))
+                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.8f) + Mathf.Round(Willp * 0.7f) + Mathf.Round(Luck * 0.3f);
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 3);
                     return true;
@@ -162,8 +162,8 @@ namespace LockedLootContainers
             else
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.2f) + mysti + Mathf.Round(Intel * 0.9f) + Mathf.Round(Willp * 0.6f) + Mathf.Round(Luck * 0.3f);
-                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
+                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.9f) + Mathf.Round(Willp * 0.6f) + Mathf.Round(Luck * 0.3f);
+                if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 0f, 70f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 4);
                     return true;

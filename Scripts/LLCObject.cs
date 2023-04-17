@@ -277,7 +277,7 @@ namespace LockedLootContainers
 
             if (missile.IsArrow)
             {
-                LLCObject hitChest = gameObject.GetComponent<LLCObject>(); // Not 100% certain if this works how I think it should, will have to see with testing and such.
+                LLCObject hitChest = gameObject.GetComponent<LLCObject>();
                 if (hitChest)
                 {
                     if (LockedLootContainersMain.AttemptChestBashWithArrows(hitChest, missile))
@@ -286,7 +286,7 @@ namespace LockedLootContainers
             }
             else if (missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.SingleTargetAtRange || missile.TargetType == DaggerfallWorkshop.Game.MagicAndEffects.TargetTypes.AreaAtRange)
             {
-                LLCObject hitChest = gameObject.GetComponent<LLCObject>(); // Not 100% certain if this works how I think it should, will have to see with testing and such.
+                LLCObject hitChest = gameObject.GetComponent<LLCObject>();
                 if (hitChest)
                 {
                     if (LockedLootContainersMain.AttemptDestructiveMagicChestImpact(hitChest, missile))
