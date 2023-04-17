@@ -325,6 +325,8 @@ namespace LockedLootContainers
 
             // Item groups within "itemGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             DaggerfallUnityItem previousItem = null;
+            List<int> prevArmorMats = new List<int>();
+            List<int> prevWepMats = new List<int>();
             for (int i = 0; i < modifItemGroupOdds.Length; i++)
             {
                 int itemChance = modifItemGroupOdds[i];
@@ -363,7 +365,7 @@ namespace LockedLootContainers
                         for (int k = 0; k < chosenArmorTypes.Count; k++)
                         {
                             DaggerfallUnityItem item = null;
-                            item = DetermineLootItem(chosenArmorTypes[k], conditionMod, oddsAverage, totalRoomValueMod);
+                            item = DetermineLootItem(chosenArmorTypes[k], conditionMod, oddsAverage, totalRoomValueMod, prevArmorMats);
                             if (item != null)
                             {
                                 if (previousItem != null) // Here to try and prevent back-to-back duplicate armor pieces.
@@ -375,6 +377,7 @@ namespace LockedLootContainers
 
                                 if (CheckIfBlacklistedItem(item, itemBlacklist)) { continue; } // For now just remove blacklisted items, instead of trying to reroll here.
                                 previousItem = item.Clone();
+                                prevArmorMats.Add(item.NativeMaterialValue);
                                 chestItems.AddItem(item);
                             }
                         }
@@ -390,7 +393,7 @@ namespace LockedLootContainers
                         for (int k = 0; k < chosenWeaponTypes.Count; k++)
                         {
                             DaggerfallUnityItem item = null;
-                            item = DetermineLootItem(chosenWeaponTypes[k] + 4, conditionMod, oddsAverage, totalRoomValueMod);
+                            item = DetermineLootItem(chosenWeaponTypes[k] + 4, conditionMod, oddsAverage, totalRoomValueMod, prevArmorMats, prevWepMats);
                             if (item != null)
                             {
                                 if (previousItem != null) // Here to try and prevent back-to-back duplicate weapons.
@@ -402,6 +405,7 @@ namespace LockedLootContainers
 
                                 if (CheckIfBlacklistedItem(item, itemBlacklist)) { continue; } // For now just remove blacklisted items, instead of trying to reroll here.
                                 previousItem = item.Clone();
+                                prevWepMats.Add(item.NativeMaterialValue);
                                 chestItems.AddItem(item);
                             }
                         }
@@ -454,7 +458,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, float conditionMod, float oddsAverage, int totalRoomValueMod)
+        public static DaggerfallUnityItem DetermineLootItem(int itemGroupLLC, float conditionMod, float oddsAverage, int totalRoomValueMod, List<int> pArmMats = null, List<int> pWepMats = null)
         {
             Genders gender = GameManager.Instance.PlayerEntity.Gender;
             Races race = GameManager.Instance.PlayerEntity.Race;
@@ -628,7 +632,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static int RollWeaponOrArmorMaterial(float oddsAverage, int totalRoomValueMod, bool isWeapon = true, bool isShield = false)
+        public static int RollWeaponOrArmorMaterial(float oddsAverage, int totalRoomValueMod, bool isWeapon = true, bool isShield = false, List<int> pArmMats = null, List<int> pWepMats = null)
         {
             // Iron, Steel, Silver, Elven, Dwarven, Mithril, Adamantium, Ebony, Orcish, Daedric
             List<float> matOdds = new List<float>() { 17.8f, 16.5f, 15.0f, 13.7f, 11.6f, 9.5f, 6.8f, 4.8f, 2.8f, 1.5f };
@@ -643,21 +647,21 @@ namespace LockedLootContainers
                     return (int)ArmorMaterialTypes.Chain;
             }
 
-            float cMod = (oddsAverage * 0.25f) + (totalRoomValueMod * 0.05f);
+            float cMod = (oddsAverage * 0.2f) + (totalRoomValueMod * 0.05f);
 
             if (oddsAverage <= 2.5f)
             {
                 if (cMod <= 0)
-                    matOdds = new List<float>() { 28.1f-(cMod*1.5f), 26.6f-cMod, 22.2f-(cMod*0.5f), 12.0f+(cMod*0.2f), 9.3f+(cMod*0.4f), 6.8f+(cMod*0.6f), 3.7f+(cMod*0.8f), 2.7f+cMod, 1.7f+(cMod*1.2f), 0.8f+(cMod*1.5f) };
+                    matOdds = new List<float>() { 54.0f-(cMod*1.5f), 46.5f-cMod, 42.2f-(cMod*0.5f), 26.4f+(cMod*0.2f), 10.3f+(cMod*0.4f), 6.8f+(cMod*0.6f), 3.7f+(cMod*0.8f), 2.7f+cMod, 1.7f+(cMod*1.2f), 0.8f+(cMod*1.5f) };
                 else
-                    matOdds = new List<float>() { 28.1f-(cMod*1.5f), 26.6f-cMod, 22.2f-(cMod*0.5f), 12.0f+(cMod*1.5f), 9.3f+(cMod*1.2f), 6.8f+cMod, 3.7f+(cMod*0.8f), 2.7f+(cMod*0.6f), 1.7f+(cMod*0.4f), 0.8f+(cMod*0.2f) };
+                    matOdds = new List<float>() { 54.0f-(cMod*1.5f), 46.5f-cMod, 42.2f-(cMod*0.5f), 26.4f+(cMod*1.5f), 10.3f+(cMod*1.2f), 6.8f+cMod, 3.7f+(cMod*0.8f), 2.7f+(cMod*0.6f), 1.7f+(cMod*0.4f), 0.8f+(cMod*0.2f) };
             }
             else if (oddsAverage > 2.5f && oddsAverage <= 5.25f)
             {
                 if (cMod <= 0)
-                    matOdds = new List<float>() { 26.1f-(cMod*1.5f), 20.9f-cMod, 16.9f-(cMod*0.5f), 20.4f+(cMod*0.2f), 15.8f+(cMod*0.4f), 11.6f+(cMod*0.6f), 4.8f+(cMod*0.8f), 3.5f+cMod, 2.2f+(cMod*1.2f), 1.0f+(cMod*1.5f) };
+                    matOdds = new List<float>() { 30.0f-(cMod*1.5f), 26.0f-cMod, 19.5f-(cMod*0.5f), 23.8f+(cMod*0.2f), 15.8f+(cMod*0.4f), 11.4f+(cMod*0.6f), 4.8f+(cMod*0.8f), 3.5f+cMod, 2.2f+(cMod*1.2f), 1.0f+(cMod*1.5f) };
                 else
-                    matOdds = new List<float>() { 26.1f-(cMod*1.5f), 20.9f-cMod, 16.9f-(cMod*0.5f), 20.4f+cMod, 15.8f+(cMod*0.9f), 11.6f+(cMod*0.8f), 4.8f+(cMod*0.7f), 3.5f+(cMod*0.6f), 2.2f+(cMod*0.5f), 1.0f+(cMod*0.3f) };
+                    matOdds = new List<float>() { 30.0f-(cMod*1.5f), 26.0f-cMod, 19.5f-(cMod*0.5f), 23.8f+cMod, 15.8f+(cMod*0.9f), 11.4f+(cMod*0.8f), 4.8f+(cMod*0.7f), 3.5f+(cMod*0.6f), 2.2f+(cMod*0.5f), 1.0f+(cMod*0.3f) };
             }
             else
             {
@@ -665,6 +669,29 @@ namespace LockedLootContainers
                     matOdds = new List<float>() { 17.8f-(cMod*1.5f), 15.5f-cMod, 12.3f-(cMod*0.5f), 13.5f+(cMod*0.2f), 10.7f+(cMod*0.3f), 8.4f+(cMod*0.4f), 6.3f+(cMod*0.5f), 4.6f+(cMod*0.6f), 2.9f+(cMod*0.7f), 1.4f+(cMod*0.9f) };
                 else
                     matOdds = new List<float>() { 17.8f-(cMod*2f), 15.5f-(cMod*1.5f), 12.3f-cMod, 13.5f+(cMod*0.4f), 10.7f+(cMod*0.7f), 8.4f+cMod, 6.3f+(cMod*1.3f), 4.6f+(cMod*1.6f), 2.9f+(cMod*1.8f), 1.4f+(cMod*2f) };
+            }
+
+            // These are here to try and reduce "high tier" armor and weapons from showing up multiple times in the same chest, key word is "try."
+            if (!isWeapon && pArmMats != null && pArmMats.Count > 0)
+            {
+                for (int i = 0; i < pArmMats.Count; i++)
+                {
+                    if (pArmMats[i] >= (int)ArmorMaterialTypes.Adamantium && pArmMats[i] <= (int)ArmorMaterialTypes.Daedric)
+                    {
+                        matOdds[6] /= 2f; matOdds[7] /= 2f; matOdds[8] /= 2f; matOdds[9] /= 2f; break;
+                    }
+                }
+            }
+
+            if (isWeapon && pWepMats != null && pWepMats.Count > 0)
+            {
+                for (int i = 0; i < pWepMats.Count; i++)
+                {
+                    if (pWepMats[i] >= (int)WeaponMaterialTypes.Adamantium && pWepMats[i] <= (int)WeaponMaterialTypes.Daedric)
+                    {
+                        matOdds[6] /= 2f; matOdds[7] /= 2f; matOdds[8] /= 2f; matOdds[9] /= 2f; break;
+                    }
+                }
             }
 
             // Makes sure any matOdds value can't go below 0.5f at the lowest.
