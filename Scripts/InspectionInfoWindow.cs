@@ -1,14 +1,6 @@
 using UnityEngine;
-using System;
-using System.IO;
-using DaggerfallConnect;
-using DaggerfallConnect.Utility;
 using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterface;
-using System.Collections.Generic;
-using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Utility.AssetInjection;
 using LockedLootContainers;
 using DaggerfallWorkshop.Game.Entity;
 

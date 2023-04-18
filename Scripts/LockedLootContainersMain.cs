@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/17/2023, 5:40 PM
+// Last Edit:		4/17/2023, 7:30 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -11,16 +11,13 @@
 using UnityEngine;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
-using DaggerfallConnect;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallConnect.Arena2;
 using System.Collections.Generic;
-using DaggerfallWorkshop.Game.Utility;
 using Wenzil.Console;
 using System;
 using DaggerfallWorkshop.Game.Serialization;
@@ -234,9 +231,8 @@ namespace LockedLootContainers
                 isBashReady = false;
             }
 
-            // So the fact I got basically everything to work so far with the projectile/collision detection stuff is pretty crazy to me.
-            // However, looking at the DaggerfallMissile.cs code under the "DoAreaOfEffect" method, I have a feeling without a PR, I won't be able to do a clean/easy
-            // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal all other successes considered.
+            // Looking at the DaggerfallMissile.cs code under the "DoAreaOfEffect" method, I have a feeling without a PR, I won't be able to do a clean/easy
+            // method to have the aoe of spell effects be detected for the chests. But I will have to see, either way not a big deal atm.
         }
 
         #region Settings
@@ -595,10 +591,10 @@ namespace LockedLootContainers
             Debug.Log("[LockedLootContainers] Trying to register console commands.");
             try
             {
-                ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
-                ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
-                ConsoleCommandsDatabase.RegisterCommand(LLCSoundTest.command, LLCSoundTest.description, LLCSoundTest.usage, LLCSoundTest.Execute);
+                //ConsoleCommandsDatabase.RegisterCommand(LLCSoundTest.command, LLCSoundTest.description, LLCSoundTest.usage, LLCSoundTest.Execute);
+                //ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
+                //ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
             }
             catch (Exception e)
             {
@@ -606,6 +602,54 @@ namespace LockedLootContainers
             }
         }
 
+        private static class TeleportToRandomChest // Just did some testing, and besides sometimes being dropped into the void, appears to work perfectly fine for testing purposes.
+        {
+            public static readonly string command = "tele2chest";
+            public static readonly string description = "Chooses random chest object from current scene and teleports player to its location.";
+            public static readonly string usage = "tele2chest";
+
+            public static string Execute(params string[] args)
+            {
+                LLCObject[] gos = FindObjectsOfType<LLCObject>();
+                List<LLCObject> chestList = new List<LLCObject>();
+                for (int i = 0; i < gos.Length; i++)
+                {
+                    if (gos[i].ChestStartHP == 0 && gos[i].LockStartHP == 0) // Meant to remove the actual LLCObject that is the base of them all but not an actual chests.
+                        continue;
+                    else
+                        chestList.Add(gos[i]);
+                }
+                LLCObject[] chests = chestList.ToArray();
+
+                if (chests.Length <= 0)
+                    return "Error: No chests in scene.";
+
+                LLCObject chest = chests[UnityEngine.Random.Range(0, chests.Length)];
+                if (chest == null)
+                    return "Error: Something went wrong.";
+
+                Vector3 chestPos = chest.transform.position;
+
+                if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
+                {
+                    GameManager.Instance.PlayerObject.transform.localPosition = chestPos;
+                }
+                else if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
+                {
+                    GameManager.Instance.PlayerObject.transform.position = chestPos;
+                }
+                else
+                {
+                    return "Error: Something went wrong.";
+                }
+                GameManager.Instance.PlayerMotor.FixStanding();
+
+                return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length);
+            }
+        }
+
+        // Will disable this for the live mod since it's only really useful for testing.
+        /*
         private static class LLCSoundTest
         {
             public static readonly string command = "llcsound";
@@ -697,7 +741,10 @@ namespace LockedLootContainers
                 return errorText;
             }
         }
+        */
 
+        // Will disable this for the live mod since it's only really useful for testing.
+        /*
         private static class MakeJunkItems
         {
             public static readonly string command = "addjunk";
@@ -729,7 +776,10 @@ namespace LockedLootContainers
                 return "Gave you ALL the junk items.";
             }
         }
+        */
 
+        // Will likely have use for this console command when working with more interface stuff in the future
+        /*
         private static class ChangeButtonRect
         {
             public static readonly string command = "butt";
@@ -762,52 +812,7 @@ namespace LockedLootContainers
                 return string.Format("Button {0} Rect Adjusted.", buttNum);
             }
         }
-
-        private static class TeleportToRandomChest // Just did some testing, and besides sometimes being dropped into the void, appears to work perfectly fine for testing purposes.
-        {
-            public static readonly string command = "tele2chest";
-            public static readonly string description = "Chooses random chest object from current scene and teleports player to its location.";
-            public static readonly string usage = "tele2chest";
-
-            public static string Execute(params string[] args)
-            {
-                LLCObject[] gos = FindObjectsOfType<LLCObject>();
-                List<LLCObject> chestList = new List<LLCObject>();
-                for (int i = 0; i < gos.Length; i++)
-                {
-                    if (gos[i].ChestStartHP == 0 && gos[i].LockStartHP == 0) // Meant to remove the actual LLCObject that is the base of them all but not an actual chests.
-                        continue;
-                    else
-                        chestList.Add(gos[i]);
-                }
-                LLCObject[] chests = chestList.ToArray();
-
-                if (chests.Length <= 0)
-                    return "Error: No chests in scene.";
-
-                LLCObject chest = chests[UnityEngine.Random.Range(0, chests.Length)];
-                if (chest == null)
-                    return "Error: Something went wrong.";
-
-                Vector3 chestPos = chest.transform.position;
-
-                if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
-                {
-                    GameManager.Instance.PlayerObject.transform.localPosition = chestPos;
-                }
-                else if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
-                {
-                    GameManager.Instance.PlayerObject.transform.position = chestPos;
-                }
-                else
-                {
-                    return "Error: Something went wrong.";
-                }
-                GameManager.Instance.PlayerMotor.FixStanding();
-
-                return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length);
-            }
-        }
+        */
 
         // Triggered when the DaggerfallInventoryWindow UI window is closed
         public static void UIManager_ChangeChestGraphicOnInventoryWindowClosed(object sender, EventArgs e)
@@ -918,7 +923,7 @@ namespace LockedLootContainers
 
         private static void DoNothingActivation(RaycastHit hit)
         {
-
+            // This is simply here so the vanilla Daggerfall chest models don't get combined with everything else when the interior/dungeon scene is created.
         }
 
         private static void ChestActivation(RaycastHit hit)
@@ -1011,7 +1016,7 @@ namespace LockedLootContainers
                             if (dfAudioSource != null)
                                 AudioSource.PlayClipAtPoint(GetLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
-                            Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                            Destroy(ChestObjRef); // Remove closed chest from scene.
                             ChestObjRef = null;
                         }
                         else
@@ -1039,7 +1044,7 @@ namespace LockedLootContainers
                         DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
                     }
                     break;
-                case PlayerActivateModes.Grab: // Bring Up Custom Chest Choice Window With Buttons To Choose What To Do, Also Might Be How You Can Attempt Disarming Traps Eventually?
+                case PlayerActivateModes.Grab:
                     if (ChestObjRef != null)
                     {
                         LLCObject chestData = ChestObjRef.GetComponent<LLCObject>();

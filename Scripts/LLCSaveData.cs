@@ -1,12 +1,8 @@
 using UnityEngine;
 using DaggerfallWorkshop.Game;
-using DaggerfallConnect;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using System;
 using System.Collections.Generic;

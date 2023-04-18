@@ -1,6 +1,5 @@
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.Serialization;
-using DaggerfallWorkshop.Game;
 
 namespace LockedLootContainers
 {

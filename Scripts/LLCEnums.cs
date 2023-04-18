@@ -1,5 +1,3 @@
-using System;
-
 namespace LockedLootContainers
 {
     /// <summary>
@@ -105,11 +103,11 @@ namespace LockedLootContainers
     }
 
     /// <summary>
-    /// The vanilla item groups that this mod will be checking for and caring about during loot generation, share the same values with the vanilla groups to be used later on.
+    /// The vanilla item groups that this mod will be checking for and caring about during loot generation.
     /// </summary>
     public enum ChestLootItemGroups
     {
-        // Yeah, I think I'm just going to make my own item groups and then use those for my own mod implementation for the loot generation. Maybe can even include modded index IDs and such if I want.
+        // Yeah, I think I'm just going to make my own item groups and then use those for my own mod implementation for the loot generation.
         Drugs = 0,
         LightArmor = 1,
         MediumArmor = 2,
@@ -587,32 +585,4 @@ namespace LockedLootContainers
         Gold = 74,
         Platinum = 75,
     }
-
-    /*
-     * Separate Rolls?:
-     * Magic Items (Likely enchant the item after the fact.)
-     * Potions & Potion Recipes
-     * Filled or Empty Soul Traps
-     * Maps
-     * Gold/Letters of Credit
-     * Paintings
-    */
-
-    /*/// <summary>
-    /// Flags for what material types are allowed to generate in certain context, such as wood not being allowed in volcanic caves, but daedric being allowed, etc.
-    /// </summary>
-    [Flags]
-    public enum PermittedMaterials
-    {
-        None = 0,
-        Wood = 1,
-        Iron = 2,
-        Steel = 4,
-        Orcish = 8,
-        Mithril = 16,
-        Dwarven = 32,
-        Adamantium = 64,
-        Daedric = 128,
-        Everything = 0xff,
-    }*/
 }

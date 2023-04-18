@@ -1,14 +1,6 @@
 using UnityEngine;
-using System;
-using System.IO;
-using DaggerfallConnect;
-using DaggerfallConnect.Utility;
-using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterface;
-using System.Collections.Generic;
-using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Utility.AssetInjection;
 using LockedLootContainers;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Items;
@@ -90,7 +82,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             attemptLockpickButton.ToolTip = defaultToolTip;
             attemptLockpickButton.ToolTipText = "Attempt Lockpick";
             attemptLockpickButton.OnMouseClick += AttemptLockpickButton_OnMouseClick;
-            attemptLockpickButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick); // May remove this click sound if it interfers with lockpicking sounds, etc.
+            attemptLockpickButton.ClickSound = DaggerfallUI.Instance.GetAudioClip(SoundClips.ButtonClick);
 
             // Exit button
             Button exitButton = DaggerfallUI.AddButton(new Rect(142, 114, 36, 17), NativePanel);
@@ -115,7 +107,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         private void AttemptLockpickButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
         {
             CloseWindow();
-            if (chest != null) // Oh yeah, don't forget to give skill XP as well for various things, failures and successes, etc.
+            if (chest != null)
             {
                 DaggerfallAudioSource dfAudioSource = chest.GetComponent<DaggerfallAudioSource>();
                 ItemCollection closedChestLoot = chest.AttachedLoot;
@@ -130,7 +122,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.AudioSource.PlayOneShot(LockedLootContainersMain.GetLockAlreadyJammedClip(), UnityEngine.Random.Range(0.9f, 1.42f) * DaggerfallUnity.Settings.SoundVolume);
                 }
-                else if (LockedLootContainersMain.LockPickChance(chest)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                else if (LockedLootContainersMain.LockPickChance(chest))
                 {
                     chest.PicksAttempted++;
                     LockedLootContainersMain.ApplyLockPickAttemptCosts();
@@ -170,8 +162,8 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     if (dfAudioSource != null)
                         AudioSource.PlayClipAtPoint(LockedLootContainersMain.GetLockpickSuccessClip(), chest.gameObject.transform.position, UnityEngine.Random.Range(1.5f, 2.31f) * DaggerfallUnity.Settings.SoundVolume);
 
-                    UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
-                    LockedLootContainersMain.ChestObjRef = null; // This may cause issues? But really no clue, just a note.
+                    UnityEngine.Object.Destroy(LockedLootContainersMain.ChestObjRef); // Remove closed chest from scene.
+                    LockedLootContainersMain.ChestObjRef = null;
                 }
                 else
                 {

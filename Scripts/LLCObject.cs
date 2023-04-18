@@ -3,8 +3,6 @@ using DaggerfallWorkshop;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.MagicAndEffects;
 
 namespace LockedLootContainers
 {

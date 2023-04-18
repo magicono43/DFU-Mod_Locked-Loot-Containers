@@ -1,13 +1,3 @@
-using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop;
-using DaggerfallConnect.Arena2;
-using DaggerfallConnect;
-using DaggerfallWorkshop.Game.Player;
-using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Utility;
-using UnityEngine;
-
 namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain

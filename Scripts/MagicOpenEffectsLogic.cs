@@ -13,14 +13,14 @@ namespace LockedLootContainers
 {
     public partial class LockedLootContainersMain
     {
-        public static bool HandleOpenEffect() // Bare basic behavior for the open effect, just for testing for now obviously.
+        public static bool HandleOpenEffect()
         {
             // Check if player has Open effect running
             Open openEffect = (Open)GameManager.Instance.PlayerEffectManager.FindIncumbentEffect<Open>();
             if (openEffect == null)
                 return false;
 
-            if (openEffect.RoundsRemaining <= 0) // Will hopefully prevent the "spam clicking" exploit issue.
+            if (openEffect.RoundsRemaining <= 0)
                 return false;
 
             if (ChestObjRef != null)
@@ -39,7 +39,7 @@ namespace LockedLootContainers
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.AudioSource.PlayOneShot(GetMagicLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                 }
-                else if (OpenEffectChance(closedChestData)) // Guess the basic "success" stuff is already here for the time being, so I'll do more with that part later on.
+                else if (OpenEffectChance(closedChestData))
                 {
                     closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
 
@@ -78,7 +78,7 @@ namespace LockedLootContainers
                     if (dfAudioSource != null)
                         AudioSource.PlayClipAtPoint(GetMagicLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
-                    Destroy(ChestObjRef); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                    Destroy(ChestObjRef); // Remove closed chest from scene.
                     ChestObjRef = null;
                 }
                 else
@@ -254,7 +254,7 @@ namespace LockedLootContainers
                             }
 
                             // Show success and play disintegrate sound
-                            DaggerfallUI.AddHUDText(GetChestDisintegratedBySpellText(), 4f); // Will possibly change text later on depending on many factors, will see.
+                            DaggerfallUI.AddHUDText(GetChestDisintegratedBySpellText(), 4f);
                             if (dfAudioSource)
                             {
                                 if (dfAudioSource != null)
@@ -301,7 +301,7 @@ namespace LockedLootContainers
                                 }
 
                                 // Show success and play explosion type sound
-                                DaggerfallUI.AddHUDText(GetChestBlownOpenBySpellText(), 4f); // Will possibly change text later on depending on many factors, will see.
+                                DaggerfallUI.AddHUDText(GetChestBlownOpenBySpellText(), 4f);
                                 if (dfAudioSource)
                                 {
                                     if (dfAudioSource != null)

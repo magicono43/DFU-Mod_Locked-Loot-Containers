@@ -1,14 +1,10 @@
 using UnityEngine;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallConnect;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Collections.Generic;
 using System;
 using DaggerfallWorkshop.Game.Utility;
@@ -30,7 +26,7 @@ namespace LockedLootContainers
 
         public void AddChests_OnTransitionInterior(PlayerEnterExit.TransitionEventArgs args)
         {
-            if (SaveLoadManager.Instance.LoadInProgress) // Hopefully this will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
+            if (SaveLoadManager.Instance.LoadInProgress) // This will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
                 return;
 
             DFLocation.BuildingTypes buildingType = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.buildingType;
@@ -255,8 +251,6 @@ namespace LockedLootContainers
                         if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
                             goList.Add(containerModels[i].gameObject);
 
-                        // Would like to eventually have other "container" type models have a chance to be replaced with a custom chest, but for now I'll just leave it as it is, maybe in a future version.
-
                         Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
                     }
                     else
@@ -284,7 +278,7 @@ namespace LockedLootContainers
 
         public void AddChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
         {
-            if (SaveLoadManager.Instance.LoadInProgress) // Hopefully this will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
+            if (SaveLoadManager.Instance.LoadInProgress) // This will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
                 return;
 
             DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
@@ -485,13 +479,11 @@ namespace LockedLootContainers
                         if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
                             goList.Add(containerModels[i].gameObject);
 
-                        // Would like to eventually have other "container" type models have a chance to be replaced with a custom chest, but for now I'll just leave it as it is, maybe in a future version.
-
-                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
+                        //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
                     }
                     else
                     {
-                        Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                        //Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
                     }
                 }
                 GameObject[] validGos = goList.ToArray();
@@ -501,7 +493,7 @@ namespace LockedLootContainers
                     MeshFilter meshFilter = null;
                     DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
 
-                    if (lootPile == null) // So lootPiles also have a MeshFilter component, so the way before was causing chests to always replace loot-piles, will want to fix this better eventually.
+                    if (lootPile == null)
                         meshFilter = validGos[i].GetComponent<MeshFilter>();
 
                     ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
@@ -611,7 +603,7 @@ namespace LockedLootContainers
                             {
                                 totalRoomValueMod += EnemyRoomValueMods(enemyEntity);
 
-                                Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
+                                //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With mobileID: {1} ||||| And Affinity: {2} ||||| And On Team: {3}", roomObjects[g].name, mobileID, affinity.ToString(), team.ToString());
                             }
                         }
                     }
@@ -626,7 +618,7 @@ namespace LockedLootContainers
                         {
                             totalRoomValueMod += BillboardRoomValueMods(flatType, archive, record);
 
-                            Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
+                            //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With BillBoard Archive: {1} ||||| And Record: {2} ||||| Flat Type: {3}", roomObjects[g].name, archive, record, flatType.ToString());
                         }
                     }
                     else if (meshFilt)
@@ -645,16 +637,16 @@ namespace LockedLootContainers
                         {
                             totalRoomValueMod += ModelRoomValueMods(modelID);
 
-                            Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
+                            //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, roomObjects[g].name, meshName);
                         }
                         else
                         {
-                            Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
+                            //Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
                         }
                     }
                     else
                     {
-                        Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
+                        //Debug.LogFormat("Overlap found on gameobject: {0}", roomObjects[g].name);
                     }
                 }
             }
@@ -761,8 +753,6 @@ namespace LockedLootContainers
                     ToggleChestShadowsOrCollision(chestGo);
                 }
 
-                //Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
-
                 // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
 
                 PopulateChestLoot(llcObj, totalRoomValueMod, miscGroupOdds, itemGroupOdds, itemBlacklist);
@@ -827,8 +817,6 @@ namespace LockedLootContainers
                         ToggleChestShadowsOrCollision(chestGo);
                     }
 
-                    //Debug.LogFormat("Chest Generated With Transform: x = {0}, y = {1}, z = {2}. Chest Material = {3}, Sturdiness = {4}, Magic Resist = {5}. With A Lock Made From = {6}, Sturdiness = {7}, Magic Resist = {8}, Lock Complexity = {9}, Jam Resistance = {10}.", chestParentObj.transform.localPosition.x, chestParentObj.transform.localPosition.y, chestParentObj.transform.localPosition.z, llcObj.ChestMaterial.ToString(), llcObj.ChestSturdiness, llcObj.ChestMagicResist, llcObj.LockMaterial.ToString(), llcObj.LockSturdiness, llcObj.LockMagicResist, llcObj.LockComplexity, llcObj.JamResist); // Might have to mess with the position values a bit, might need the "parent" or something instead.
-
                     lootPile.Items.Clear(); // Likely not necessary, but doing it just in case.
                     Destroy(lootPile.gameObject);
 
@@ -839,7 +827,7 @@ namespace LockedLootContainers
             }
         }
 
-        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod) // Trying out new method here, will see if it comes out any better.
+        public static ChestMaterials RollChestMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod)
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f };
@@ -889,7 +877,7 @@ namespace LockedLootContainers
             return (ChestMaterials)index;
         }
 
-        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats) // Trying out new method here, will see if it comes out any better.
+        public static LockMaterials RollLockMaterial(bool[] allowedMats, int permitMatsCount, int roomValueMod, ChestMaterials chestMats)
         {
             // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
             List<float> odds = new List<float>() { 26.0f, 21.4f, 15.6f, 9.1f, 13.0f, 7.1f, 5.2f, 2.6f};
@@ -969,7 +957,7 @@ namespace LockedLootContainers
         {
             int chestSturdiness = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11);
             bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
 
             switch (chestMat)
@@ -1008,7 +996,7 @@ namespace LockedLootContainers
         {
             int lockSturdiness = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11);
             bool insideWaterBlock = false; // Will determine this properly later when I get into the Unity editor again and see how getting the block-name works and such.
 
             switch (lockMat)
@@ -1047,7 +1035,7 @@ namespace LockedLootContainers
         {
             int chestMagicRes = 1;
             int randomMod = UnityEngine.Random.Range(-10, 11);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 7f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 7f), -5, 6);
 
             switch (chestMat)
             {
@@ -1077,7 +1065,7 @@ namespace LockedLootContainers
         {
             int lockMagicRes = 1;
             int randomMod = UnityEngine.Random.Range(-10, 11);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 7f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 7f), -5, 6);
 
             switch (lockMat)
             {
@@ -1106,7 +1094,7 @@ namespace LockedLootContainers
         public static int RollLockComplexity(LockMaterials lockMat, int roomValueMod)
         {
             int lockComplexity = 1;
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -5, 6); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -5, 6);
 
             switch (lockMat)
             {
@@ -1136,7 +1124,7 @@ namespace LockedLootContainers
         {
             int jamResist = 1;
             int randomMod = UnityEngine.Random.Range(-20, 21);
-            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11); // May add some random factor to this later, but for now just static based on room value mod stuff.
+            int roomMod = (int)Mathf.Clamp(Mathf.Round(roomValueMod / 5f), -10, 11);
 
             switch (lockMat)
             {

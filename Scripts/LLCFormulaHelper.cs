@@ -1054,7 +1054,7 @@ namespace LockedLootContainers
             return wepDamage;
         }
 
-        public static int DaggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent, mostly placeholder for now.
+        public static int DaggerfallMatsToLLCValue(int nativeMaterialValue) // For determining "material difference" between weapon and LLC material estimated equivalent.
         {
             switch ((WeaponMaterialTypes)nativeMaterialValue)
             {

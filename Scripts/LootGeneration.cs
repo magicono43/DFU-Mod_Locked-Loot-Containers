@@ -1,17 +1,11 @@
 using UnityEngine;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Utility.ModSupport;
-using DaggerfallConnect;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
 using System.Collections.Generic;
 using System;
 using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Game.Formulas;
 using System.Linq;
 
 namespace LockedLootContainers
@@ -38,8 +32,6 @@ namespace LockedLootContainers
                     i--;
                 }
             }
-
-            // Start trying to rework loot odds modifier stuff here.
 
             int[] modifItemGroupOdds = (int[])itemGroupOdds.Clone();
             int[] modifMiscGroupOdds = (int[])miscGroupOdds.Clone();
@@ -143,6 +135,7 @@ namespace LockedLootContainers
                     modifMiscGroupOdds[i] = 1;
             }
 
+            /*
             // Debug log string creator, for testing purposes only.
             string baseString = "";
             for (int i = 0; i < modifItemGroupOdds.Length; i++)
@@ -160,6 +153,7 @@ namespace LockedLootContainers
                 baseString = baseString + ", " + valueString;
             }
             Debug.LogFormat("Misc Group Odds For Chest: {0}", baseString);
+            */
 
             for (int i = 0; i < modifMiscGroupOdds.Length; i++) // Groups within "miscGroupOdds" are actually looped through and rolled to determine what items in those groups should be populated in chest.
             {
@@ -420,7 +414,7 @@ namespace LockedLootContainers
                     if (failedRegenAttempts >= 8) // Allow item-groups that failed to create an item due to being blacklisted, have 8 tries before forcing their generation loop to stop.
                         break;
 
-                    if (itemChance >= 60) // This is to try and reduce certain items basically always appearing due to the multiplication of odds, will see if it makes things better or worse.
+                    if (itemChance >= 60) // This is to try and reduce certain items basically always appearing, attempting to make it feel more "random."
                     {
                         if (Dice100.SuccessRoll(35))
                         {

@@ -64,11 +64,11 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText(GetBashedLockOffText(), 3f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText(GetBashedLockOffText(), 3f);
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetLockBashAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
-                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                        Destroy(chest.gameObject); // Remove closed chest from scene.
                     }
                     else
                     {
@@ -117,7 +117,7 @@ namespace LockedLootContainers
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, critBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
-                        Destroy(chest.gameObject); // Removed closed chest from scene, but saved its characteristics we care about for opened chest loot-pile.
+                        Destroy(chest.gameObject); // Remove closed chest from scene.
                     }
                     else
                     {
@@ -186,7 +186,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play smash open sound
-                        DaggerfallUI.AddHUDText(GetArrowSmashedOpenChestText(), 3f); // Will possibly change text later on depending on many factors, will see.
+                        DaggerfallUI.AddHUDText(GetArrowSmashedOpenChestText(), 3f);
                         if (dfAudioSource)
                         {
                             if (dfAudioSource != null)
@@ -265,7 +265,7 @@ namespace LockedLootContainers
                     ApplyBashingCostLogic(chest, weapon, true, false, critBash, matDiff);
                 }
             }
-            else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well, but just this for now.
+            else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well.
             {
                 if (lockMat < 0) // If lock is made of wood
                 {
@@ -288,7 +288,7 @@ namespace LockedLootContainers
             {
                 if (lockMat < 0) // If lock is made of wood
                 {
-                    float critBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 40f); // Just for now, will have to see through testing if this needs work.
+                    float critBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 40f);
                     if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(critBashChance, 10f, 100f))))
                         critBash = true;
 
@@ -296,7 +296,7 @@ namespace LockedLootContainers
                 }
                 else // If lock is made from any metal
                 {
-                    float critBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 30f); // Just for now, will have to see through testing if this needs work.
+                    float critBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 30f);
                     if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(critBashChance, 2f, 90f))))
                         critBash = true;
 
@@ -353,7 +353,7 @@ namespace LockedLootContainers
                     ApplyBashingCostLogic(chest, weapon, false, false, critBash, matDiff);
                 }
             }
-            else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well, but just this for now.
+            else if (wepSkillID == (int)DFCareer.Skills.BluntWeapon) // Checks if the weapon being used is a Blunt Weapon. Later on might check for other weapon types as well.
             {
                 if (chestMat < 0) // If chest is made of wood
                 {
@@ -376,7 +376,7 @@ namespace LockedLootContainers
             {
                 if (chestMat < 0) // If chest is made of wood
                 {
-                    float hardBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 17f); // Just for now, will have to see through testing if this needs work.
+                    float hardBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 17f);
                     if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(hardBashChance, 3f, 90f))))
                         critBash = true;
 
@@ -384,7 +384,7 @@ namespace LockedLootContainers
                 }
                 else // If chest is made from any metal
                 {
-                    float hardBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 7f); // Just for now, will have to see through testing if this needs work.
+                    float hardBashChance = Mathf.Round(((matDiff + Mathf.RoundToInt(Stren / 10f)) * 10f) + Mathf.RoundToInt(Luck / 5f) + 7f);
                     if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(hardBashChance, 0f, 70f))))
                         critBash = true;
 
@@ -450,7 +450,7 @@ namespace LockedLootContainers
 
             BashingDamageLootContents(chest, weapon, wepSkillID, hitLock, hitWood, critBash);
 
-            if (hitLock && critBash) { bashHitMod = 0.7f; } // Math was confusing me on how to combine these values together for some reason, so just doing this weird if-else chain here instead, for now.
+            if (hitLock && critBash) { bashHitMod = 0.7f; } // Math was confusing me on how to combine these values together for some reason, so just doing this weird if-else chain here instead.
             else if (hitLock && !critBash) { bashHitMod = 0.35f; }
             else if (!hitLock && critBash) { bashHitMod = 1f; }
             else { bashHitMod = 0.5f; }
@@ -470,7 +470,7 @@ namespace LockedLootContainers
                         fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                         Player.DecreaseHealth((int)healthDam); // Currently could be abused by something like the "Health Regen" trait, but whatever for now.
-                        Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                        Player.DecreaseFatigue((int)fatigueDam, false);
                     }
                     else // Since player health is currently at "minimum" level that bashing with fists can reduce it, health is not damaged, but instead fatigue damage is multiplied alot as a cost.
                     {
@@ -478,7 +478,7 @@ namespace LockedLootContainers
                         fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.08f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                         fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
-                        Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                        Player.DecreaseFatigue((int)fatigueDam, false);
                     }
                 }
                 else // Hitting either metal lock or chest body with bare fists
@@ -494,7 +494,7 @@ namespace LockedLootContainers
                         fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
                         Player.DecreaseHealth((int)healthDam); // Currently could be abused by something like the "Health Regen" trait, but whatever for now.
-                        Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                        Player.DecreaseFatigue((int)fatigueDam, false);
                     }
                     else // Since player health is currently at "minimum" level that bashing with fists can reduce it, health is not damaged, but instead fatigue damage is multiplied alot as a cost.
                     {
@@ -502,7 +502,7 @@ namespace LockedLootContainers
                         fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.14f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                         fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
-                        Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                        Player.DecreaseFatigue((int)fatigueDam, false);
                     }
                 }
             }
@@ -515,7 +515,7 @@ namespace LockedLootContainers
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
-                    Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    Player.DecreaseFatigue((int)fatigueDam, false);
                     weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
                 else // Hitting either metal lock or chest body with a blunt type weapon
@@ -525,7 +525,7 @@ namespace LockedLootContainers
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.04f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
-                    Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    Player.DecreaseFatigue((int)fatigueDam, false);
                     weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
             }
@@ -539,7 +539,7 @@ namespace LockedLootContainers
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
-                    Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    Player.DecreaseFatigue((int)fatigueDam, false);
                     weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
                 else // Hitting either metal lock or chest body with a bladed type weapon
@@ -550,7 +550,7 @@ namespace LockedLootContainers
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.04f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
 
-                    Player.DecreaseFatigue((int)fatigueDam, false); // Will need to do testing to make sure this works with the fatigue multiplier, including above formulas and such, bit confusing.
+                    Player.DecreaseFatigue((int)fatigueDam, false);
                     weapon.LowerCondition((int)Mathf.Max(1, Mathf.Round(weapon.maxCondition * (rolledWepDamPercent / 100f))), Player);
                 }
             }
