@@ -595,13 +595,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(40, UnityEngine.Random.Range(40, 61 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(50, UnityEngine.Random.Range(50, 71 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(15, UnityEngine.Random.Range(15, 17 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 50) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(27, UnityEngine.Random.Range(27, 32 + Mathf.Clamp(Mathf.Round(spellMag / 2), 1, 70) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -611,13 +611,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(40, UnityEngine.Random.Range(40, 61 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(50, UnityEngine.Random.Range(50, 71 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(10, UnityEngine.Random.Range(10, 13 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 50) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(27, UnityEngine.Random.Range(27, 32 + Mathf.Clamp(Mathf.Round(spellMag / 2), 1, 70) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -628,13 +628,13 @@ namespace LockedLootContainers
             {
                 if (damOrDisin == 2) // Disintegration Effect
                 {
-                    float conditionMod = (float)Mathf.Max(90, UnityEngine.Random.Range(90, 110 + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(95, UnityEngine.Random.Range(95, 115 + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
                 else if (damOrDisin == 1) // Damage Health Effect
                 {
-                    float conditionMod = (float)Mathf.Max(40, UnityEngine.Random.Range(40, 43 + Mathf.Clamp(Mathf.Round(spellMag / 3), 1, 100) + Mathf.RoundToInt(Luck / -10f))) / 100f;
+                    float conditionMod = (float)Mathf.Max(50, UnityEngine.Random.Range(50, 62 + Mathf.Clamp(Mathf.Round(spellMag / 2), 1, 140) + Mathf.RoundToInt(Luck / -10f))) / 100f;
                     int damAmount = (int)(item.maxCondition * conditionMod);
                     return RemoveOrDamageBasedOnCondition(chest, item, damAmount);
                 }
@@ -642,7 +642,7 @@ namespace LockedLootContainers
             }
             else if (item.IsAStack())
             {
-                int breakNum = UnityEngine.Random.Range(Mathf.CeilToInt(item.stackCount * 0.55f), item.stackCount + 1);
+                int breakNum = UnityEngine.Random.Range(Mathf.CeilToInt(item.stackCount * 0.7f), item.stackCount + 1);
                 DetermineDestroyedLootRefuseType(item, out wasteItem, out wasteAmount);
                 wasteItem.stackCount = breakNum * wasteAmount;
                 chest.AttachedLoot.AddItem(wasteItem);
@@ -830,78 +830,78 @@ namespace LockedLootContainers
                 switch (item.ItemGroup)
                 {
                     case ItemGroups.UselessItems1:
-                        if (item.IsPotion) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                        if (item.IsPotion) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemGlassFragments.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
                     case ItemGroups.Armor:
                         wasteItem = LLCItemBuilder.CreateScrapMaterial(WeaponMaterialTypes.None, (ArmorMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return;
                     case ItemGroups.Weapons:
-                        if (item.TemplateIndex == (int)Weapons.Arrow) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemBrokenArrow.templateIndex); return; }
+                        if (item.TemplateIndex == (int)Weapons.Arrow) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemBrokenArrow.templateIndex); return; }
                         else { wasteItem = LLCItemBuilder.CreateScrapMaterial((WeaponMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return; }
                     case ItemGroups.MensClothing:
                     case ItemGroups.WomensClothing:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemTatteredCloth.templateIndex); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemTatteredCloth.templateIndex); return;
                     case ItemGroups.Books:
                     case ItemGroups.Maps:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); wasteAmount = GetWasteAmount(item); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemPaperShreds.templateIndex); wasteAmount = GetWasteAmount(item); return;
                     case ItemGroups.UselessItems2:
-                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
-                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemTatteredCloth.templateIndex); return; }
-                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                        if (item.TemplateIndex == (int)UselessItems2.Oil || item.TemplateIndex == (int)UselessItems2.Lantern) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemGlassFragments.templateIndex); return; }
+                        else if (item.TemplateIndex == (int)UselessItems2.Bandage) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemTatteredCloth.templateIndex); return; }
+                        else if (item.TemplateIndex == (int)UselessItems2.Parchment) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemPaperShreds.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
                     case ItemGroups.Gems:
                     case ItemGroups.MiscellaneousIngredients2:
                     case ItemGroups.MetalIngredients:
-                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemIvoryFragments.templateIndex); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
+                        if (item.TemplateIndex == (int)MiscellaneousIngredients2.Ivory) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemIvoryFragments.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemShinyRubble.templateIndex); return; }
                     case ItemGroups.Drugs:
                     case ItemGroups.PlantIngredients1:
                     case ItemGroups.PlantIngredients2:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemClumpofPlantMatter.templateIndex); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemClumpofPlantMatter.templateIndex); return;
                     case ItemGroups.MiscellaneousIngredients1:
-                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemIvoryFragments.templateIndex); return; }
+                        if (item.TemplateIndex >= 59 && item.TemplateIndex <= 64) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemGlassFragments.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemIvoryFragments.templateIndex); return; }
                     case ItemGroups.CreatureIngredients1:
                     case ItemGroups.CreatureIngredients2:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlobofGore.templateIndex); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemGlobofGore.templateIndex); return;
                     case ItemGroups.CreatureIngredients3:
-                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlobofGore.templateIndex); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemIvoryFragments.templateIndex); return; }
+                        if (item.TemplateIndex == (int)CreatureIngredients3.Nymph_hair) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemGlobofGore.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemIvoryFragments.templateIndex); return; }
                     case ItemGroups.Jewellery:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemDestroyedJewelry.templateIndex); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemDestroyedJewelry.templateIndex); return;
                     case ItemGroups.MiscItems:
-                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
-                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); return; }
-                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                        if (item.TemplateIndex == (int)MiscItems.Soul_trap) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemShinyRubble.templateIndex); return; }
+                        else if (item.TemplateIndex == (int)MiscItems.Letter_of_credit || item.TemplateIndex == (int)MiscItems.Potion_recipe || item.TemplateIndex == (int)MiscItems.Map) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemPaperShreds.templateIndex); return; }
+                        else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
                     case ItemGroups.Currency:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemRuinedCoin.templateIndex); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemRuinedCoin.templateIndex); return;
                     default:
-                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return;
+                        wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return;
                 }
             }
             else // Modded Item Templates
             {
                 if (RepairToolsCheck && item.TemplateIndex >= 800 && item.TemplateIndex <= 805)
                 {
-                    if (item.TemplateIndex == (int)Tools.Whetstone) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
-                    else if (item.TemplateIndex == (int)Tools.Sewing_Kit) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
-                    else if (item.TemplateIndex == (int)Tools.Armorers_Hammer) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
-                    else if (item.TemplateIndex == (int)Tools.Jewelers_Pliers) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
-                    else if (item.TemplateIndex == (int)Tools.Epoxy_Glue) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemGlassFragments.templateIndex); return; }
-                    else if (item.TemplateIndex == (int)Tools.Charging_Powder) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
-                    else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                    if (item.TemplateIndex == (int)Tools.Whetstone) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Sewing_Kit) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Armorers_Hammer) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Jewelers_Pliers) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Epoxy_Glue) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemGlassFragments.templateIndex); return; }
+                    else if (item.TemplateIndex == (int)Tools.Charging_Powder) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemShinyRubble.templateIndex); return; }
+                    else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
                 }
                 else if (JewelryAdditionsCheck && item.TemplateIndex >= 4700 && item.TemplateIndex <= 4714)
                 {
-                    if (item.TemplateIndex >= 4700 && item.TemplateIndex <= 4707) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemDestroyedJewelry.templateIndex); return; }
-                    else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemShinyRubble.templateIndex); return; }
+                    if (item.TemplateIndex >= 4700 && item.TemplateIndex <= 4707) { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemDestroyedJewelry.templateIndex); return; }
+                    else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemShinyRubble.templateIndex); return; }
                 }
                 else if (ClimatesAndCaloriesCheck && item.TemplateIndex == (int)Supplies.Rations)
                 {
-                    wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return;
+                    wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return;
                 }
                 else if (SkillBooksCheck && item.TemplateIndex >= 551 && item.TemplateIndex <= 554)
                 {
-                    wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemPaperShreds.templateIndex); wasteAmount = UnityEngine.Random.Range(3, 10 + 1); return;
+                    wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemPaperShreds.templateIndex); wasteAmount = UnityEngine.Random.Range(3, 10 + 1); return;
                 }
                 else if (RolePlayRealismNewWeaponCheck && (item.TemplateIndex == (int)SmallWeapons.Archers_Axe || item.TemplateIndex == (int)SmallWeapons.Light_Flail))
                 {
@@ -911,7 +911,7 @@ namespace LockedLootContainers
                 {
                     wasteItem = LLCItemBuilder.CreateScrapMaterial(WeaponMaterialTypes.None, (ArmorMaterialTypes)item.NativeMaterialValue); wasteAmount = GetWasteAmount(item); return;
                 }
-                else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemUselessRefuse.templateIndex); return; }
+                else { wasteItem = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemUselessRefuse.templateIndex); return; }
             }
         }
 

@@ -23,6 +23,13 @@ namespace LockedLootContainers
             if (openEffect.RoundsRemaining <= 0)
                 return false;
 
+            // This check is from the "Open" spell code. Will likely need to be changed in order to function past DFU v0.14.5, atleast that's what Interkarma said was the case.
+            bool usedSkeletonKey = 
+                openEffect.ParentBundle.castByItem != null &&
+                openEffect.ParentBundle.castByItem.IsArtifact &&
+                openEffect.ParentBundle.castByItem.WorldTextureArchive == 432 &&
+                openEffect.ParentBundle.castByItem.WorldTextureRecord == 20;
+
             if (ChestObjRef != null)
             {
                 LLCObject closedChestData = ChestObjRef.GetComponent<LLCObject>();
@@ -39,7 +46,7 @@ namespace LockedLootContainers
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.AudioSource.PlayOneShot(GetMagicLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                 }
-                else if (OpenEffectChance(closedChestData))
+                else if (OpenEffectChance(closedChestData, usedSkeletonKey))
                 {
                     closedChestData.PicksAttempted++; // Increase picks attempted counter by 1 on the chest.
 
@@ -74,7 +81,7 @@ namespace LockedLootContainers
                     }
 
                     // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText(GetMagicLockPickSuccessText(), 3f);
+                    DaggerfallUI.AddHUDText(GetMagicLockPickSuccessText(usedSkeletonKey), 3f);
                     if (dfAudioSource != null)
                         AudioSource.PlayClipAtPoint(GetMagicLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -109,15 +116,16 @@ namespace LockedLootContainers
             return true;
         }
 
-        public static bool OpenEffectChance(LLCObject chest)
+        public static bool OpenEffectChance(LLCObject chest, bool usedSkeletonKey = false)
         {
             int magicResist = chest.LockMagicResist;
             int lockComp = chest.LockComplexity;
+            int skBonus = usedSkeletonKey ? 300 : 0;
 
             if (magicResist >= 0 && magicResist <= 19)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.5f) + Mathf.Round(Willp * 1f) + Mathf.Round(Luck * 0.3f);
+                float successChance = (magicResist * -1.4f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.5f) + Mathf.Round(Willp * 1f) + Mathf.Round(Luck * 0.3f) + skBonus;
                 if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 7f, 100f))))
                     return true;
                 else
@@ -126,7 +134,7 @@ namespace LockedLootContainers
             else if (magicResist >= 20 && magicResist <= 39)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.6f) + Mathf.Round(Willp * 0.9f) + Mathf.Round(Luck * 0.3f);
+                float successChance = (magicResist * -1.4f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.6f) + Mathf.Round(Willp * 0.9f) + Mathf.Round(Luck * 0.3f) + skBonus;
                 if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 5f, 95f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 1);
@@ -138,7 +146,7 @@ namespace LockedLootContainers
             else if (magicResist >= 40 && magicResist <= 59)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.7f) + Mathf.Round(Willp * 0.8f) + Mathf.Round(Luck * 0.3f);
+                float successChance = (magicResist * -1.4f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.7f) + Mathf.Round(Willp * 0.8f) + Mathf.Round(Luck * 0.3f) + skBonus;
                 if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 3f, 90f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 2);
@@ -150,7 +158,7 @@ namespace LockedLootContainers
             else if (magicResist >= 60 && magicResist <= 79)
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.8f) + Mathf.Round(Willp * 0.7f) + Mathf.Round(Luck * 0.3f);
+                float successChance = (magicResist * -1.4f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.8f) + Mathf.Round(Willp * 0.7f) + Mathf.Round(Luck * 0.3f) + skBonus;
                 if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 1f, 80f))))
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 3);
@@ -162,7 +170,7 @@ namespace LockedLootContainers
             else
             {
                 int mysti = (int)Mathf.Ceil(Mysti * 1.7f);
-                float successChance = (magicResist * -1.3f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.9f) + Mathf.Round(Willp * 0.6f) + Mathf.Round(Luck * 0.3f);
+                float successChance = (magicResist * -1.4f) + Mathf.Floor(lockComp * -0.3f) + mysti + Mathf.Round(Intel * 0.9f) + Mathf.Round(Willp * 0.6f) + Mathf.Round(Luck * 0.3f) + skBonus;
                 if (Dice100.SuccessRoll((int)Mathf.Round(Mathf.Clamp(successChance, 0f, 70f)))) // Potentially add specific text depending on initial odds, like "Through dumb-Luck, you somehow unlocked it", etc.
                 {
                     Player.TallySkill(DFCareer.Skills.Mysticism, 4);
@@ -223,6 +231,8 @@ namespace LockedLootContainers
                 {
                     if (damOrDisin[i] == 2)
                     {
+                        BashingDamageLootContents(chest, null, (short)DFCareer.Skills.HandToHand, false, true, magOrChance[i] >= 35 ? true : false);
+
                         if (ChestDisintegrationRoll(chest, magOrChance[i], missile.ElementType))
                         {
                             // Chest has been disintegrated and contents are accessible (but damaged greatly, if not outright destroyed.)
@@ -269,6 +279,7 @@ namespace LockedLootContainers
                         {
                             alreadyCheckedDamEffects = true;
                             int damDealt = DetermineMagicDamageToChest(chest, totalDamageMag, missile.ElementType);
+                            BashingDamageLootContents(chest, null, (short)DFCareer.Skills.HandToHand, false, true, magOrChance[i] >= 70 ? true : false);
 
                             if (ChestBlownOpenAttempt(chest, damDealt))
                             {
@@ -380,19 +391,19 @@ namespace LockedLootContainers
 
                     if (!item.IsQuestItem)
                     {
-                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
+                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(85 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(90 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
@@ -411,19 +422,19 @@ namespace LockedLootContainers
 
                     if (!item.IsQuestItem)
                     {
-                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                        if (itemStab == LootItemSturdiness.Very_Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Fragile && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Solid && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }
-                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(70 + (int)Mathf.Round(Luck / -5f)))
+                        else if (itemStab == LootItemSturdiness.Resilient && Dice100.SuccessRoll(75 + (int)Mathf.Round(Luck / -5f)))
                         {
                             if (HandleDestroyingLootItem(chest, item, damOrDisin, spellMag)) { i--; continue; }
                         }

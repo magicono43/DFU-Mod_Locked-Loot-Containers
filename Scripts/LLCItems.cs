@@ -7,7 +7,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4721;
 
-        public ItemMatScraps() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemMatScraps() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -43,7 +43,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4722;
 
-        public ItemBrokenArrow() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemBrokenArrow() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -64,7 +64,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4723;
 
-        public ItemTatteredCloth() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemTatteredCloth() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -85,7 +85,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4724;
 
-        public ItemGlassFragments() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemGlassFragments() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -106,7 +106,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4725;
 
-        public ItemPaperShreds() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemPaperShreds() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -127,7 +127,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4726;
 
-        public ItemShinyRubble() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemShinyRubble() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -148,7 +148,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4727;
 
-        public ItemIvoryFragments() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemIvoryFragments() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -169,7 +169,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4728;
 
-        public ItemDestroyedJewelry() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemDestroyedJewelry() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -190,7 +190,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4729;
 
-        public ItemRuinedCoin() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemRuinedCoin() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -211,7 +211,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4730;
 
-        public ItemClumpofPlantMatter() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemClumpofPlantMatter() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -232,7 +232,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4731;
 
-        public ItemGlobofGore() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemGlobofGore() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -253,7 +253,7 @@ namespace LockedLootContainers
     {
         public const int templateIndex = 4732;
 
-        public ItemUselessRefuse() : base(ItemGroups.UselessItems1, templateIndex)
+        public ItemUselessRefuse() : base(ItemGroups.UselessItems2, templateIndex)
         {
         }
 
@@ -351,7 +351,7 @@ namespace LockedLootContainers
                 }
             }
 
-            DaggerfallUnityItem item = ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemMatScraps.templateIndex);
+            DaggerfallUnityItem item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemMatScraps.templateIndex);
             switch (scrapMat)
             {
                 default:

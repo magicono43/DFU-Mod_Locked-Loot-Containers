@@ -145,7 +145,7 @@ namespace LockedLootContainers
                 chest.HasBeenBashed = true;
 
                 // Would be interesting when an arrow "pings" off a metal chest it would actually leave a physical object nearby that could be clicked instead of adding to chest inventory, but eh.
-                chest.AttachedLoot.AddItem(ItemBuilder.CreateItem(ItemGroups.UselessItems1, ItemBrokenArrow.templateIndex));
+                chest.AttachedLoot.AddItem(ItemBuilder.CreateItem(ItemGroups.UselessItems2, ItemBrokenArrow.templateIndex));
 
                 DaggerfallUnityItem bowUsed = GameManager.Instance.WeaponManager.LastBowUsed;
                 if (bowUsed != null)
@@ -510,7 +510,7 @@ namespace LockedLootContainers
             {
                 if (hitWood) // Hitting either wooden lock or chest body with a blunt type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, (3 + Mathf.RoundToInt((Stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
+                    float rolledWepDamPercent = Mathf.Max(0.25f, ((Stren / 5f) * 0.05f) + ((Dice100.SuccessRoll(25 + Mathf.RoundToInt(Luck / 2f))) ? -0.5f : 0) * bashHitMod);
                     float rolledFatiguePercent = Mathf.Max(2, UnityEngine.Random.Range(2, Mathf.Round(4 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
@@ -520,7 +520,7 @@ namespace LockedLootContainers
                 }
                 else // Hitting either metal lock or chest body with a blunt type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(2, UnityEngine.Random.Range(2, (4 + Mathf.RoundToInt((Stren / 10f) * 0.4f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
+                    float rolledWepDamPercent = Mathf.Max(0.5f, ((Stren / 5f) * 0.05f) + ((Dice100.SuccessRoll(25 + Mathf.RoundToInt(Luck / 2f))) ? -0.5f : 0) * bashHitMod);
                     float rolledFatiguePercent = Mathf.Max(4, UnityEngine.Random.Range(4, Mathf.Round(9 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.04f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
@@ -533,8 +533,8 @@ namespace LockedLootContainers
             {
                 if (hitWood) // Hitting either wooden lock or chest body with a bladed type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(1, UnityEngine.Random.Range(1, (3 + Mathf.RoundToInt((Stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
-                    rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (1 + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (1 + chest.LockSturdiness / 300f));
+                    float rolledWepDamPercent = Mathf.Max(0.5f, ((Stren / 5f) * 0.1f) + ((Dice100.SuccessRoll(25 + Mathf.RoundToInt(Luck / 2f))) ? -0.75f : 0) * bashHitMod);
+                    rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (0.25f + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (0.25f + chest.LockSturdiness / 300f));
                     float rolledFatiguePercent = Mathf.Max(2, UnityEngine.Random.Range(2, Mathf.Round(4 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.02f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;
@@ -544,8 +544,8 @@ namespace LockedLootContainers
                 }
                 else // Hitting either metal lock or chest body with a bladed type weapon
                 {
-                    float rolledWepDamPercent = Mathf.Max(2, UnityEngine.Random.Range(2, (3 + Mathf.RoundToInt((Stren / 10f) * 0.2f) + ((Dice100.SuccessRoll(50 + Mathf.RoundToInt(Luck / 2f))) ? -1 : 0)) * bashHitMod));
-                    rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (1 + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (1 + chest.LockSturdiness / 300f));
+                    float rolledWepDamPercent = Mathf.Max(0.75f, ((Stren / 5f) * 0.1f) + ((Dice100.SuccessRoll(25 + Mathf.RoundToInt(Luck / 2f))) ? -0.75f : 0) * bashHitMod);
+                    rolledWepDamPercent = (!hitLock) ? Mathf.Round(rolledWepDamPercent * (0.25f + chest.ChestSturdiness / 100f)) : Mathf.Round(rolledWepDamPercent * (0.25f + chest.LockSturdiness / 300f));
                     float rolledFatiguePercent = Mathf.Max(4, UnityEngine.Random.Range(4, Mathf.Round(11 + Mathf.RoundToInt(Endur / -10f) + Mathf.RoundToInt(Willp / -25f) * bashHitMod)));
                     fatigueDam = Mathf.Max((int)Mathf.Floor(Player.MaxFatigue * 0.04f), (int)Mathf.Floor(Player.MaxFatigue * (rolledFatiguePercent / 100f)));
                     fatigueDam = (Player.CurrentFatigue - fatigueDam < 0) ? Player.CurrentFatigue : fatigueDam;

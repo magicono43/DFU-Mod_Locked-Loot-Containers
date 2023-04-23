@@ -37,17 +37,32 @@ namespace LockedLootContainers
             else { return "The lock is jammed and inoperable..."; }
         }
 
-        public static string GetMagicLockPickSuccessText()
+        public static string GetMagicLockPickSuccessText(bool usedSkeletonKey = false)
         {
-            int rand = UnityEngine.Random.Range(0, 13);
-            if (rand == 0) { return "The locking mechanism disengages."; }
-            else if (rand == 1) { return "With a satisfying click, the lock springs open."; }
-            else if (rand == 2) { return "The spell bypasses the lock's defenses, unlocking it with ease."; }
-            else if (rand == 3) { return "The spell coaxes the lock open, with a satisfying click..."; }
-            else if (rand == 4) { return "The lock surrenders to the spell, clicking open."; }
-            else if (rand == 5) { return "The lock's resistance is broken by a surge of magical energy, granting access."; }
-            else if (rand == 6) { return "The lock yields to your spell, granting access with a shimmering glow."; }
-            else { return "The lock clicks open..."; }
+            if (usedSkeletonKey)
+            {
+                int rand = UnityEngine.Random.Range(0, 13);
+                if (rand == 0) { return "Mostly thanks to The Skeleton's Key, the locking mechanism disengages."; }
+                else if (rand == 1) { return "With a satisfying click, the lock springs open."; }
+                else if (rand == 2) { return "The Skeleton Key's spell bypasses the lock's defenses, unlocking it with ease."; }
+                else if (rand == 3) { return "The Skeleton Key's spell coaxes the lock open, with a satisfying click..."; }
+                else if (rand == 4) { return "The lock surrenders to The Skeleton Key's spell, unlocking it effortlessly."; }
+                else if (rand == 5) { return "The lock's resistance is broken by a surge of magical energy, granting access."; }
+                else if (rand == 6) { return "The lock yields to The Skeleton's Key, granting access with a shimmering glow."; }
+                else { return "Thanks to The Skeleton's Key, the lock clicks open..."; }
+            }
+            else
+            {
+                int rand = UnityEngine.Random.Range(0, 13);
+                if (rand == 0) { return "The locking mechanism disengages."; }
+                else if (rand == 1) { return "With a satisfying click, the lock springs open."; }
+                else if (rand == 2) { return "The spell bypasses the lock's defenses, unlocking it with ease."; }
+                else if (rand == 3) { return "The spell coaxes the lock open, with a satisfying click..."; }
+                else if (rand == 4) { return "The lock surrenders to the spell, clicking open."; }
+                else if (rand == 5) { return "The lock's resistance is broken by a surge of magical energy, granting access."; }
+                else if (rand == 6) { return "The lock yields to your spell, granting access with a shimmering glow."; }
+                else { return "The lock clicks open..."; }
+            }
         }
 
         public static string GetMagicLockPickAttemptText()

@@ -11,6 +11,7 @@ using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallConnect.Arena2;
 using System.Linq;
+using DaggerfallWorkshop.Game.Questing;
 
 namespace LockedLootContainers
 {
@@ -228,6 +229,12 @@ namespace LockedLootContainers
                 lootPiles = FindObjectsOfType<DaggerfallLoot>();
                 for (int i = 0; i < lootPiles.Length; i++)
                 {
+                    // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                    DaggerfallAction dfAction = lootPiles[i].GetComponent<DaggerfallAction>();
+                    QuestResourceBehaviour dfQRB = lootPiles[i].GetComponent<QuestResourceBehaviour>();
+                    if (dfAction != null) { continue; }
+                    if (dfQRB != null) { continue; }
+
                     if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
                         goList.Add(lootPiles[i].gameObject);
                 }
@@ -239,6 +246,12 @@ namespace LockedLootContainers
                     int modelID = -1;
                     bool validID = false;
                     string meshName = containerModels[i].mesh.name;
+
+                    // Ignore any models that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                    DaggerfallAction dfAction = containerModels[i].GetComponent<DaggerfallAction>();
+                    QuestResourceBehaviour dfQRB = containerModels[i].GetComponent<QuestResourceBehaviour>();
+                    if (dfAction != null) { continue; }
+                    if (dfQRB != null) { continue; }
 
                     if (meshName.Length > 0)
                     {
@@ -456,6 +469,12 @@ namespace LockedLootContainers
                 lootPiles = FindObjectsOfType<DaggerfallLoot>();
                 for (int i = 0; i < lootPiles.Length; i++)
                 {
+                    // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                    DaggerfallAction dfAction = lootPiles[i].GetComponent<DaggerfallAction>();
+                    QuestResourceBehaviour dfQRB = lootPiles[i].GetComponent<QuestResourceBehaviour>();
+                    if (dfAction != null) { continue; }
+                    if (dfQRB != null) { continue; }
+
                     if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
                         goList.Add(lootPiles[i].gameObject);
                 }
@@ -467,6 +486,12 @@ namespace LockedLootContainers
                     int modelID = -1;
                     bool validID = false;
                     string meshName = containerModels[i].mesh.name;
+
+                    // Ignore any models that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                    DaggerfallAction dfAction = containerModels[i].GetComponent<DaggerfallAction>();
+                    QuestResourceBehaviour dfQRB = containerModels[i].GetComponent<QuestResourceBehaviour>();
+                    if (dfAction != null) { continue; }
+                    if (dfQRB != null) { continue; }
 
                     if (meshName.Length > 0)
                     {
@@ -679,6 +704,9 @@ namespace LockedLootContainers
 
             int chestOdds = Mathf.RoundToInt(baseChestOdds * roomMod);
 
+            if (ForceChestSpawnToggle)
+                chestOdds = 100000;
+
             if (chestOdds <= 0)
                 return;
 
@@ -687,6 +715,9 @@ namespace LockedLootContainers
                 if (allowedMats[i] == true)
                     permitMatsCount++;
             }
+
+            if (ForceChestSpawnToggle && permitMatsCount <= 0)
+                permitMatsCount = 8;
 
             if (permitMatsCount <= 0)
                 return;

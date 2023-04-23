@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/17/2023, 7:30 PM
+// Last Edit:		4/23/2023, 7:40 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:			
@@ -52,6 +52,7 @@ namespace LockedLootContainers
         public static GameObject MainCamera { get; set; }
         public static int PlayerLayerMask { get; set; }
         public static AudioClip LastSoundPlayed { get { return lastSoundPlayed; } set { lastSoundPlayed = value; } }
+        public static bool ForceChestSpawnToggle { get; set; }
         public static IUserInterfaceWindow LastUIWindow { get; set; }
         public static DaggerfallLoot LastLootedChest { get; set; }
         public static PlayerEntity Player { get { return GameManager.Instance.PlayerEntity; } }
@@ -592,8 +593,9 @@ namespace LockedLootContainers
             try
             {
                 ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(AlwaysSpawnChests.command, AlwaysSpawnChests.description, AlwaysSpawnChests.usage, AlwaysSpawnChests.Execute);
                 //ConsoleCommandsDatabase.RegisterCommand(LLCSoundTest.command, LLCSoundTest.description, LLCSoundTest.usage, LLCSoundTest.Execute);
-                //ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
                 //ConsoleCommandsDatabase.RegisterCommand(ChangeButtonRect.command, ChangeButtonRect.description, ChangeButtonRect.usage, ChangeButtonRect.Execute);
             }
             catch (Exception e)
@@ -645,6 +647,27 @@ namespace LockedLootContainers
                 GameManager.Instance.PlayerMotor.FixStanding();
 
                 return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length);
+            }
+        }
+
+        private static class AlwaysSpawnChests
+        {
+            public static readonly string command = "forcespawnchest";
+            public static readonly string description = "Toggle To Force All Loot-piles To Be Replaced By LLC Chests, No Matter The Odds, For Testing.";
+            public static readonly string usage = "forcespawnchest";
+
+            public static string Execute(params string[] args)
+            {
+                if (ForceChestSpawnToggle == false)
+                {
+                    ForceChestSpawnToggle = true;
+                    return "ON: Chests will now ALWAYS replace loot-piles.";
+                }
+                else
+                {
+                    ForceChestSpawnToggle = false;
+                    return "OFF: Chests will no longer always replace loot-piles.";
+                }
             }
         }
 
@@ -743,13 +766,11 @@ namespace LockedLootContainers
         }
         */
 
-        // Will disable this for the live mod since it's only really useful for testing.
-        /*
         private static class MakeJunkItems
         {
-            public static readonly string command = "addjunk";
+            public static readonly string command = "addjunkLLC";
             public static readonly string description = "Spawns LLC Junk Items.";
-            public static readonly string usage = "addjunk";
+            public static readonly string usage = "addjunkLLC";
 
             public static string Execute(params string[] args)
             {
@@ -769,14 +790,13 @@ namespace LockedLootContainers
 
                 for (int i = 0; i < 11; i++)
                 {
-                    DaggerfallUnityItem item = ItemBuilder.CreateItem(ItemGroups.UselessItems1, 4722 + i);
+                    DaggerfallUnityItem item = ItemBuilder.CreateItem(ItemGroups.UselessItems2, 4722 + i);
                     Player.Items.AddItem(item);
                 }
 
                 return "Gave you ALL the junk items.";
             }
         }
-        */
 
         // Will likely have use for this console command when working with more interface stuff in the future
         /*
