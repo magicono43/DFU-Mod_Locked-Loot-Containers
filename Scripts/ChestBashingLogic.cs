@@ -64,7 +64,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText(GetBashedLockOffText(), 3f);
+                        CreateScreenWrappedHudText(TextTokenFromRawString(GetBashedLockOffText()));
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetLockBashAudioClip(chest, true), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -113,7 +113,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play unlock sound
-                        DaggerfallUI.AddHUDText(GetBashedOpenChestText(), 3f); // Will possibly change text later on depending on many factors, will see.
+                        CreateScreenWrappedHudText(TextTokenFromRawString(GetBashedOpenChestText()));
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetChestBashAudioClip(chest, weapon, true, critBash), chest.gameObject.transform.position, UnityEngine.Random.Range(1.4f, 1.92f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -129,7 +129,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
+                CreateScreenWrappedHudText(TextTokenFromRawString("ERROR: Chest Was Found As Null."));
             }
         }
 
@@ -186,7 +186,7 @@ namespace LockedLootContainers
                         }
 
                         // Show success and play smash open sound
-                        DaggerfallUI.AddHUDText(GetArrowSmashedOpenChestText(), 3f);
+                        CreateScreenWrappedHudText(TextTokenFromRawString(GetArrowSmashedOpenChestText()));
                         if (dfAudioSource)
                         {
                             if (dfAudioSource != null)
@@ -218,7 +218,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
+                CreateScreenWrappedHudText(TextTokenFromRawString("ERROR: Chest Was Found As Null."));
             }
             return false;
         }

@@ -1,10 +1,10 @@
 // Project:         LockedLootContainers mod for Daggerfall Unity (http://www.dfworkshop.net)
-// Copyright:       Copyright (C) 2022 Kirk.O
+// Copyright:       Copyright (C) 2025 Kirk.O
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/23/2023, 7:40 PM
-// Version:			1.00
+// Last Edit:		4/8/2025, 6:30 PM
+// Version:			1.05
 // Special Thanks:  
 // Modifier:			
 
@@ -22,6 +22,7 @@ using Wenzil.Console;
 using System;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
+using DaggerfallConnect.Arena2;
 
 namespace LockedLootContainers
 {
@@ -37,6 +38,10 @@ namespace LockedLootContainers
         public static bool AllowChestCollision { get; set; }
         public static bool AllowChestShadows { get; set; }
 
+        public static bool AllowCompatibilityWarnings { get; set; }
+        public static bool AllowVerboseErrorLogging { get; set; }
+        public static bool DoNotSpamExceptionsLogs { get; set; }
+
         // Mod Compatibility Check Values
         public static bool RepairToolsCheck { get; set; }
         public static bool JewelryAdditionsCheck { get; set; }
@@ -46,6 +51,7 @@ namespace LockedLootContainers
         public static bool RolePlayRealismBandagingCheck { get; set; }
         public static bool RolePlayRealismNewWeaponCheck { get; set; }
         public static bool RolePlayRealismNewArmorCheck { get; set; }
+        public static bool TemperedInteriorsCheck { get; set; }
 
         // Global Variables
         public static GameObject ChestObjRef { get; set; }
@@ -60,6 +66,8 @@ namespace LockedLootContainers
         public static WeaponManager WepManager { get { return GameManager.Instance.WeaponManager; } }
 
         bool isBashReady = true;
+
+        public static bool exceptionLogging = true;
 
         // Mod Textures || GUI
         public Texture2D ChestChoiceMenuTexture;
@@ -244,6 +252,15 @@ namespace LockedLootContainers
             AllowChestCollision = mod.GetSettings().GetValue<bool>("GraphicsSettings", "ChestCollisionToggle");
             AllowChestShadows = mod.GetSettings().GetValue<bool>("GraphicsSettings", "ChestShadowsToggle");
 
+            AllowCompatibilityWarnings = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "AllowModCompatWarnings");
+            AllowVerboseErrorLogging = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "AllowVerboseErrorLogging");
+            DoNotSpamExceptionsLogs = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "DoNotSpamExceptionsLogs");
+
+            if (change.HasChanged("ErrorLoggingAndCompatibilitySettings", "DoNotSpamExceptionsLogs"))
+            {
+                exceptionLogging = true;
+            }
+
             RefreshChestGraphics();
         }
 
@@ -369,6 +386,48 @@ namespace LockedLootContainers
 
         #endregion
 
+        public static TextFile.Token[] TextTokenFromRawString(string rawString)
+        {
+            var listOfCompLines = new List<string>();
+            int partLength = 115;
+            if (!DaggerfallUnity.Settings.SDFFontRendering)
+                partLength = 65;
+            string sentence = rawString;
+            string[] words = sentence.Split(' ');
+            var parts = new Dictionary<int, string>();
+            string part = string.Empty;
+            int partCounter = 0;
+            foreach (var word in words)
+            {
+                if (part.Length + word.Length < partLength)
+                {
+                    part += string.IsNullOrEmpty(part) ? word : " " + word;
+                }
+                else
+                {
+                    parts.Add(partCounter, part);
+                    part = word;
+                    partCounter++;
+                }
+            }
+            parts.Add(partCounter, part);
+
+            foreach (var item in parts)
+            {
+                listOfCompLines.Add(item.Value);
+            }
+
+            return DaggerfallUnity.Instance.TextProvider.CreateTokens(TextFile.Formatting.JustifyCenter, listOfCompLines.ToArray());
+        }
+
+        public static void CreateScreenWrappedHudText(TextFile.Token[] tokens, float textDelay = 3f)
+        {
+            if (tokens != null && tokens.Length > 0)
+            {
+                DaggerfallUI.AddHUDText(tokens, textDelay);
+            }
+        }
+
         private void ModCompatibilityChecking()
         {
             Mod repairTools = ModManager.Instance.GetMod("RepairTools");
@@ -391,6 +450,53 @@ namespace LockedLootContainers
                 RolePlayRealismBandagingCheck = rolePlayRealismSettings.GetBool("Modules", "bandaging");
                 RolePlayRealismNewWeaponCheck = rolePlayRealismSettings.GetBool("Modules", "newWeapons");
                 RolePlayRealismNewArmorCheck = rolePlayRealismSettings.GetBool("Modules", "newArmor");
+            }
+
+            // Tempered Interiors mod: https://www.nexusmods.com/daggerfallunity/mods/392
+            Mod temperedInteriors = ModManager.Instance.GetModFromGUID("a1ec918d-fad6-4050-99ec-d07043a0308a");
+            TemperedInteriorsCheck = temperedInteriors != null ? true : false;
+        }
+
+        public static void LogModException(Exception e, byte errorType = 0)
+        {
+            string errorName = "something generic was occuring";
+
+            switch (errorType)
+            {
+                case 1: errorName = "transitioning into an interior"; break;
+                case 2: errorName = "transitioning to an exterior"; break;
+                case 3: errorName = "transitioning into a dungeon"; break;
+                case 4: errorName = "the inventory window was being closed"; break;
+                case 5: errorName = "an existing save was being loaded"; break;
+                case 6: errorName = "a new character was just created"; break;
+                case 0:
+                default:
+                    break;
+            }
+
+            if (exceptionLogging)
+            {
+                if (AllowVerboseErrorLogging)
+                {
+                    Debug.LogErrorFormat("[ERROR] Locked Loot Containers: Exception has occured while {0}: " + e.ToString(), errorName);
+                    if (errorType == 1 && TemperedInteriorsCheck)
+                    {
+                        Debug.LogWarning("[Warning] Locked Loot Containers: The 'Tempered Interiors' mod appears to be active, this may be the cause of the above exception");
+                    }
+                }
+                else
+                {
+                    Debug.LogFormat("[ERROR] Locked Loot Containers: Exception has occured while {0}", errorName);
+                    if (errorType == 1 && TemperedInteriorsCheck)
+                    {
+                        Debug.Log("[Warning] Locked Loot Containers: The 'Tempered Interiors' mod appears to be active, this may be the cause of the above exception");
+                    }
+                }
+
+                if (DoNotSpamExceptionsLogs)
+                {
+                    exceptionLogging = false;
+                }
             }
         }
 

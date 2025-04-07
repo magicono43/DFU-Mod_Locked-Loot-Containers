@@ -325,31 +325,31 @@ namespace LockedLootContainers
 
         public static bool LockpickDetectionCheck(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes buildingType)
         {
-            int detectionChance = (20 + (buildingData.quality * 3)) * -1;
+            int detectionChance = 20 + (buildingData.quality * 3);
             int closedMod = BuildingOpenCheck(buildingData, buildingType) ? 0 : 30;
-            int sneakChance = Sneak + Mathf.RoundToInt(PickP * 0.2f) + Mathf.RoundToInt(Agili * 0.6f) + Mathf.RoundToInt(Luck * 0.4f) + closedMod;
+            int sneakChance = (Sneak + Mathf.RoundToInt(PickP * 0.2f) + Mathf.RoundToInt(Agili * 0.6f) + Mathf.RoundToInt(Luck * 0.4f) + closedMod) * -1;
 
             Player.TallySkill(DFCareer.Skills.Stealth, 1);
             Player.TallySkill(DFCareer.Skills.Pickpocket, 1);
 
             if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(detectionChance + sneakChance, 5f, 90f))))
-                return false;
-            else
                 return true;
+            else
+                return false;
         }
 
         public static bool MagicLockpickDetectionCheck(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes buildingType)
         {
-            int detectionChance = (20 + (buildingData.quality * 3)) * -1;
+            int detectionChance = 20 + (buildingData.quality * 3);
             int closedMod = BuildingOpenCheck(buildingData, buildingType) ? 0 : 30;
-            int sneakChance = Sneak + Mathf.RoundToInt(Illus * 0.2f) + Mathf.RoundToInt(Speed * 0.4f) + Mathf.RoundToInt(Luck * 0.6f) + closedMod;
+            int sneakChance = (Sneak + Mathf.RoundToInt(Illus * 0.2f) + Mathf.RoundToInt(Speed * 0.4f) + Mathf.RoundToInt(Luck * 0.6f) + closedMod) * -1;
 
             Player.TallySkill(DFCareer.Skills.Stealth, 1);
 
             if (Dice100.SuccessRoll(Mathf.RoundToInt(Mathf.Clamp(detectionChance + sneakChance, 5f, 90f))))
-                return false;
-            else
                 return true;
+            else
+                return false;
         }
 
         public static void RegisterDetectedPunishment(PlayerGPS.DiscoveredBuilding buildingData, DFLocation.BuildingTypes bT)
@@ -360,16 +360,52 @@ namespace LockedLootContainers
             {
                 if (IsValidShop(bT) || bT == DFLocation.BuildingTypes.Tavern || IsValidTownHouse(bT) || bT == DFLocation.BuildingTypes.Palace)
                 {
-                    DaggerfallUI.AddHUDText("You were detected...", 2f);
-                    playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
-                    playerEntity.SpawnCityGuards(true);
+                    if (bT == DFLocation.BuildingTypes.House2)
+                    {
+                        int factionID = buildingData.factionID;
+
+                        if (factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild)
+                        {
+                            CreateScreenWrappedHudText(TextTokenFromRawString("You were detected, bad thieves bring shame to the entire guild..."));
+                            playerEntity.FactionData.ChangeReputation(factionID, -4, true);
+                            FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
+                            if (factionData.rep < 0)
+                            {
+                                GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Rogue, 2, 3, 8); // Make 2 instances so maybe they will spawn more quickly?
+                                GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Rogue, 2, 3, 8);
+                            }
+                        }
+                        else if (factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood)
+                        {
+                            CreateScreenWrappedHudText(TextTokenFromRawString("You were detected, The Dark Brotherhood does not approve stealing from your own kin..."));
+                            playerEntity.FactionData.ChangeReputation(factionID, -4, true);
+                            FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
+                            if (factionData.rep < 0)
+                            {
+                                GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Assassin, 2, 3, 8); // Make 2 instances so maybe they will spawn more quickly?
+                                GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Assassin, 2, 3, 8);
+                            }
+                        }
+                        else
+                        {
+                            CreateScreenWrappedHudText(TextTokenFromRawString("You were detected..."), 2f);
+                            playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
+                            playerEntity.SpawnCityGuards(true);
+                        }
+                    }
+                    else
+                    {
+                        CreateScreenWrappedHudText(TextTokenFromRawString("You were detected..."), 2f);
+                        playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
+                        playerEntity.SpawnCityGuards(true);
+                    }
                 }
                 else if (bT == DFLocation.BuildingTypes.Temple)
                 {
                     int factionID = buildingData.factionID;
                     FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
                     string factionName = factionData.name;
-                    DaggerfallUI.AddHUDText("You were detected, " + factionName + " disproves of this transgression...", 3f);
+                    CreateScreenWrappedHudText(TextTokenFromRawString("You were detected, " + factionName + " disproves of this transgression..."));
                     playerEntity.FactionData.ChangeReputation(factionID, -2, true);
                     playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
                     playerEntity.SpawnCityGuards(true);
@@ -382,32 +418,10 @@ namespace LockedLootContainers
                     {
                         FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
                         string factionName = factionData.name;
-                        DaggerfallUI.AddHUDText("You were detected, " + factionName + " disproves of this transgression...", 3f);
+                        CreateScreenWrappedHudText(TextTokenFromRawString("You were detected, " + factionName + " disproves of this transgression..."));
                         playerEntity.FactionData.ChangeReputation(factionID, -2, true);
                         playerEntity.CrimeCommitted = PlayerEntity.Crimes.Theft;
                         playerEntity.SpawnCityGuards(true);
-                    }
-                    else if (factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild)
-                    {
-                        DaggerfallUI.AddHUDText("You were detected, bad thieves bring shame to the entire guild...", 3f);
-                        playerEntity.FactionData.ChangeReputation(factionID, -4, true);
-                        FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
-                        if (factionData.rep < 0)
-                        {
-                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Rogue, 2, 3, 8); // Make 2 instances so maybe they will spawn more quickly?
-                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Rogue, 2, 3, 8);
-                        }
-                    }
-                    else if (factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood)
-                    {
-                        DaggerfallUI.AddHUDText("You were detected, The Dark Brotherhood does not approve stealing from your own kin...", 3f);
-                        playerEntity.FactionData.ChangeReputation(factionID, -4, true);
-                        FactionFile.FactionData factionData = playerEntity.FactionData.FactionDict[factionID];
-                        if (factionData.rep < 0)
-                        {
-                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Assassin, 2, 3, 8); // Make 2 instances so maybe they will spawn more quickly?
-                            GameObjectHelper.CreateFoeSpawner(false, MobileTypes.Assassin, 2, 3, 8);
-                        }
                     }
                 }
             }

@@ -42,7 +42,7 @@ namespace LockedLootContainers
 
                 if (closedChestData.IsLockJammed)
                 {
-                    DaggerfallUI.AddHUDText(GetMagicLockAlreadyJammedText(), 2f);
+                    CreateScreenWrappedHudText(TextTokenFromRawString(GetMagicLockAlreadyJammedText()), 2f);
                     if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                         dfAudioSource.AudioSource.PlayOneShot(GetMagicLockAlreadyJammedClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                 }
@@ -81,7 +81,7 @@ namespace LockedLootContainers
                     }
 
                     // Show success and play unlock sound
-                    DaggerfallUI.AddHUDText(GetMagicLockPickSuccessText(usedSkeletonKey), 3f);
+                    CreateScreenWrappedHudText(TextTokenFromRawString(GetMagicLockPickSuccessText(usedSkeletonKey)));
                     if (dfAudioSource != null)
                         AudioSource.PlayClipAtPoint(GetMagicLockpickSuccessClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(1.7f, 2.61f) * DaggerfallUnity.Settings.SoundVolume);
 
@@ -95,13 +95,13 @@ namespace LockedLootContainers
 
                     if (DoesLockJam(closedChestData, mechDamDealt))
                     {
-                        DaggerfallUI.AddHUDText(GetMagicJammedLockText(), 3f);
+                        CreateScreenWrappedHudText(TextTokenFromRawString(GetMagicJammedLockText()));
                         if (dfAudioSource != null)
                             AudioSource.PlayClipAtPoint(GetMagicLockpickJammedClip(), closedChestData.gameObject.transform.position, UnityEngine.Random.Range(8.2f, 9.71f) * DaggerfallUnity.Settings.SoundVolume);
                     }
                     else
                     {
-                        DaggerfallUI.AddHUDText(GetMagicLockPickAttemptText(), 2f);
+                        CreateScreenWrappedHudText(TextTokenFromRawString(GetMagicLockPickAttemptText()), 2f);
                         if (dfAudioSource != null && !dfAudioSource.IsPlaying())
                             dfAudioSource.AudioSource.PlayOneShot(GetMagicLockpickAttemptClip(), UnityEngine.Random.Range(1.2f, 1.91f) * DaggerfallUnity.Settings.SoundVolume);
                     }
@@ -109,7 +109,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
+                CreateScreenWrappedHudText(TextTokenFromRawString("ERROR: Chest Was Found As Null."));
             }
 
             openEffect.CancelEffect();
@@ -264,7 +264,7 @@ namespace LockedLootContainers
                             }
 
                             // Show success and play disintegrate sound
-                            DaggerfallUI.AddHUDText(GetChestDisintegratedBySpellText(), 4f);
+                            CreateScreenWrappedHudText(TextTokenFromRawString(GetChestDisintegratedBySpellText()), 4f);
                             if (dfAudioSource)
                             {
                                 if (dfAudioSource != null)
@@ -312,7 +312,7 @@ namespace LockedLootContainers
                                 }
 
                                 // Show success and play explosion type sound
-                                DaggerfallUI.AddHUDText(GetChestBlownOpenBySpellText(), 4f);
+                                CreateScreenWrappedHudText(TextTokenFromRawString(GetChestBlownOpenBySpellText()), 4f);
                                 if (dfAudioSource)
                                 {
                                     if (dfAudioSource != null)
@@ -332,7 +332,7 @@ namespace LockedLootContainers
             }
             else
             {
-                DaggerfallUI.AddHUDText("ERROR: Chest Was Found As Null.", 3f);
+                CreateScreenWrappedHudText(TextTokenFromRawString("ERROR: Chest Was Found As Null."));
             }
             return false;
         }

@@ -27,502 +27,527 @@ namespace LockedLootContainers
 
         public void AddChests_OnTransitionInterior(PlayerEnterExit.TransitionEventArgs args)
         {
-            if (SaveLoadManager.Instance.LoadInProgress) // This will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
-                return;
-
-            DFLocation.BuildingTypes buildingType = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.buildingType;
-            PlayerGPS.DiscoveredBuilding buildingData = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData;
-            DaggerfallLoot[] lootPiles;
-            MeshFilter[] containerModels;
-
-            if (DaggerfallWorkshop.Game.Banking.DaggerfallBankManager.IsHouseOwned(buildingData.buildingKey)) // Don't check for adding chests to player owned houses.
-                return;
-
-            if (buildingType == DFLocation.BuildingTypes.Ship && DaggerfallWorkshop.Game.Banking.DaggerfallBankManager.OwnsShip) // Don't check for adding chests to player owned ships.
-                return;
-
-            bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
-            // Misc Item Group Odds: Gold, LoC, G-Min, G-Max, LoC-Min, LoC-Max, Potions, Maps, Potion Recipes, Paintings, Soul-gems, Magic Items, Max Condition %, Min Condition %
-            int[] miscGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            // Allowed Item Groups:    Drug, Armor, Weap, Cloth, Book, Jewel, Supply, Relic, Ingred
-            // Item Group Odds %: 
-            int[] itemGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            // Array of "blacklisted" items going by their template index value, these will be filtered out from being spawned as loot later.
-            int [] itemBlacklist = { -1 };
-
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
+            try
             {
-                if (IsValidShop(buildingType))
-                {
-                    switch (buildingType)
-                    {
-                        case DFLocation.BuildingTypes.Alchemist:
-                            allowedMats = new bool[] { true, true, true, false, true, true, false, false };
-                            baseChestOdds = 15;
-                            miscGroupOdds = new int[] { 15, 1, 20, 150, 750, 1500, 25, 0, 35, 0, 0, 0, 80, 25 };
-                            itemGroupOdds = new int[] { 15, 0, 0, 0, 0, 0, 0, 0, 25, 25, 10, 25, 5, 0, 0, 5, 0, 5, 60, 45, 45, 25, 15, 7, 40, 35 };
-                            itemBlacklist = new int[] { (int)Lights.Torch, (int)Jewelry.Crown };
-                            break;
-                        case DFLocation.BuildingTypes.Armorer:
-                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
-                            baseChestOdds = 25;
-                            miscGroupOdds = new int[] { 20, 1, 60, 400, 1500, 3500, 0, 0, 0, 0, 0, 0, 90, 40 };
-                            itemGroupOdds = new int[] { 1, 30, 30, 30, 30, 10, 10, 10, 25, 25, 0, 10, 5, 20, 5, 15, 0, 5, 0, 0, 0, 0, 0, 0, 0, 25 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Lights.Torch, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                            break;
-                        case DFLocation.BuildingTypes.WeaponSmith:
-                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
-                            baseChestOdds = 25;
-                            miscGroupOdds = new int[] { 20, 1, 60, 400, 1500, 3500, 0, 0, 0, 0, 0, 0, 90, 40 };
-                            itemGroupOdds = new int[] { 1, 10, 10, 10, 20, 35, 35, 35, 25, 25, 0, 10, 5, 15, 5, 15, 0, 5, 0, 0, 0, 0, 0, 0, 0, 20 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Lights.Torch, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                            break;
-                        case DFLocation.BuildingTypes.GeneralStore:
-                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                            baseChestOdds = 25;
-                            miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
-                            itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Jewelry.Crown };
-                            break;
-                        case DFLocation.BuildingTypes.PawnShop:
-                            allowedMats = new bool[] { true, true, true, true, true, true, true, true };
-                            baseChestOdds = 35;
-                            miscGroupOdds = new int[] { 20, 1, 30, 500, 1000, 2250, 0, 6, 0, 20, 0, 4, 70, 25 };
-                            itemGroupOdds = new int[] { 2, 5, 5, 5, 5, 5, 5, 5, 25, 25, 10, 15, 15, 0, 5, 5, 10, 20, 0, 0, 0, 0, 0, 0, 0, 15 };
-                            break;
-                        case DFLocation.BuildingTypes.GemStore:
-                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                            baseChestOdds = 30;
-                            miscGroupOdds = new int[] { 20, 1, 30, 650, 1500, 3000, 0, 0, 0, 0, 0, 0, 80, 35 };
-                            itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 25, 25, 0, 50, 50, 0, 0, 5, 0, 10, 0, 0, 0, 0, 0, 0, 0, 35 };
-                            itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage };
-                            break;
-                        case DFLocation.BuildingTypes.ClothingStore:
-                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                            baseChestOdds = 15;
-                            miscGroupOdds = new int[] { 20, 1, 35, 550, 850, 1850, 0, 0, 0, 0, 0, 0, 90, 55 };
-                            itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 150, 150, 0, 5, 15, 0, 0, 5, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Lights.Torch, (int)Jewelry.Crown };
-                            break;
-                        case DFLocation.BuildingTypes.Bookseller:
-                        case DFLocation.BuildingTypes.Library:
-                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                            baseChestOdds = 15;
-                            miscGroupOdds = new int[] { 10, 1, 15, 250, 500, 1000, 0, 20, 20, 1, 0, 0, 70, 30 };
-                            itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 0, 0, 0, 30, 30, 80, 5, 5, 0, 10, 45, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
-                            itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage, (int)Jewelry.Crown };
-                            break;
-                        case DFLocation.BuildingTypes.Bank:
-                            allowedMats = new bool[] { false, false, true, true, false, true, true, true };
-                            baseChestOdds = 40;
-                            miscGroupOdds = new int[] { 50, 10, 200, 950, 3000, 7000, 0, 0, 0, 1, 0, 0, 70, 30 };
-                            itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 25, 25, 5, 5, 5, 0, 10, 20, 0, 5, 0, 0, 0, 0, 0, 0, 0, 25 };
-                            itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage };
-                            break;
-                        default:
-                            allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                            baseChestOdds = 25;
-                            miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
-                            itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
-                            break;
-                    }
-                }
-                else if (buildingType == DFLocation.BuildingTypes.Tavern)
-                {
-                    allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                    baseChestOdds = 35;
-                    miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 3, 2, 0, 0, 1, 65, 20 };
-                    itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 45, 45, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 0, 0, 0, 0, 5 };
-                    itemBlacklist = new int[] { (int)Jewelry.Crown };
-                }
-                else if (buildingType == DFLocation.BuildingTypes.Palace)
-                {
-                    allowedMats = new bool[] { false, true, true, true, true, true, true, true };
-                    baseChestOdds = 50;
-                    miscGroupOdds = new int[] { 50, 3, 200, 800, 2000, 5500, 10, 2, 0, 8, 1, 2, 75, 35 };
-                    itemGroupOdds = new int[] { 5, 15, 15, 15, 15, 15, 15, 15, 45, 45, 10, 10, 10, 0, 5, 5, 3, 5, 0, 0, 0, 0, 0, 0, 0, 20 };
-                    itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage, (int)Supplies.Rations };
-                }
-                else if (IsValidTownHouse(buildingType))
-                {
-                    allowedMats = new bool[] { true, true, true, false, true, false, false, false };
-                    baseChestOdds = 30;
-                    miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 2, 1, 1, 1, 1, 70, 25 };
-                    itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 35, 35, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 10, 5, 2, 5, 5 };
-                    itemBlacklist = new int[] { (int)Lights.Torch, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                }
-                else if (buildingType == DFLocation.BuildingTypes.Temple)
-                {
-                    allowedMats = new bool[] { true, true, true, true, true, true, true, true };
-                    baseChestOdds = 20;
-                    miscGroupOdds = new int[] { 40, 1, 100, 900, 550, 1300, 15, 0, 5, 1, 1, 2, 75, 30 };
-                    itemGroupOdds = new int[] { 3, 5, 5, 5, 5, 5, 5, 5, 25, 25, 10, 10, 10, 0, 5, 5, 10, 45, 15, 15, 15, 15, 8, 3, 10, 10 };
-                    itemBlacklist = new int[] { (int)Jewelry.Crown };
-                }
-                else if (buildingType == DFLocation.BuildingTypes.GuildHall)
-                {
-                    switch (buildingData.factionID)
-                    {
-                        case (int)FactionFile.FactionIDs.The_Mages_Guild:
-                            allowedMats = new bool[] { false, false, false, false, true, true, true, true };
-                            baseChestOdds = 20;
-                            miscGroupOdds = new int[] { 15, 1, 15, 300, 750, 1650, 10, 1, 3, 0, 3, 15, 65, 25 };
-                            itemGroupOdds = new int[] { 3, 0, 0, 0, 0, 10, 0, 0, 25, 25, 25, 0, 5, 0, 10, 10, 0, 0, 10, 10, 10, 10, 8, 3, 10, 10 };
-                            itemBlacklist = new int[] { (int)Jewelry.Crown };
-                            break;
-                        case (int)FactionFile.FactionIDs.The_Fighters_Guild:
-                            allowedMats = new bool[] { false, true, true, true, false, false, false, false };
-                            baseChestOdds = 30;
-                            miscGroupOdds = new int[] { 30, 1, 40, 500, 800, 1750, 5, 5, 0, 0, 0, 1, 85, 35 };
-                            itemGroupOdds = new int[] { 3, 15, 15, 15, 25, 30, 30, 30, 20, 20, 0, 0, 5, 10, 10, 25, 0, 5, 0, 0, 0, 10, 0, 0, 0, 10 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                            break;
-                        case (int)FactionFile.FactionIDs.Generic_Knightly_Order: // Will have to test if this one actually works for all the knightly orders or not, will see.
-                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
-                            baseChestOdds = 30;
-                            miscGroupOdds = new int[] { 20, 1, 30, 350, 700, 1500, 5, 5, 0, 0, 0, 1, 90, 45 };
-                            itemGroupOdds = new int[] { 1, 30, 30, 30, 35, 20, 20, 20, 25, 25, 5, 5, 5, 5, 5, 15, 3, 10, 0, 0, 0, 5, 0, 0, 0, 5 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                            break;
-                        case (int)FactionFile.FactionIDs.The_Thieves_Guild:
-                            allowedMats = new bool[] { true, true, false, false, false, true, false, false };
-                            baseChestOdds = 20;
-                            miscGroupOdds = new int[] { 25, 0, 10, 200, 0, 0, 0, 0, 0, 3, 0, 2, 60, 20 };
-                            itemGroupOdds = new int[] { 15, 35, 35, 0, 10, 40, 15, 0, 20, 20, 0, 15, 15, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 15 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand };
-                            break;
-                        case (int)FactionFile.FactionIDs.The_Dark_Brotherhood:
-                            allowedMats = new bool[] { true, true, true, true, true, true, true, true };
-                            baseChestOdds = 20;
-                            miscGroupOdds = new int[] { 435, 1, 75, 750, 1000, 3000, 25, 3, 10, 0, 4, 1, 70, 25 };
-                            itemGroupOdds = new int[] { 5, 25, 25, 5, 5, 50, 25, 5, 20, 20, 5, 5, 10, 0, 0, 10, 0, 7, 7, 7, 7, 20, 15, 5, 15, 10 };
-                            itemBlacklist = new int[] { (int)SmallWeapons.Wand };
-                            break;
-                        default:
-                            allowedMats = new bool[] { true, true, true, true, true, true, true, true };
-                            baseChestOdds = 20;
-                            miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 3, 2, 0, 0, 1, 65, 20 };
-                            itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 40, 40, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 0, 0, 0, 0, 5 };
-                            break;
-                    }
-                }
-                else
-                {
+                if (SaveLoadManager.Instance.LoadInProgress) // This will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
                     return;
-                }
 
-                // Change RNG Seed Here.
-                // Mostly Copy/Pasted from this post: https://stackoverflow.com/questions/72418725/rngcryptoserviceprovider-is-obsolete
-                var randomNumber = new byte[4];
-                int seedNum = 1;
+                DFLocation.BuildingTypes buildingType = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData.buildingType;
+                PlayerGPS.DiscoveredBuilding buildingData = GameManager.Instance.PlayerEnterExit.BuildingDiscoveryData;
+                DaggerfallLoot[] lootPiles;
+                MeshFilter[] containerModels;
 
-                using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                if (DaggerfallWorkshop.Game.Banking.DaggerfallBankManager.IsHouseOwned(buildingData.buildingKey)) // Don't check for adding chests to player owned houses.
+                    return;
+
+                if (buildingType == DFLocation.BuildingTypes.Ship && DaggerfallWorkshop.Game.Banking.DaggerfallBankManager.OwnsShip) // Don't check for adding chests to player owned ships.
+                    return;
+
+                bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
+                int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
+                                        // Misc Item Group Odds: Gold, LoC, G-Min, G-Max, LoC-Min, LoC-Max, Potions, Maps, Potion Recipes, Paintings, Soul-gems, Magic Items, Max Condition %, Min Condition %
+                int[] miscGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                // Allowed Item Groups:    Drug, Armor, Weap, Cloth, Book, Jewel, Supply, Relic, Ingred
+                // Item Group Odds %: 
+                int[] itemGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                // Array of "blacklisted" items going by their template index value, these will be filtered out from being spawned as loot later.
+                int[] itemBlacklist = { -1 };
+
+                if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
                 {
-                    rng.GetBytes(randomNumber);
-                    seedNum = BitConverter.ToInt32(randomNumber, 0);
-                }
-                UnityEngine.Random.InitState(seedNum);
-
-                // Make list of loot-piles currently in the interior "scene."
-                List<GameObject> goList = new List<GameObject>();
-                lootPiles = FindObjectsOfType<DaggerfallLoot>();
-                for (int i = 0; i < lootPiles.Length; i++)
-                {
-                    // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
-                    DaggerfallAction dfAction = lootPiles[i].GetComponent<DaggerfallAction>();
-                    QuestResourceBehaviour dfQRB = lootPiles[i].GetComponent<QuestResourceBehaviour>();
-                    if (dfAction != null) { continue; }
-                    if (dfQRB != null) { continue; }
-
-                    if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
-                        goList.Add(lootPiles[i].gameObject);
-                }
-
-                // Make list of "valid" container type models in the current interior "scene."
-                containerModels = FindObjectsOfType<MeshFilter>();
-                for (int i = 0; i < containerModels.Length; i++)
-                {
-                    int modelID = -1;
-                    bool validID = false;
-                    string meshName = containerModels[i].mesh.name;
-
-                    // Ignore any models that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
-                    DaggerfallAction dfAction = containerModels[i].GetComponent<DaggerfallAction>();
-                    QuestResourceBehaviour dfQRB = containerModels[i].GetComponent<QuestResourceBehaviour>();
-                    if (dfAction != null) { continue; }
-                    if (dfQRB != null) { continue; }
-
-                    if (meshName.Length > 0)
+                    if (IsValidShop(buildingType))
                     {
-                        string properName = meshName.Substring(0, meshName.Length - 9);
-                        validID = int.TryParse(properName, out modelID);
+                        switch (buildingType)
+                        {
+                            case DFLocation.BuildingTypes.Alchemist:
+                                allowedMats = new bool[] { true, true, true, false, true, true, false, false };
+                                baseChestOdds = 15;
+                                miscGroupOdds = new int[] { 15, 1, 20, 150, 750, 1500, 25, 0, 35, 0, 0, 0, 80, 25 };
+                                itemGroupOdds = new int[] { 15, 0, 0, 0, 0, 0, 0, 0, 25, 25, 10, 25, 5, 0, 0, 5, 0, 5, 60, 45, 45, 25, 15, 7, 40, 35 };
+                                itemBlacklist = new int[] { (int)Lights.Torch, (int)Jewelry.Crown };
+                                break;
+                            case DFLocation.BuildingTypes.Armorer:
+                                allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                                baseChestOdds = 25;
+                                miscGroupOdds = new int[] { 20, 1, 60, 400, 1500, 3500, 0, 0, 0, 0, 0, 0, 90, 40 };
+                                itemGroupOdds = new int[] { 1, 30, 30, 30, 30, 10, 10, 10, 25, 25, 0, 10, 5, 20, 5, 15, 0, 5, 0, 0, 0, 0, 0, 0, 0, 25 };
+                                itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Lights.Torch, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                                break;
+                            case DFLocation.BuildingTypes.WeaponSmith:
+                                allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                                baseChestOdds = 25;
+                                miscGroupOdds = new int[] { 20, 1, 60, 400, 1500, 3500, 0, 0, 0, 0, 0, 0, 90, 40 };
+                                itemGroupOdds = new int[] { 1, 10, 10, 10, 20, 35, 35, 35, 25, 25, 0, 10, 5, 15, 5, 15, 0, 5, 0, 0, 0, 0, 0, 0, 0, 20 };
+                                itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Lights.Torch, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                                break;
+                            case DFLocation.BuildingTypes.GeneralStore:
+                                allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                                baseChestOdds = 25;
+                                miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
+                                itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
+                                itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Jewelry.Crown };
+                                break;
+                            case DFLocation.BuildingTypes.PawnShop:
+                                allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                                baseChestOdds = 35;
+                                miscGroupOdds = new int[] { 20, 1, 30, 500, 1000, 2250, 0, 6, 0, 20, 0, 4, 70, 25 };
+                                itemGroupOdds = new int[] { 2, 5, 5, 5, 5, 5, 5, 5, 25, 25, 10, 15, 15, 0, 5, 5, 10, 20, 0, 0, 0, 0, 0, 0, 0, 15 };
+                                break;
+                            case DFLocation.BuildingTypes.GemStore:
+                                allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                                baseChestOdds = 30;
+                                miscGroupOdds = new int[] { 20, 1, 30, 650, 1500, 3000, 0, 0, 0, 0, 0, 0, 80, 35 };
+                                itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 25, 25, 0, 50, 50, 0, 0, 5, 0, 10, 0, 0, 0, 0, 0, 0, 0, 35 };
+                                itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage };
+                                break;
+                            case DFLocation.BuildingTypes.ClothingStore:
+                                allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                                baseChestOdds = 15;
+                                miscGroupOdds = new int[] { 20, 1, 35, 550, 850, 1850, 0, 0, 0, 0, 0, 0, 90, 55 };
+                                itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 150, 150, 0, 5, 15, 0, 0, 5, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0 };
+                                itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Lights.Torch, (int)Jewelry.Crown };
+                                break;
+                            case DFLocation.BuildingTypes.Bookseller:
+                            case DFLocation.BuildingTypes.Library:
+                                allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                                baseChestOdds = 15;
+                                miscGroupOdds = new int[] { 10, 1, 15, 250, 500, 1000, 0, 20, 20, 1, 0, 0, 70, 30 };
+                                itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 0, 0, 0, 30, 30, 80, 5, 5, 0, 10, 45, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
+                                itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage, (int)Jewelry.Crown };
+                                break;
+                            case DFLocation.BuildingTypes.Bank:
+                                allowedMats = new bool[] { false, false, true, true, false, true, true, true };
+                                baseChestOdds = 40;
+                                miscGroupOdds = new int[] { 50, 10, 200, 950, 3000, 7000, 0, 0, 0, 1, 0, 0, 70, 30 };
+                                itemGroupOdds = new int[] { 1, 0, 0, 0, 0, 0, 0, 0, 25, 25, 5, 5, 5, 0, 10, 20, 0, 5, 0, 0, 0, 0, 0, 0, 0, 25 };
+                                itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage };
+                                break;
+                            case DFLocation.BuildingTypes.House2:
+                                if (buildingData.factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild)
+                                {
+                                    allowedMats = new bool[] { true, true, false, false, false, true, false, false };
+                                    baseChestOdds = 20;
+                                    miscGroupOdds = new int[] { 25, 0, 10, 200, 0, 0, 0, 0, 0, 3, 0, 2, 60, 20 };
+                                    itemGroupOdds = new int[] { 15, 35, 35, 0, 10, 40, 15, 0, 20, 20, 0, 15, 15, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 15 };
+                                    itemBlacklist = new int[] { (int)SmallWeapons.Wand };
+                                }
+                                else if (buildingData.factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood)
+                                {
+                                    allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                                    baseChestOdds = 20;
+                                    miscGroupOdds = new int[] { 435, 1, 75, 750, 1000, 3000, 25, 3, 10, 0, 4, 1, 70, 25 };
+                                    itemGroupOdds = new int[] { 5, 25, 25, 5, 5, 50, 25, 5, 20, 20, 5, 5, 10, 0, 0, 10, 0, 7, 7, 7, 7, 20, 15, 5, 15, 10 };
+                                    itemBlacklist = new int[] { (int)SmallWeapons.Wand };
+                                }
+                                else
+                                {
+                                    allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                                    baseChestOdds = 25;
+                                    miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
+                                    itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
+                                }
+                                break;
+                            default:
+                                allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                                baseChestOdds = 25;
+                                miscGroupOdds = new int[] { 25, 1, 40, 600, 1250, 2750, 0, 0, 0, 3, 0, 1, 80, 30 };
+                                itemGroupOdds = new int[] { 2, 0, 0, 0, 0, 15, 15, 15, 35, 35, 20, 5, 5, 25, 35, 35, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0 };
+                                break;
+                        }
                     }
-
-                    if (validID)
+                    else if (buildingType == DFLocation.BuildingTypes.Tavern)
                     {
-                        if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
-                            goList.Add(containerModels[i].gameObject);
-
-                        Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
+                        allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                        baseChestOdds = 35;
+                        miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 3, 2, 0, 0, 1, 65, 20 };
+                        itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 45, 45, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 0, 0, 0, 0, 5 };
+                        itemBlacklist = new int[] { (int)Jewelry.Crown };
+                    }
+                    else if (buildingType == DFLocation.BuildingTypes.Palace)
+                    {
+                        allowedMats = new bool[] { false, true, true, true, true, true, true, true };
+                        baseChestOdds = 50;
+                        miscGroupOdds = new int[] { 50, 3, 200, 800, 2000, 5500, 10, 2, 0, 8, 1, 2, 75, 35 };
+                        itemGroupOdds = new int[] { 5, 15, 15, 15, 15, 15, 15, 15, 45, 45, 10, 10, 10, 0, 5, 5, 3, 5, 0, 0, 0, 0, 0, 0, 0, 20 };
+                        itemBlacklist = new int[] { (int)Lights.Torch, (int)Supplies.Bandage, (int)Supplies.Rations };
+                    }
+                    else if (IsValidTownHouse(buildingType))
+                    {
+                        allowedMats = new bool[] { true, true, true, false, true, false, false, false };
+                        baseChestOdds = 30;
+                        miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 2, 1, 1, 1, 1, 70, 25 };
+                        itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 35, 35, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 10, 5, 2, 5, 5 };
+                        itemBlacklist = new int[] { (int)Lights.Torch, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                    }
+                    else if (buildingType == DFLocation.BuildingTypes.Temple)
+                    {
+                        allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                        baseChestOdds = 20;
+                        miscGroupOdds = new int[] { 40, 1, 100, 900, 550, 1300, 15, 0, 5, 1, 1, 2, 75, 30 };
+                        itemGroupOdds = new int[] { 3, 5, 5, 5, 5, 5, 5, 5, 25, 25, 10, 10, 10, 0, 5, 5, 10, 45, 15, 15, 15, 15, 8, 3, 10, 10 };
+                        itemBlacklist = new int[] { (int)Jewelry.Crown };
+                    }
+                    else if (buildingType == DFLocation.BuildingTypes.GuildHall)
+                    {
+                        switch (buildingData.factionID)
+                        {
+                            case (int)FactionFile.FactionIDs.The_Mages_Guild:
+                                allowedMats = new bool[] { false, false, false, false, true, true, true, true };
+                                baseChestOdds = 20;
+                                miscGroupOdds = new int[] { 15, 1, 15, 300, 750, 1650, 10, 1, 3, 0, 3, 15, 65, 25 };
+                                itemGroupOdds = new int[] { 3, 0, 0, 0, 0, 10, 0, 0, 25, 25, 25, 0, 5, 0, 10, 10, 0, 0, 10, 10, 10, 10, 8, 3, 10, 10 };
+                                itemBlacklist = new int[] { (int)Jewelry.Crown };
+                                break;
+                            case (int)FactionFile.FactionIDs.The_Fighters_Guild:
+                                allowedMats = new bool[] { false, true, true, true, false, false, false, false };
+                                baseChestOdds = 30;
+                                miscGroupOdds = new int[] { 30, 1, 40, 500, 800, 1750, 5, 5, 0, 0, 0, 1, 85, 35 };
+                                itemGroupOdds = new int[] { 3, 15, 15, 15, 25, 30, 30, 30, 20, 20, 0, 0, 5, 10, 10, 25, 0, 5, 0, 0, 0, 10, 0, 0, 0, 10 };
+                                itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                                break;
+                            case (int)FactionFile.FactionIDs.Generic_Knightly_Order: // Will have to test if this one actually works for all the knightly orders or not, will see.
+                                allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                                baseChestOdds = 30;
+                                miscGroupOdds = new int[] { 20, 1, 30, 350, 700, 1500, 5, 5, 0, 0, 0, 1, 90, 45 };
+                                itemGroupOdds = new int[] { 1, 30, 30, 30, 35, 20, 20, 20, 25, 25, 5, 5, 5, 5, 5, 15, 3, 10, 0, 0, 0, 5, 0, 0, 0, 5 };
+                                itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                                break;
+                            default:
+                                allowedMats = new bool[] { true, true, true, true, true, true, true, true };
+                                baseChestOdds = 20;
+                                miscGroupOdds = new int[] { 30, 1, 20, 400, 600, 2000, 5, 3, 2, 0, 0, 1, 65, 20 };
+                                itemGroupOdds = new int[] { 3, 10, 10, 10, 10, 10, 10, 10, 40, 40, 5, 5, 5, 5, 5, 5, 0, 5, 10, 10, 10, 0, 0, 0, 0, 5 };
+                                break;
+                        }
                     }
                     else
                     {
-                        Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                        return;
+                    }
+
+                    // Change RNG Seed Here.
+                    // Mostly Copy/Pasted from this post: https://stackoverflow.com/questions/72418725/rngcryptoserviceprovider-is-obsolete
+                    var randomNumber = new byte[4];
+                    int seedNum = 1;
+
+                    using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                    {
+                        rng.GetBytes(randomNumber);
+                        seedNum = BitConverter.ToInt32(randomNumber, 0);
+                    }
+                    UnityEngine.Random.InitState(seedNum);
+
+                    // Make list of loot-piles currently in the interior "scene."
+                    List<GameObject> goList = new List<GameObject>();
+                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
+                    for (int i = 0; i < lootPiles.Length; i++)
+                    {
+                        // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                        DaggerfallAction dfAction = lootPiles[i].GetComponent<DaggerfallAction>();
+                        QuestResourceBehaviour dfQRB = lootPiles[i].GetComponent<QuestResourceBehaviour>();
+                        if (dfAction != null) { continue; }
+                        if (dfQRB != null) { continue; }
+
+                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
+                            goList.Add(lootPiles[i].gameObject);
+                    }
+
+                    // Make list of "valid" container type models in the current interior "scene."
+                    containerModels = FindObjectsOfType<MeshFilter>();
+                    for (int i = 0; i < containerModels.Length; i++)
+                    {
+                        int modelID = -1;
+                        bool validID = false;
+                        string meshName = containerModels[i].mesh.name;
+
+                        // Ignore any models that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                        DaggerfallAction dfAction = containerModels[i].GetComponent<DaggerfallAction>();
+                        QuestResourceBehaviour dfQRB = containerModels[i].GetComponent<QuestResourceBehaviour>();
+                        if (dfAction != null) { continue; }
+                        if (dfQRB != null) { continue; }
+
+                        if (meshName.Length >= 9)
+                        {
+                            string properName = meshName.Substring(0, meshName.Length - 9);
+                            validID = int.TryParse(properName, out modelID);
+                        }
+
+                        if (validID)
+                        {
+                            if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
+                                goList.Add(containerModels[i].gameObject);
+
+                            //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
+                        }
+                        else
+                        {
+                            //Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                        }
+                    }
+                    GameObject[] validGos = goList.ToArray();
+
+                    for (int i = 0; i < validGos.Length; i++)
+                    {
+                        MeshFilter meshFilter = validGos[i].GetComponent<MeshFilter>();
+                        DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
+
+                        int buildingQualityRoomMod = 0;
+                        if (buildingData.quality <= 7)
+                            buildingQualityRoomMod = (buildingData.quality * 10) - 80;
+                        else
+                            buildingQualityRoomMod = (buildingData.quality * 5) - 40;
+
+                        ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist, buildingQualityRoomMod);
                     }
                 }
-                GameObject[] validGos = goList.ToArray();
-
-                for (int i = 0; i < validGos.Length; i++)
-                {
-                    MeshFilter meshFilter = validGos[i].GetComponent<MeshFilter>();
-                    DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
-
-                    int buildingQualityRoomMod = 0;
-                    if (buildingData.quality <= 7)
-                        buildingQualityRoomMod = (buildingData.quality * 10) - 80;
-                    else
-                        buildingQualityRoomMod = (buildingData.quality * 5) - 40;
-
-                    ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist, buildingQualityRoomMod);
-                }
+            }
+            catch (Exception e)
+            {
+                LogModException(e, 1);
             }
         }
 
         public void AddChests_OnTransitionDungeonInterior(PlayerEnterExit.TransitionEventArgs args)
         {
-            if (SaveLoadManager.Instance.LoadInProgress) // This will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
-                return;
-
-            DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
-            DaggerfallLoot[] lootPiles;
-            MeshFilter[] containerModels;
-
-            bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
-            int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
-            // Misc Item Group Odds: Gold, LoC, G-Min, G-Max, LoC-Min, LoC-Max, Potions, Maps, Potion Recipes, Paintings, Soul-gems, Magic Items, Max Condition %, Min Condition %
-            int[] miscGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            // Allowed Item Groups:    Drug, Armor, Weap, Cloth, Book, Jewel, Supply, Relic, Ingred
-            // Item Group Odds %: 
-            int[] itemGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            // Array of "blacklisted" items going by their template index value, these will be filtered out from being spawned as loot later.
-            int [] itemBlacklist = { -1 };
-
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
+            try
             {
-                switch (locationData.MapTableData.DungeonType)
+                if (SaveLoadManager.Instance.LoadInProgress) // This will keep this from running when loading a save, but not when normally entering and exiting while playing, etc.
+                    return;
+
+                DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
+                DaggerfallLoot[] lootPiles;
+                MeshFilter[] containerModels;
+
+                bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
+                int baseChestOdds = 10; // This value will be changed based on the type of dungeon, which will determine the base odds for a chest to be generated in place of a loot-pile in the end.
+                                        // Misc Item Group Odds: Gold, LoC, G-Min, G-Max, LoC-Min, LoC-Max, Potions, Maps, Potion Recipes, Paintings, Soul-gems, Magic Items, Max Condition %, Min Condition %
+                int[] miscGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                // Allowed Item Groups:    Drug, Armor, Weap, Cloth, Book, Jewel, Supply, Relic, Ingred
+                // Item Group Odds %: 
+                int[] itemGroupOdds = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                // Array of "blacklisted" items going by their template index value, these will be filtered out from being spawned as loot later.
+                int[] itemBlacklist = { -1 };
+
+                if (GameManager.Instance.PlayerEnterExit.IsPlayerInside)
                 {
-                    case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
-                        allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
-                        itemGroupOdds = new int[] { 0, 20, 20, 20, 20, 20, 20, 20, 45, 45, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
-                        itemBlacklist = new int[] { (int)Supplies.Rations };
-                        break;
-                    case DFRegion.DungeonTypes.OrcStronghold:
-                        allowedMats = new bool[] { false, true, true, true, true, false, false, false };
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 75, 1, 75, 455, 600, 2500, 15, 6, 8, 1, 0, 3, 95, 40 };
-                        itemGroupOdds = new int[] { 15, 10, 20, 65, 20, 20, 50, 50, 20, 20, 0, 10, 25, 30, 20, 60, 0, 20, 30, 30, 30, 20, 10, 5, 15, 30 };
-                        itemBlacklist = new int[] { (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)SmallWeapons.Wand, (int)Jewelry.Tiara };
-                        break;
-                    case DFRegion.DungeonTypes.HumanStronghold:
-                        allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 25;
-                        miscGroupOdds = new int[] { 85, 3, 50, 500, 750, 4000, 10, 5, 5, 8, 3, 5, 85, 35 };
-                        itemGroupOdds = new int[] { 10, 30, 30, 30, 30, 30, 30, 30, 60, 60, 30, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
-                        itemBlacklist = new int[] { (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.Prison:
-                        allowedMats = new bool[] { true, true, false, false, false, false, false, false };
-                        baseChestOdds = 10;
-                        miscGroupOdds = new int[] { 40, 1, 15, 200, 400, 1500, 0, 3, 2, 2, 0, 1, 60, 30 };
-                        itemGroupOdds = new int[] { 80, 20, 0, 0, 0, 75, 0, 0, 50, 50, 0, 5, 10, 10, 15, 40, 0, 15, 0, 0, 0, 0, 0, 0, 15, 3 };
-                        itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Tools.Armorers_Hammer, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.DesecratedTemple: // Could even make these specific to some worshipped god and such, but that's just idea guy talking.
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 90, 4, 30, 525, 700, 4000, 25, 0, 15, 7, 3, 6, 75, 25 };
-                        itemGroupOdds = new int[] { 5, 20, 20, 0, 0, 10, 30, 20, 65, 65, 40, 15, 40, 5, 30, 70, 60, 150, 30, 30, 30, 30, 20, 10, 30, 10 };
-                        itemBlacklist = new int[] { (int)Tools.Armorers_Hammer, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.Mine:
-                        allowedMats = new bool[] { true, true, true, false, true, true, false, false };
-                        baseChestOdds = 15;
-                        miscGroupOdds = new int[] { 40, 1, 10, 250, 500, 2250, 0, 15, 0, 0, 0, 3, 75, 40 };
-                        itemGroupOdds = new int[] { 5, 30, 10, 0, 0, 10, 10, 25, 15, 15, 0, 65, 0, 35, 150, 60, 0, 0, 0, 0, 0, 15, 0, 0, 10, 350 };
-                        itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.NaturalCave:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
-                        baseChestOdds = 10;
-                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
-                        itemGroupOdds = new int[] { 15, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 15, 15, 15, 15, 45, 15, 5, 20, 150 };
-                        itemBlacklist = new int[] { (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.Coven:
-                        allowedMats = new bool[] { true, false, false, false, true, true, true, true };
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 30, 1, 5, 120, 400, 1000, 45, 3, 30, 1, 10, 9, 60, 35 };
-                        itemGroupOdds = new int[] { 10, 10, 0, 0, 0, 40, 0, 0, 35, 35, 60, 25, 30, 0, 0, 30, 0, 70, 150, 150, 150, 200, 100, 40, 150, 40 };
-                        itemBlacklist = new int[] { (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.VampireHaunt:
-                        allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 50, 1, 40, 450, 800, 3750, 7, 4, 6, 9, 7, 5, 75, 35 };
-                        itemGroupOdds = new int[] { 0, 30, 15, 5, 5, 50, 25, 10, 50, 50, 35, 30, 40, 0, 0, 20, 0, 0, 0, 0, 0, 35, 25, 10, 5, 0 };
-                        itemBlacklist = new int[] { (int)Supplies.Rations, (int)Jewelry.JA_Ring, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.Laboratory:
-                        allowedMats = new bool[] { false, true, true, false, true, true, true, true };
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 30, 1, 10, 170, 500, 1500, 35, 2, 35, 0, 15, 8, 75, 40 };
-                        itemGroupOdds = new int[] { 10, 10, 0, 0, 0, 40, 0, 0, 15, 15, 200, 20, 10, 10, 50, 70, 0, 0, 80, 80, 80, 200, 150, 50, 200, 70 };
-                        itemBlacklist = new int[] { (int)Tools.Whetstone, (int)Tools.Armorers_Hammer, (int)Tools.Jewelers_Pliers, (int)Tools.Charging_Powder, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.HarpyNest:
-                        allowedMats = new bool[] { true, true, true, false, true, true, true, true };
-                        baseChestOdds = 10;
-                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
-                        itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 15, 15, 0, 0, 0, 0, 30, 15, 0, 25, 20, 0, 0, 25, 25, 25, 300, 25, 10, 20, 30 };
-                        itemBlacklist = new int[] { (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.RuinedCastle:
-                        allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 35;
-                        miscGroupOdds = new int[] { 45, 4, 70, 600, 1250, 6000, 2, 3, 0, 12, 0, 2, 60, 30 };
-                        itemGroupOdds = new int[] { 5, 10, 25, 40, 15, 40, 40, 40, 20, 20, 30, 40, 50, 0, 15, 25, 0, 40, 0, 0, 0, 0, 0, 0, 0, 20 };
-                        break;
-                    case DFRegion.DungeonTypes.SpiderNest:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
-                        baseChestOdds = 10;
-                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
-                        itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 15, 15, 0, 0, 0, 0, 30, 15, 0, 25, 20, 0, 0, 25, 25, 25, 300, 25, 10, 20, 30 };
-                        itemBlacklist = new int[] { (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.GiantStronghold:
-                        allowedMats = new bool[] { true, true, true, false, false, false, false, false };
-                        baseChestOdds = 15;
-                        miscGroupOdds = new int[] { 45, 1, 60, 650, 500, 1500, 3, 6, 2, 1, 0, 1, 65, 25 };
-                        itemGroupOdds = new int[] { 20, 15, 15, 15, 30, 10, 20, 40, 10, 10, 0, 10, 20, 0, 20, 20, 0, 0, 10, 10, 10, 100, 10, 0, 0, 20 };
-                        itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.DragonsDen:
-                        allowedMats = PermittedMaterials_FireProof;
-                        baseChestOdds = 40;
-                        miscGroupOdds = new int[] { 80, 0, 150, 2500, 0, 0, 5, 7, 3, 10, 6, 12, 70, 25 };
-                        itemGroupOdds = new int[] { 0, 10, 35, 70, 50, 25, 55, 55, 0, 0, 10, 90, 90, 0, 30, 30, 10, 40, 0, 0, 0, 40, 20, 70, 20, 70 };
-                        itemBlacklist = new int[] { (int)Supplies.Parchment };
-                        break;
-                    case DFRegion.DungeonTypes.BarbarianStronghold:
-                        allowedMats = new bool[] { true, true, true, true, true, false, false, false };
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 50, 1, 90, 700, 500, 1750, 4, 6, 3, 1, 0, 2, 75, 35 };
-                        itemGroupOdds = new int[] { 20, 40, 20, 0, 20, 20, 35, 55, 15, 15, 0, 10, 25, 10, 50, 50, 0, 0, 20, 20, 20, 85, 10, 5, 10, 30 };
-                        itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Tools.Sewing_Kit, (int)Tools.Armorers_Hammer, (int)Tools.Charging_Powder, (int)Jewelry.Tiara };
-                        break;
-                    case DFRegion.DungeonTypes.VolcanicCaves:
-                        allowedMats = PermittedMaterials_FireProof;
-                        baseChestOdds = 15;
-                        miscGroupOdds = new int[] { 45, 1, 120, 1200, 300, 1250, 8, 2, 2, 0, 15, 7, 55, 25 };
-                        itemGroupOdds = new int[] { 0, 0, 20, 40, 30, 25, 25, 25, 0, 0, 0, 60, 40, 0, 50, 0, 0, 20, 0, 0, 0, 50, 15, 10, 0, 150 };
-                        itemBlacklist = new int[] { (int)Supplies.Parchment };
-                        break;
-                    case DFRegion.DungeonTypes.ScorpionNest:
-                        allowedMats = new bool[] { true, true, true, true, true, true, true, false };
-                        baseChestOdds = 10;
-                        miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
-                        itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 15, 15, 0, 0, 0, 0, 30, 15, 0, 25, 20, 0, 0, 25, 25, 25, 300, 25, 10, 20, 30 };
-                        itemBlacklist = new int[] { (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    case DFRegion.DungeonTypes.Cemetery:
-                        allowedMats = new bool[] { true, true, false, false, false, false, false, false };
-                        baseChestOdds = 20;
-                        miscGroupOdds = new int[] { 25, 1, 20, 400, 500, 1750, 0, 6, 2, 4, 1, 3, 65, 25 };
-                        itemGroupOdds = new int[] { 0, 20, 20, 20, 20, 20, 20, 20, 45, 45, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
-                        itemBlacklist = new int[] { (int)Supplies.Rations, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
-                        break;
-                    default:
-                        allowedMats = PermittedMaterials_All;
-                        baseChestOdds = 10;
-                        miscGroupOdds = new int[] { 50, 5, 50, 500, 500, 5000, 5, 5, 5, 5, 5, 5, 55, 5 };
-                        itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
-                        break;
-                }
-
-                // Change RNG Seed Here.
-                // Mostly Copy/Pasted from this post: https://stackoverflow.com/questions/72418725/rngcryptoserviceprovider-is-obsolete
-                var randomNumber = new byte[4];
-                int seedNum = 1;
-
-                using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(randomNumber);
-                    seedNum = BitConverter.ToInt32(randomNumber, 0);
-                }
-                UnityEngine.Random.InitState(seedNum);
-
-                // Make list of loot-piles currently in the dungeon "scene."
-                List<GameObject> goList = new List<GameObject>();
-                lootPiles = FindObjectsOfType<DaggerfallLoot>();
-                for (int i = 0; i < lootPiles.Length; i++)
-                {
-                    // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
-                    DaggerfallAction dfAction = lootPiles[i].GetComponent<DaggerfallAction>();
-                    QuestResourceBehaviour dfQRB = lootPiles[i].GetComponent<QuestResourceBehaviour>();
-                    if (dfAction != null) { continue; }
-                    if (dfQRB != null) { continue; }
-
-                    if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
-                        goList.Add(lootPiles[i].gameObject);
-                }
-
-                // Make list of "valid" container type models in the current dungeon "scene."
-                containerModels = FindObjectsOfType<MeshFilter>();
-                for (int i = 0; i < containerModels.Length; i++)
-                {
-                    int modelID = -1;
-                    bool validID = false;
-                    string meshName = containerModels[i].mesh.name;
-
-                    // Ignore any models that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
-                    DaggerfallAction dfAction = containerModels[i].GetComponent<DaggerfallAction>();
-                    QuestResourceBehaviour dfQRB = containerModels[i].GetComponent<QuestResourceBehaviour>();
-                    if (dfAction != null) { continue; }
-                    if (dfQRB != null) { continue; }
-
-                    if (meshName.Length > 0)
+                    switch (locationData.MapTableData.DungeonType)
                     {
-                        string properName = meshName.Substring(0, meshName.Length - 9);
-                        validID = int.TryParse(properName, out modelID);
+                        case DFRegion.DungeonTypes.Crypt: // Maybe the next parameters will be for when I get to defining what traps, amounts, and trap types are allowed/common in some dungeon types.
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 35, 1, 30, 350, 1000, 5000, 0, 10, 3, 15, 3, 8, 70, 25 };
+                            itemGroupOdds = new int[] { 0, 20, 20, 20, 20, 20, 20, 20, 45, 45, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                            itemBlacklist = new int[] { (int)Supplies.Rations };
+                            break;
+                        case DFRegion.DungeonTypes.OrcStronghold:
+                            allowedMats = new bool[] { false, true, true, true, true, false, false, false };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 75, 1, 75, 455, 600, 2500, 15, 6, 8, 1, 0, 3, 95, 40 };
+                            itemGroupOdds = new int[] { 15, 10, 20, 65, 20, 20, 50, 50, 20, 20, 0, 10, 25, 30, 20, 60, 0, 20, 30, 30, 30, 20, 10, 5, 15, 30 };
+                            itemBlacklist = new int[] { (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)SmallWeapons.Wand, (int)Jewelry.Tiara };
+                            break;
+                        case DFRegion.DungeonTypes.HumanStronghold:
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 25;
+                            miscGroupOdds = new int[] { 85, 3, 50, 500, 750, 4000, 10, 5, 5, 8, 3, 5, 85, 35 };
+                            itemGroupOdds = new int[] { 10, 30, 30, 30, 30, 30, 30, 30, 60, 60, 30, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
+                            itemBlacklist = new int[] { (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.Prison:
+                            allowedMats = new bool[] { true, true, false, false, false, false, false, false };
+                            baseChestOdds = 10;
+                            miscGroupOdds = new int[] { 40, 1, 15, 200, 400, 1500, 0, 3, 2, 2, 0, 1, 60, 30 };
+                            itemGroupOdds = new int[] { 80, 20, 0, 0, 0, 75, 0, 0, 50, 50, 0, 5, 10, 10, 15, 40, 0, 15, 0, 0, 0, 0, 0, 0, 15, 3 };
+                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Tools.Armorers_Hammer, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.DesecratedTemple: // Could even make these specific to some worshipped god and such, but that's just idea guy talking.
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 90, 4, 30, 525, 700, 4000, 25, 0, 15, 7, 3, 6, 75, 25 };
+                            itemGroupOdds = new int[] { 5, 20, 20, 0, 0, 10, 30, 20, 65, 65, 40, 15, 40, 5, 30, 70, 60, 150, 30, 30, 30, 30, 20, 10, 30, 10 };
+                            itemBlacklist = new int[] { (int)Tools.Armorers_Hammer, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.Mine:
+                            allowedMats = new bool[] { true, true, true, false, true, true, false, false };
+                            baseChestOdds = 15;
+                            miscGroupOdds = new int[] { 40, 1, 10, 250, 500, 2250, 0, 15, 0, 0, 0, 3, 75, 40 };
+                            itemGroupOdds = new int[] { 5, 30, 10, 0, 0, 10, 10, 25, 15, 15, 0, 65, 0, 35, 150, 60, 0, 0, 0, 0, 0, 15, 0, 0, 10, 350 };
+                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Tools.Sewing_Kit, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.NaturalCave:
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                            baseChestOdds = 10;
+                            miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
+                            itemGroupOdds = new int[] { 15, 30, 10, 0, 10, 20, 30, 15, 0, 0, 0, 40, 15, 10, 25, 20, 0, 15, 15, 15, 15, 45, 15, 5, 20, 150 };
+                            itemBlacklist = new int[] { (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.Coven:
+                            allowedMats = new bool[] { true, false, false, false, true, true, true, true };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 30, 1, 5, 120, 400, 1000, 45, 3, 30, 1, 10, 9, 60, 35 };
+                            itemGroupOdds = new int[] { 10, 10, 0, 0, 0, 40, 0, 0, 35, 35, 60, 25, 30, 0, 0, 30, 0, 70, 150, 150, 150, 200, 100, 40, 150, 40 };
+                            itemBlacklist = new int[] { (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.VampireHaunt:
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 50, 1, 40, 450, 800, 3750, 7, 4, 6, 9, 7, 5, 75, 35 };
+                            itemGroupOdds = new int[] { 0, 30, 15, 5, 5, 50, 25, 10, 50, 50, 35, 30, 40, 0, 0, 20, 0, 0, 0, 0, 0, 35, 25, 10, 5, 0 };
+                            itemBlacklist = new int[] { (int)Supplies.Rations, (int)Jewelry.JA_Ring, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.Laboratory:
+                            allowedMats = new bool[] { false, true, true, false, true, true, true, true };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 30, 1, 10, 170, 500, 1500, 35, 2, 35, 0, 15, 8, 75, 40 };
+                            itemGroupOdds = new int[] { 10, 10, 0, 0, 0, 40, 0, 0, 15, 15, 200, 20, 10, 10, 50, 70, 0, 0, 80, 80, 80, 200, 150, 50, 200, 70 };
+                            itemBlacklist = new int[] { (int)Tools.Whetstone, (int)Tools.Armorers_Hammer, (int)Tools.Jewelers_Pliers, (int)Tools.Charging_Powder, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.HarpyNest:
+                            allowedMats = new bool[] { true, true, true, false, true, true, true, true };
+                            baseChestOdds = 10;
+                            miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
+                            itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 15, 15, 0, 0, 0, 0, 30, 15, 0, 25, 20, 0, 0, 25, 25, 25, 300, 25, 10, 20, 30 };
+                            itemBlacklist = new int[] { (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.RuinedCastle:
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 35;
+                            miscGroupOdds = new int[] { 45, 4, 70, 600, 1250, 6000, 2, 3, 0, 12, 0, 2, 60, 30 };
+                            itemGroupOdds = new int[] { 5, 10, 25, 40, 15, 40, 40, 40, 20, 20, 30, 40, 50, 0, 15, 25, 0, 40, 0, 0, 0, 0, 0, 0, 0, 20 };
+                            break;
+                        case DFRegion.DungeonTypes.SpiderNest:
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                            baseChestOdds = 10;
+                            miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
+                            itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 15, 15, 0, 0, 0, 0, 30, 15, 0, 25, 20, 0, 0, 25, 25, 25, 300, 25, 10, 20, 30 };
+                            itemBlacklist = new int[] { (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.GiantStronghold:
+                            allowedMats = new bool[] { true, true, true, false, false, false, false, false };
+                            baseChestOdds = 15;
+                            miscGroupOdds = new int[] { 45, 1, 60, 650, 500, 1500, 3, 6, 2, 1, 0, 1, 65, 25 };
+                            itemGroupOdds = new int[] { 20, 15, 15, 15, 30, 10, 20, 40, 10, 10, 0, 10, 20, 0, 20, 20, 0, 0, 10, 10, 10, 100, 10, 0, 0, 20 };
+                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.DragonsDen:
+                            allowedMats = PermittedMaterials_FireProof;
+                            baseChestOdds = 40;
+                            miscGroupOdds = new int[] { 80, 0, 150, 2500, 0, 0, 5, 7, 3, 10, 6, 12, 70, 25 };
+                            itemGroupOdds = new int[] { 0, 10, 35, 70, 50, 25, 55, 55, 0, 0, 10, 90, 90, 0, 30, 30, 10, 40, 0, 0, 0, 40, 20, 70, 20, 70 };
+                            itemBlacklist = new int[] { (int)Supplies.Parchment };
+                            break;
+                        case DFRegion.DungeonTypes.BarbarianStronghold:
+                            allowedMats = new bool[] { true, true, true, true, true, false, false, false };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 50, 1, 90, 700, 500, 1750, 4, 6, 3, 1, 0, 2, 75, 35 };
+                            itemGroupOdds = new int[] { 20, 40, 20, 0, 20, 20, 35, 55, 15, 15, 0, 10, 25, 10, 50, 50, 0, 0, 20, 20, 20, 85, 10, 5, 10, 30 };
+                            itemBlacklist = new int[] { (int)SmallWeapons.Wand, (int)Supplies.Parchment, (int)Tools.Sewing_Kit, (int)Tools.Armorers_Hammer, (int)Tools.Charging_Powder, (int)Jewelry.Tiara };
+                            break;
+                        case DFRegion.DungeonTypes.VolcanicCaves:
+                            allowedMats = PermittedMaterials_FireProof;
+                            baseChestOdds = 15;
+                            miscGroupOdds = new int[] { 45, 1, 120, 1200, 300, 1250, 8, 2, 2, 0, 15, 7, 55, 25 };
+                            itemGroupOdds = new int[] { 0, 0, 20, 40, 30, 25, 25, 25, 0, 0, 0, 60, 40, 0, 50, 0, 0, 20, 0, 0, 0, 50, 15, 10, 0, 150 };
+                            itemBlacklist = new int[] { (int)Supplies.Parchment };
+                            break;
+                        case DFRegion.DungeonTypes.ScorpionNest:
+                            allowedMats = new bool[] { true, true, true, true, true, true, true, false };
+                            baseChestOdds = 10;
+                            miscGroupOdds = new int[] { 35, 1, 20, 300, 400, 2000, 5, 8, 4, 1, 1, 2, 55, 15 };
+                            itemGroupOdds = new int[] { 10, 30, 10, 0, 10, 15, 15, 0, 0, 0, 0, 30, 15, 0, 25, 20, 0, 0, 25, 25, 25, 300, 25, 10, 20, 30 };
+                            itemBlacklist = new int[] { (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        case DFRegion.DungeonTypes.Cemetery:
+                            allowedMats = new bool[] { true, true, false, false, false, false, false, false };
+                            baseChestOdds = 20;
+                            miscGroupOdds = new int[] { 25, 1, 20, 400, 500, 1750, 0, 6, 2, 4, 1, 3, 65, 25 };
+                            itemGroupOdds = new int[] { 0, 20, 20, 20, 20, 20, 20, 20, 45, 45, 15, 20, 40, 5, 10, 40, 0, 50, 0, 0, 0, 15, 10, 0, 0, 20 };
+                            itemBlacklist = new int[] { (int)Supplies.Rations, (int)Tools.Charging_Powder, (int)Jewelry.Tiara, (int)Jewelry.Crown };
+                            break;
+                        default:
+                            allowedMats = PermittedMaterials_All;
+                            baseChestOdds = 10;
+                            miscGroupOdds = new int[] { 50, 5, 50, 500, 500, 5000, 5, 5, 5, 5, 5, 5, 55, 5 };
+                            itemGroupOdds = new int[] { 10, 40, 40, 40, 40, 40, 40, 40, 75, 75, 35, 20, 30, 15, 30, 60, 0, 30, 10, 10, 10, 10, 5, 2, 5, 5 };
+                            break;
                     }
 
-                    if (validID)
-                    {
-                        if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
-                            goList.Add(containerModels[i].gameObject);
+                    // Change RNG Seed Here.
+                    // Mostly Copy/Pasted from this post: https://stackoverflow.com/questions/72418725/rngcryptoserviceprovider-is-obsolete
+                    var randomNumber = new byte[4];
+                    int seedNum = 1;
 
-                        //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
-                    }
-                    else
+                    using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
                     {
-                        //Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                        rng.GetBytes(randomNumber);
+                        seedNum = BitConverter.ToInt32(randomNumber, 0);
+                    }
+                    UnityEngine.Random.InitState(seedNum);
+
+                    // Make list of loot-piles currently in the dungeon "scene."
+                    List<GameObject> goList = new List<GameObject>();
+                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
+                    for (int i = 0; i < lootPiles.Length; i++)
+                    {
+                        // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                        DaggerfallAction dfAction = lootPiles[i].GetComponent<DaggerfallAction>();
+                        QuestResourceBehaviour dfQRB = lootPiles[i].GetComponent<QuestResourceBehaviour>();
+                        if (dfAction != null) { continue; }
+                        if (dfQRB != null) { continue; }
+
+                        if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
+                            goList.Add(lootPiles[i].gameObject);
+                    }
+
+                    // Make list of "valid" container type models in the current dungeon "scene."
+                    containerModels = FindObjectsOfType<MeshFilter>();
+                    for (int i = 0; i < containerModels.Length; i++)
+                    {
+                        int modelID = -1;
+                        bool validID = false;
+                        string meshName = containerModels[i].mesh.name;
+
+                        // Ignore any models that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
+                        DaggerfallAction dfAction = containerModels[i].GetComponent<DaggerfallAction>();
+                        QuestResourceBehaviour dfQRB = containerModels[i].GetComponent<QuestResourceBehaviour>();
+                        if (dfAction != null) { continue; }
+                        if (dfQRB != null) { continue; }
+
+                        if (meshName.Length >= 9)
+                        {
+                            string properName = meshName.Substring(0, meshName.Length - 9);
+                            validID = int.TryParse(properName, out modelID);
+                        }
+
+                        if (validID)
+                        {
+                            if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
+                                goList.Add(containerModels[i].gameObject);
+
+                            //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
+                        }
+                        else
+                        {
+                            //Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
+                        }
+                    }
+                    GameObject[] validGos = goList.ToArray();
+
+                    for (int i = 0; i < validGos.Length; i++)
+                    {
+                        MeshFilter meshFilter = null;
+                        DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
+
+                        if (lootPile == null)
+                            meshFilter = validGos[i].GetComponent<MeshFilter>();
+
+                        ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
                     }
                 }
-                GameObject[] validGos = goList.ToArray();
-
-                for (int i = 0; i < validGos.Length; i++)
-                {
-                    MeshFilter meshFilter = null;
-                    DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
-
-                    if (lootPile == null)
-                        meshFilter = validGos[i].GetComponent<MeshFilter>();
-
-                    ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
-                }
+            }
+            catch (Exception e)
+            {
+                LogModException(e, 3);
             }
         }
 
@@ -652,7 +677,7 @@ namespace LockedLootContainers
                         bool validID = false;
                         string meshName = meshFilt.mesh.name;
 
-                        if (meshName.Length > 0)
+                        if (meshName.Length >= 9)
                         {
                             string properName = meshName.Substring(0, meshName.Length - 9);
                             validID = int.TryParse(properName, out modelID);
