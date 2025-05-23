@@ -36,6 +36,48 @@
             "$version": "v1"
         },
 		{
+            "Name": "ChestGenerationSettings",
+            "Description": "Related To Chest Generation Options And Settings",
+            "IsAdvanced": false,
+            "Keys": [
+				{
+                    "Value": true,
+                    "Name": "DungeonQuestMarkerChestSpawnToggle",
+                    "Description": "If Chests Should Spawn On Unoccupied Dungeon Quest Marker Locations || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 100,
+                    "Value": 100,
+                    "Name": "DungeonQuestMarkerChestSpawnOdds",
+                    "Description": "Default = 100 || Changes Odds Of Unoccupied Dungeon Quest Marker Locations Spawning A Chest",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 500,
+                    "Value": 20,
+                    "Name": "DungeonQuestMarkerLootModMinRange",
+                    "Description": "Default = 20 || Minimum Percent Loot Will Be Increased For Chests Spawned At Dungeon Quest Markers",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 500,
+                    "Value": 35,
+                    "Name": "DungeonQuestMarkerLootModMaxRange",
+                    "Description": "Default = 35 || Maximum Percent Loot Will Be Increased For Chests Spawned At Dungeon Quest Markers",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                }
+            ],
+            "$version": "v1"
+        },
+		{
             "Name": "ErrorLoggingAndCompatibilitySettings",
             "Description": "Related To Error Logging And Automatic Mod Compatibility Messages",
             "IsAdvanced": false,

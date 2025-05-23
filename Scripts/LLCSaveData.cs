@@ -182,7 +182,7 @@ namespace LockedLootContainers
                         bool validID = false;
                         string meshName = validModels[i].mesh.name;
 
-                        if (meshName.Length > 0)
+                        if (meshName.Length >= 9)
                         {
                             string properName = meshName.Substring(0, meshName.Length - 9);
                             validID = int.TryParse(properName, out modelID);

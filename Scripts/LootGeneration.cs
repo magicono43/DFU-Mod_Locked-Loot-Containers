@@ -186,6 +186,7 @@ namespace LockedLootContainers
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            while (Dice100.SuccessRoll(itemChance)) { if (Dice100.SuccessRoll(60)) { ++bonus; } itemChance = Mathf.FloorToInt(itemChance * 0.7f); }
                             for (int s = 0; s < 1 + bonus; s++)
                             {
                                 amount = UnityEngine.Random.Range(1, 5);
@@ -200,6 +201,7 @@ namespace LockedLootContainers
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            while (Dice100.SuccessRoll(itemChance)) { if (Dice100.SuccessRoll(60)) { ++bonus; } itemChance = Mathf.FloorToInt(itemChance * 0.7f); }
                             for (int s = 0; s < 1 + bonus; s++)
                             {
                                 chestItems.AddItem(new DaggerfallUnityItem(ItemGroups.MiscItems, 8));
@@ -210,6 +212,7 @@ namespace LockedLootContainers
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            while (Dice100.SuccessRoll(itemChance)) { if (Dice100.SuccessRoll(60)) { ++bonus; } itemChance = Mathf.FloorToInt(itemChance * 0.7f); }
                             for (int s = 0; s < 1 + bonus; s++)
                             {
                                 int recipeIdx = UnityEngine.Random.Range(0, DaggerfallWorkshop.Game.MagicAndEffects.PotionRecipe.classicRecipeKeys.Length);
@@ -223,6 +226,7 @@ namespace LockedLootContainers
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            while (Dice100.SuccessRoll(itemChance)) { if (Dice100.SuccessRoll(60)) { ++bonus; } itemChance = Mathf.FloorToInt(itemChance * 0.7f); }
                             for (int s = 0; s < 1 + bonus; s++)
                             {
                                 item = ItemBuilder.CreateItem(ItemGroups.Paintings, (int)Paintings.Painting);
@@ -235,6 +239,7 @@ namespace LockedLootContainers
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            while (Dice100.SuccessRoll(itemChance)) { if (Dice100.SuccessRoll(60)) { ++bonus; } itemChance = Mathf.FloorToInt(itemChance * 0.7f); }
                             for (int s = 0; s < 1 + bonus; s++)
                             {
                                 if (Dice100.FailedRoll(25))
@@ -257,6 +262,7 @@ namespace LockedLootContainers
                         if (Dice100.SuccessRoll(itemChance))
                         {
                             int bonus = Dice100.SuccessRoll(15) ? 1 : 0;
+                            while (Dice100.SuccessRoll(itemChance)) { if (Dice100.SuccessRoll(60)) { ++bonus; } itemChance = Mathf.FloorToInt(itemChance * 0.7f); }
                             for (int s = 0; s < 1 + bonus; s++)
                             {
                                 item = ItemBuilder.CreateRandomMagicItem(UnityEngine.Random.Range(1, 22), GameManager.Instance.PlayerEntity.Gender, GameManager.Instance.PlayerEntity.Race);
@@ -330,8 +336,12 @@ namespace LockedLootContainers
                 {
                     if (armorWepsCanBeTogether)
                     {
-                        if ((armorSetOdds >= 100 && Dice100.SuccessRoll(armorSetOdds / 5)) || (armWepTotCount >= 5 && Dice100.SuccessRoll((armWepTotCount - 4) * 20)))
+                        int setsGenerated = 0;
+                        bool createdASet = false;
+                        while ((armorSetOdds >= 100 && Dice100.SuccessRoll(armorSetOdds / 5)) || (armWepTotCount >= 5 && Dice100.SuccessRoll((armWepTotCount - 4) * 20)))
                         {
+                            ++setsGenerated;
+                            createdASet = true;
                             DaggerfallUnityItem[] equipmentSet = RetrieveEquipmentSet(oddsAverage, totalRoomValueMod, conditionMod);
                             for (int g = 0; g < equipmentSet.Length; g++) // No blacklist checking/filtering for now, but whatever, not a big deal.
                             {
@@ -339,6 +349,18 @@ namespace LockedLootContainers
                                     chestItems.AddItem(equipmentSet[g]);
                             }
 
+                            switch (setsGenerated)
+                            {
+                                case 1: armorSetOdds -= 50; armWepTotCount -= 2; break;
+                                case 2: armorSetOdds -= 100; armWepTotCount -= 5; break;
+                                case 3: armorSetOdds -= 200; armWepTotCount -= 10; break;
+                                case 4: armorSetOdds -= 400; armWepTotCount -= 20; break;
+                                default: armorSetOdds -= 500; armWepTotCount -= 40; break;
+                            }
+                        }
+
+                        if (createdASet)
+                        {
                             for (int h = 0; h < 7; h++) // Make sure this is only counting the 7 values related to armor and weapon odds, may need to change loop limit value.
                             {
                                 modifItemGroupOdds[h + 1] = 0; // When equipment set is generated, set associated group value odds to 0, so no more can generate in this chest.
@@ -414,11 +436,11 @@ namespace LockedLootContainers
                     if (failedRegenAttempts >= 8) // Allow item-groups that failed to create an item due to being blacklisted, have 8 tries before forcing their generation loop to stop.
                         break;
 
-                    if (itemChance >= 60) // This is to try and reduce certain items basically always appearing, attempting to make it feel more "random."
+                    if (itemChance >= 75) // This is to try and reduce certain items basically always appearing, attempting to make it feel more "random."
                     {
                         if (Dice100.SuccessRoll(35))
                         {
-                            itemChance /= 2;
+                            itemChance = Mathf.RoundToInt(itemChance * 0.7f);
                             continue;
                         }
                     }
@@ -447,7 +469,7 @@ namespace LockedLootContainers
                         chestItems.AddItem(item);
                     }
 
-                    itemChance /= 2;
+                    itemChance = Mathf.RoundToInt(itemChance * 0.7f);
                 }
             }
         }

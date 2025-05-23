@@ -3,8 +3,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		4/8/2025, 6:30 PM
-// Version:			1.05
+// Last Edit:		5/22/2025, 11:50 PM
+// Version:			1.10
 // Special Thanks:  
 // Modifier:			
 
@@ -37,6 +37,11 @@ namespace LockedLootContainers
         public static int ChestGraphicType { get; set; }
         public static bool AllowChestCollision { get; set; }
         public static bool AllowChestShadows { get; set; }
+
+        public static bool AllowDungeonQuestMarkerChestSpawning { get; set; }
+        public static int DungeonQuestMarkerSpawnOdds { get; set; }
+        public static int DungeonQuestMarkerLootMultiMinRange { get; set; }
+        public static int DungeonQuestMarkerLootMultiMaxRange { get; set; }
 
         public static bool AllowCompatibilityWarnings { get; set; }
         public static bool AllowVerboseErrorLogging { get; set; }
@@ -252,9 +257,19 @@ namespace LockedLootContainers
             AllowChestCollision = mod.GetSettings().GetValue<bool>("GraphicsSettings", "ChestCollisionToggle");
             AllowChestShadows = mod.GetSettings().GetValue<bool>("GraphicsSettings", "ChestShadowsToggle");
 
+            AllowDungeonQuestMarkerChestSpawning = mod.GetSettings().GetValue<bool>("ChestGenerationSettings", "DungeonQuestMarkerChestSpawnToggle");
+            DungeonQuestMarkerSpawnOdds = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "DungeonQuestMarkerChestSpawnOdds");
+            DungeonQuestMarkerLootMultiMinRange = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "DungeonQuestMarkerLootModMinRange");
+            DungeonQuestMarkerLootMultiMaxRange = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "DungeonQuestMarkerLootModMaxRange");
+
             AllowCompatibilityWarnings = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "AllowModCompatWarnings");
             AllowVerboseErrorLogging = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "AllowVerboseErrorLogging");
             DoNotSpamExceptionsLogs = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "DoNotSpamExceptionsLogs");
+
+            if (DungeonQuestMarkerLootMultiMinRange >= DungeonQuestMarkerLootMultiMaxRange)
+            {
+                DungeonQuestMarkerLootMultiMaxRange = DungeonQuestMarkerLootMultiMinRange;
+            }
 
             if (change.HasChanged("ErrorLoggingAndCompatibilitySettings", "DoNotSpamExceptionsLogs"))
             {
@@ -699,6 +714,7 @@ namespace LockedLootContainers
             try
             {
                 ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomChest.command, TeleportToRandomChest.description, TeleportToRandomChest.usage, TeleportToRandomChest.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(TeleportToRandomQuestMarker.command, TeleportToRandomQuestMarker.description, TeleportToRandomQuestMarker.usage, TeleportToRandomQuestMarker.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(AlwaysSpawnChests.command, AlwaysSpawnChests.description, AlwaysSpawnChests.usage, AlwaysSpawnChests.Execute);
                 //ConsoleCommandsDatabase.RegisterCommand(LLCSoundTest.command, LLCSoundTest.description, LLCSoundTest.usage, LLCSoundTest.Execute);
                 ConsoleCommandsDatabase.RegisterCommand(MakeJunkItems.command, MakeJunkItems.description, MakeJunkItems.usage, MakeJunkItems.Execute);
@@ -753,6 +769,50 @@ namespace LockedLootContainers
                 GameManager.Instance.PlayerMotor.FixStanding();
 
                 return string.Format("Teleport Finished, there are currently {0} chests left in the scene.", chests.Length);
+            }
+        }
+
+        private static class TeleportToRandomQuestMarker
+        {
+            public static readonly string command = "tele2randomquestmarker";
+            public static readonly string description = "Chooses random quest marker in current dungeon and teleports player onto it.";
+            public static readonly string usage = "tele2randomquestmarker";
+
+            public static string Execute(params string[] args)
+            {
+                DaggerfallConnect.DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
+                QuestMarkerChestSpawnPoints[] questMarkerSpawnPoints = MakeListOfQuestMarkerChestSpawnPoints(locationData);
+
+                if (questMarkerSpawnPoints.Length > 0)
+                {
+                    // Teleport Player To Random Marker Location From This List.
+                    int index = UnityEngine.Random.Range(0, questMarkerSpawnPoints.Length);
+                    QuestMarkerChestSpawnPoints selectedMarker = questMarkerSpawnPoints[index];
+
+                    Vector3 dungeonBlockPosition = new Vector3(selectedMarker.dungeonX * RDBLayout.RDBSide, 0, selectedMarker.dungeonZ * RDBLayout.RDBSide);
+                    Vector3 pos = dungeonBlockPosition + selectedMarker.flatPosition;
+
+                    if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
+                    {
+                        GameManager.Instance.PlayerObject.transform.localPosition = pos;
+                        GameManager.Instance.PlayerMotor.FixStanding();
+                    }
+                    else if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideBuilding)
+                    {
+                        GameManager.Instance.PlayerObject.transform.position = pos;
+                        GameManager.Instance.PlayerMotor.FixStanding();
+                    }
+                    else
+                    {
+                        return "Error: Not currently in a building interior or dungeon.";
+                    }
+                }
+                else
+                {
+                    return "Error: No valid quest markers in this location.";
+                }
+
+                return "Teleport Finished.";
             }
         }
 

@@ -484,6 +484,28 @@ namespace LockedLootContainers
                     }
                     UnityEngine.Random.InitState(seedNum);
 
+                    // Make a list of valid and currently unused quest objective markers in the "scene" that will likely have a chest placed on it.
+                    if (AllowDungeonQuestMarkerChestSpawning)
+                    {
+                        QuestMarkerChestSpawnPoints[] questMarkerSpawnPoints = MakeListOfQuestMarkerChestSpawnPoints(locationData);
+
+                        for (int i = 0; i < questMarkerSpawnPoints.Length; i++)
+                        {
+                            if (IsQuestMarkerCurrentlyOccupied(questMarkerSpawnPoints[i]))
+                            {
+                                continue; // Don't create a chest where this quest marker location is, because it appears to be occupied by an active quest object.
+                            }
+                            else
+                            {
+                                if (Dice100.SuccessRoll(DungeonQuestMarkerSpawnOdds))
+                                {
+                                    // Create a chest in this currently inactive quest marker location.
+                                    PlaceCustomChest(questMarkerSpawnPoints[i], allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
+                                }
+                            }
+                        }
+                    }
+
                     // Make list of loot-piles currently in the dungeon "scene."
                     List<GameObject> goList = new List<GameObject>();
                     lootPiles = FindObjectsOfType<DaggerfallLoot>();
@@ -549,6 +571,96 @@ namespace LockedLootContainers
             {
                 LogModException(e, 3);
             }
+        }
+
+        public static void PlaceCustomChest(QuestMarkerChestSpawnPoints marker, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds, int[] itemBlacklist, int buildQualMod = 0)
+        {
+            if (marker == null)
+                return;
+
+            int totalRoomValueMod = UnityEngine.Random.Range(70, 121);
+            int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
+
+            for (int i = 0; i < allowedMats.Length; i++)
+            {
+                if (allowedMats[i] == true)
+                    permitMatsCount++;
+            }
+
+            if (permitMatsCount <= 0)
+                return;
+
+            Vector3 dungeonBlockPosition = new Vector3(marker.dungeonX * RDBLayout.RDBSide, 0, marker.dungeonZ * RDBLayout.RDBSide);
+            Vector3 pos = dungeonBlockPosition + marker.flatPosition;
+
+            GameObject chestGo = null;
+            if (ChestGraphicType == 0) // Use sprite based graphics for chests
+            {
+                chestGo = GameObjectHelper.CreateDaggerfallBillboardGameObject(ClosedChestSpriteID, 0, GameObjectHelper.GetBestParent());
+            }
+            else // Use 3D models for chests
+            {
+                GameObject usedModelPrefab = (ChestGraphicType == 1) ? Instance.LowPolyClosedChestPrefab : Instance.HighPolyClosedChestPrefab;
+                chestGo = GameObjectHelper.InstantiatePrefab(usedModelPrefab, GameObjectHelper.GetGoModelName(ClosedChestModelID), GameObjectHelper.GetBestParent(), pos);
+                Collider col = chestGo.AddComponent<BoxCollider>();
+                chestGo.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0, 9) * 45f);
+                chestGo.transform.position = new Vector3(chestGo.transform.position.x, chestGo.transform.position.y - 0.32f, chestGo.transform.position.z);
+            }
+
+            LLCObject llcObj = chestGo.AddComponent<LLCObject>();
+            llcObj.AttachedLoot = new ItemCollection();
+            llcObj.LoadID = DaggerfallUnity.NextUID;
+
+            llcObj.ChestMaterial = RollChestMaterial(allowedMats, permitMatsCount, totalRoomValueMod);
+            llcObj.LockMaterial = RollLockMaterial(allowedMats, permitMatsCount, totalRoomValueMod, llcObj.ChestMaterial);
+
+            llcObj.ChestSturdiness = RollChestSturdiness(llcObj.ChestMaterial, "", totalRoomValueMod);
+            llcObj.LockSturdiness = RollLockSturdiness(llcObj.LockMaterial, "", totalRoomValueMod);
+
+            SetChestHitPoints(llcObj);
+            SetLockHitPoints(llcObj);
+
+            llcObj.ChestMagicResist = RollChestMagicResist(llcObj.ChestMaterial, llcObj.ChestSturdiness, totalRoomValueMod);
+            llcObj.LockMagicResist = RollLockMagicResist(llcObj.LockMaterial, llcObj.LockSturdiness, totalRoomValueMod);
+
+            llcObj.LockComplexity = RollLockComplexity(llcObj.LockMaterial, totalRoomValueMod);
+            llcObj.JamResist = RollJamResist(llcObj.LockMaterial, totalRoomValueMod);
+            SetLockMechanismHitPoints(llcObj);
+
+            if (ChestGraphicType == 0) // Use sprite based graphics for chests
+            {
+                // Set position
+                Billboard dfBillboard = chestGo.GetComponent<Billboard>();
+                chestGo.transform.position = pos;
+                chestGo.transform.position += new Vector3(0, dfBillboard.Summary.Size.y / 2, 0);
+                GameObjectHelper.AlignBillboardToGround(chestGo, dfBillboard.Summary.Size);
+            }
+
+            if (ChestGraphicType != 0) // Only consider shadow and collision settings for 3D model chests
+            {
+                ToggleChestShadowsOrCollision(chestGo);
+            }
+
+            int randMulti = UnityEngine.Random.Range(DungeonQuestMarkerLootMultiMinRange, DungeonQuestMarkerLootMultiMaxRange + 1);
+            float lootMulti = 1f + (float)(randMulti * 0.01f);
+
+            int[] modMiscGroupOdds = (int[])miscGroupOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.
+            int[] modItemGroupOdds = (int[])itemGroupOdds.Clone();
+
+            for (int i = 0; i < modMiscGroupOdds.Length; i++)
+            {
+                if (i == 12 || i == 13) { continue; } // Don't modify the item condition ranges.
+                else { modMiscGroupOdds[i] = Mathf.RoundToInt(modMiscGroupOdds[i] * lootMulti); }
+            }
+
+            for (int i = 0; i < modItemGroupOdds.Length; i++)
+            {
+                modItemGroupOdds[i] = Mathf.RoundToInt(modItemGroupOdds[i] * lootMulti);
+            }
+
+            // Maybe later on add some Event stuff here so other mods can know when this made added a chest or when loot generation happens for the chests or something? Will see.
+
+            PopulateChestLoot(llcObj, totalRoomValueMod, modMiscGroupOdds, modItemGroupOdds, itemBlacklist);
         }
 
         public static void ReplaceWithCustomChest(MeshFilter meshFilter, DaggerfallLoot lootPile, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds, int[] itemBlacklist, int buildQualMod = 0)
@@ -628,7 +740,7 @@ namespace LockedLootContainers
                 // Turns out, depending on the size of certain overlap boxes, you can sort of get some idea of what the object is currently in, like inside a coffin and such.
                 // Later on consider adding toggle setting for this whole "room context" thing here, for possibly faster loading times or something without it potentially.
 
-                DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
+                //DaggerfallEntityBehaviour aoeEntity = overlaps[r].GetComponent<DaggerfallEntityBehaviour>(); // Use this as an example for getting components I care about?
             }
 
             for (int g = 0; g < roomObjects.Count; g++)
@@ -1213,6 +1325,114 @@ namespace LockedLootContainers
             int finalHP = (int)Mathf.Max(1, chest.JamResist * stabMod * randomMod * 2f);
             chest.LockMechStartHP = finalHP;
             chest.LockMechCurrentHP = finalHP;
+        }
+
+        public static QuestMarkerChestSpawnPoints[] MakeListOfQuestMarkerChestSpawnPoints(DFLocation location)
+        {
+            const int editorFlatArchive = 199;
+            const int spawnMarkerFlatIndex = 11;
+            const int itemMarkerFlatIndex = 18;
+
+            List<QuestMarkerChestSpawnPoints> spawnPointsList = new List<QuestMarkerChestSpawnPoints>();
+
+            if (!location.HasDungeon)
+                return spawnPointsList.ToArray();
+
+            // Step through dungeon layout to find all blocks with markers
+            foreach (var dungeonBlock in location.Dungeon.Blocks) // May put a "try-catch" block here to catch some compile errors due to no location being defined.
+            {
+                // Get block data
+                DFBlock blockData = DaggerfallUnity.Instance.ContentReader.BlockFileReader.GetBlock(dungeonBlock.BlockName);
+
+                // Skip misplaced overlapping N block at -1,-1 in Orsinium
+                // This must be a B block to close out dungeon on that edge, not an N block which opens dungeon to void
+                // DaggerfallDungeon skips this N block during layout, so prevent it being available to quest system
+                if (location.MapTableData.MapId == 19021260 &&
+                    dungeonBlock.X == -1 && dungeonBlock.Z == -1 && dungeonBlock.BlockName == "N0000065.RDB")
+                {
+                    continue;
+                }
+
+                // Iterate all groups
+                foreach (DFBlock.RdbObjectRoot group in blockData.RdbBlock.ObjectRootList)
+                {
+                    // Skip empty object groups
+                    if (null == group.RdbObjects)
+                        continue;
+
+                    // Look for flats in this group
+                    foreach (DFBlock.RdbObject obj in group.RdbObjects)
+                    {
+                        // Look for editor flats
+                        Vector3 position = new Vector3(obj.XPos, -obj.YPos, obj.ZPos) * MeshReader.GlobalScale;
+                        if (obj.Type == DFBlock.RdbResourceTypes.Flat)
+                        {
+                            if (obj.Resources.FlatResource.TextureArchive == editorFlatArchive)
+                            {
+                                switch (obj.Resources.FlatResource.TextureRecord) // May consider eventually adding more valid spawn locations than just quest-markers.
+                                {
+                                    case spawnMarkerFlatIndex:
+                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z));
+                                        break;
+                                    case itemMarkerFlatIndex:
+                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z));
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Assign arrays if at least one quest marker found
+            if (spawnPointsList.Count > 0)
+                return spawnPointsList.ToArray();
+            else
+                return null;
+        }
+
+        public class QuestMarkerChestSpawnPoints
+        {
+            public Vector3 flatPosition;                // Position of marker flat in block layout
+            public int dungeonX;                        // Dungeon block X position in location
+            public int dungeonZ;                        // Dungeon block Z position in location
+
+            public QuestMarkerChestSpawnPoints(Vector3 flatPosition, int dungeonX, int dungeonZ)
+            {
+                this.flatPosition = flatPosition;
+                this.dungeonX = dungeonX;
+                this.dungeonZ = dungeonZ;
+            }
+        }
+
+        public static QuestMarkerChestSpawnPoints CreateSpawnPoint(Vector3 flatPosition, int dungeonX = 0, int dungeonZ = 0)
+        {
+            QuestMarkerChestSpawnPoints spawnPoints = new QuestMarkerChestSpawnPoints(flatPosition, dungeonX, dungeonZ);
+            spawnPoints.flatPosition = flatPosition;
+            spawnPoints.dungeonX = dungeonX;
+            spawnPoints.dungeonZ = dungeonZ;
+
+            return spawnPoints;
+        }
+
+        public static bool IsQuestMarkerCurrentlyOccupied(QuestMarkerChestSpawnPoints marker)
+        {
+            Vector3 dungeonBlockPosition = new Vector3(marker.dungeonX * RDBLayout.RDBSide, 0, marker.dungeonZ * RDBLayout.RDBSide);
+            Vector3 pos = dungeonBlockPosition + marker.flatPosition;
+
+            Collider[] overlaps = Physics.OverlapSphere(pos, 1.0f, PlayerLayerMask);
+            for (int r = 0; r < overlaps.Length; r++)
+            {
+                GameObject go = overlaps[r].gameObject;
+
+                if (go)
+                {
+                    QuestResourceBehaviour dfQRB = go.GetComponent<QuestResourceBehaviour>();
+                    if (dfQRB != null) { return true; }
+                }
+            }
+
+            return false;
         }
 
         public static int EnemyRoomValueMods(EnemyEntity enemyEntity) // Will want to take into account modded enemies and such later on when getting to the polishing parts.
