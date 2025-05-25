@@ -217,7 +217,7 @@ namespace LockedLootContainers
             int chestResist = chest.ChestMagicResist;
             int chestStab = chest.ChestSturdiness;
 
-            return chestResist + Mathf.RoundToInt(chestStab / 5f) - Mathf.RoundToInt(elementMod * ((Destr * 0.4f) + (Willp * 0.6f) + (Luck * 0.2f)));
+            return chestResist + Mathf.RoundToInt(chestStab / 5f) - Mathf.RoundToInt(elementMod * ((Destr * 0.6f) + (Willp * 0.6f) + (Luck * 0.2f)));
         }
 
         public static int CalculateChestMagicDamage(LLCObject chest, int magnitude, float elementMod)
@@ -225,8 +225,8 @@ namespace LockedLootContainers
             int damage = 0;
             int chestResist = chest.ChestMagicResist;
             int chestStab = chest.ChestSturdiness;
-            float chestDamRes = Mathf.Abs(((Mathf.RoundToInt(chestStab * 0.2f) + chestResist) * 0.4f / 100f) - 1f);
-            float luckMod = (Luck / 250f) + 1f;
+            float chestDamRes = Mathf.Abs(((Mathf.RoundToInt(chestStab * 0.2f) + chestResist) * 0.3f / 100f) - 1f);
+            float luckMod = (Luck * 0.004f) + 1f;
 
             damage = Mathf.Max(1, Mathf.RoundToInt(magnitude * elementMod * chestDamRes * luckMod));
 
