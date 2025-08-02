@@ -315,7 +315,10 @@ namespace LockedLootContainers
                     return;
 
                 DFLocation locationData = GameManager.Instance.PlayerGPS.CurrentLocation;
-                DaggerfallLoot[] lootPiles;
+                List<GameObject> goList = new List<GameObject>();
+                List<GameObject> modelGoList = new List<GameObject>();
+                ItemCollection storedLootItems = new ItemCollection();
+                bool destroyLootPiles = false;
                 MeshFilter[] containerModels;
 
                 bool[] allowedMats = { true, true, true, true, true, true, true, true }; // Wood, Iron, Steel, Orcish, Mithril, Dwarven, Adamantium, Daedric
@@ -484,31 +487,86 @@ namespace LockedLootContainers
                     }
                     UnityEngine.Random.InitState(seedNum);
 
-                    // Make a list of valid and currently unused quest objective markers in the "scene" that will likely have a chest placed on it.
-                    if (AllowDungeonQuestMarkerChestSpawning)
+                    // Next time I work on this or tomorrow, figure out when and if to destroy loot-pile objects with the new setting active.
+                    // Also, what to do with the loot taken from those loot piles, where to put chests afterward, etc.
+                    // As well as the other options/settings that will go along with these new options and such, and what order to do all this logic in.
+
+                    // Make a list of valid and currently unoccupied quest objective markers in the "scene" that will likely have a chest placed on it.
+                    if (AllowDungeonQuestMarkerChestSpawning || SpawnSingularMegaChestInDungeons)
                     {
                         QuestMarkerChestSpawnPoints[] questMarkerSpawnPoints = MakeListOfQuestMarkerChestSpawnPoints(locationData);
+                        List<byte> validSpawnList = new List<byte>();
 
                         for (int i = 0; i < questMarkerSpawnPoints.Length; i++)
                         {
                             if (IsQuestMarkerCurrentlyOccupied(questMarkerSpawnPoints[i]))
                             {
-                                continue; // Don't create a chest where this quest marker location is, because it appears to be occupied by an active quest object.
+                                validSpawnList.Add(2); // Don't create a chest where this quest marker location is, because it appears to be occupied by an active quest object.
                             }
                             else
                             {
                                 if (Dice100.SuccessRoll(DungeonQuestMarkerSpawnOdds))
                                 {
-                                    // Create a chest in this currently inactive quest marker location.
+                                    validSpawnList.Add(0); // Allow a chest in this currently inactive quest marker location.
+                                }
+                                else
+                                {
+                                    validSpawnList.Add(1); // This would be a valid spot for a quest marker chest, but it failed its roll to be created.
+                                }
+                            }
+                        }
+
+                        int numValidSpawns = 0;
+                        for (int i = 0; i < validSpawnList.Count; i++)
+                        {
+                            if (validSpawnList[i] == 0) { ++numValidSpawns; }
+                        }
+
+                        // Have the "Mega-Chest" spawning logic in the code below, likely have a separate method for actually creating said Mega-Chest and populating the loot and such, tomorrow atleast.
+                        // If there are valid spawns for quest markers, place chests on those markers.
+                        if (!SpawnSingularMegaChestInDungeons && numValidSpawns > 0)
+                        {
+                            for (int i = 0; i < questMarkerSpawnPoints.Length; i++)
+                            {
+                                if (validSpawnList[i] == 0)
+                                {
                                     PlaceCustomChest(questMarkerSpawnPoints[i], allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
                                 }
+                            }
+                        }
+                        else // If no valid markers were counted, try to force atleast one to spawn on marker that failed to spawn due to roll, if still can't do so, abort attempt and log message to console.
+                        {
+                            List<int> randomSpawnPicker = new List<int>();
+                            for (int i = 0; i < validSpawnList.Count; i++)
+                            {
+                                if (validSpawnList[i] != 2) { randomSpawnPicker.Add(i); }
+                            }
+
+                            if (randomSpawnPicker.Count > 0)
+                            {
+                                int randNum = UnityEngine.Random.Range(0, randomSpawnPicker.Count);
+
+                                if (SpawnSingularMegaChestInDungeons)
+                                {
+                                    if (Dice100.SuccessRoll(MegaChestSpawnOdds))
+                                    {
+                                        PlaceCustomChest(questMarkerSpawnPoints[randomSpawnPicker[randNum]], allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist, 0, true);
+                                    }
+                                }
+                                else
+                                {
+                                    PlaceCustomChest(questMarkerSpawnPoints[randomSpawnPicker[randNum]], allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
+                                }
+                            }
+                            else
+                            {
+                                Debug.LogWarning("[Warning] Locked Loot Containers: Could not find valid or unoccupied quest-marker to place chest at, so don't expect to find one!");
                             }
                         }
                     }
 
                     // Make list of loot-piles currently in the dungeon "scene."
-                    List<GameObject> goList = new List<GameObject>();
-                    lootPiles = FindObjectsOfType<DaggerfallLoot>();
+                    DaggerfallLoot[] lootPiles = FindObjectsOfType<DaggerfallLoot>();
                     for (int i = 0; i < lootPiles.Length; i++)
                     {
                         // Ignore any loot-piles that might have "DaggerfallAction" or "QuestResourceBehavior" attached to them.
@@ -518,9 +576,18 @@ namespace LockedLootContainers
                         if (dfQRB != null) { continue; }
 
                         if (lootPiles[i].ContainerType == LootContainerTypes.RandomTreasure && lootPiles[i].ContainerImage == InventoryContainerImages.Chest)
+                        {
                             goList.Add(lootPiles[i].gameObject);
+
+                            if (RemoveUnprotectedDungeonLootPiles)
+                            {
+                                destroyLootPiles = true;
+                                storedLootItems.TransferAll(lootPiles[i].Items);
+                            }
+                        }
                     }
 
+                    // Tomorrow when I work on this, split up the execution using the new "modelGoList" list so I can delete the loot-pile gameobjects if necessary and such.
                     // Make list of "valid" container type models in the current dungeon "scene."
                     containerModels = FindObjectsOfType<MeshFilter>();
                     for (int i = 0; i < containerModels.Length; i++)
@@ -544,7 +611,7 @@ namespace LockedLootContainers
                         if (validID)
                         {
                             if (modelID >= 41811 && modelID <= 41813) // Vanilla DF Chest models
-                                goList.Add(containerModels[i].gameObject);
+                                modelGoList.Add(containerModels[i].gameObject);
 
                             //Debug.LogFormat("Overlap found on gameobject: {0} ||||| With MeshFilter Name: {1} ||||| And Mesh Name: {2}", modelID, containerModels[i].name, meshName);
                         }
@@ -553,17 +620,104 @@ namespace LockedLootContainers
                             //Debug.LogFormat("Overlap found on model name: {0}", containerModels[i].mesh.name);
                         }
                     }
+
                     GameObject[] validGos = goList.ToArray();
+                    GameObject[] validModelGos = modelGoList.ToArray();
+
+                    for (int i = 0; i < validModelGos.Length; i++)
+                    {
+                        MeshFilter meshFilter = validModelGos[i].GetComponent<MeshFilter>();
+                        ReplaceWithCustomChest(meshFilter, null, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
+                    }
+
+                    LLCObject[] gos = FindObjectsOfType<LLCObject>();
+                    List<LLCObject> chestList = new List<LLCObject>();
+                    for (int i = 0; i < gos.Length; i++)
+                    {
+                        if (gos[i].ChestStartHP == 0 && gos[i].LockStartHP == 0)
+                            continue;
+                        else
+                            chestList.Add(gos[i]);
+                    }
+                    LLCObject[] chests = chestList.ToArray();
+
+                    if (chests.Length > 0) // Likely put a try-catch around this entire loot distribution section, likely a place alot of "index out of range" error could happen, etc.
+                    {
+                        // Likely continue working on this tomorrow.
+                        // Distribute saved loot to existing chests.
+                        List<ItemCollection> splitUpLootCollections = new List<ItemCollection>(); // This is the temporary proxy for the individual chest inventories, before actual distribution.
+
+                        byte attempts = 0;
+                        while (storedLootItems.Count > 0)
+                        {
+                            ItemCollection newCollection = new ItemCollection(); // This will store the individual stacks if any are created.
+
+                            int loopNum = 0;
+                            int startLength = storedLootItems.Count;
+                            while (loopNum < startLength) // I'll have to keep an eye on this loop logic for sure, probably will need to tweak with testing, etc.
+                            {
+                                DaggerfallUnityItem item = storedLootItems.GetItem(loopNum);
+                                if (item == null) { ++loopNum; continue; }
+
+                                // After eating my dinner and such, remember to also maybe only do the "stack split" behavior on vanilla item-templates, not modded ones, if possible, etc.
+                                // Check this github issue for updates on this bugged behavior with stack splitting modded items: https://github.com/Interkarma/daggerfall-unity/issues/2758
+                                if (item.IsAStack())
+                                {
+                                    // Possibly make own method for splitting stacks, if possible, since the vanilla one currently breaks modded items.
+                                    // Do logic for splitting an item and dividing stack by number of chests in scene.
+                                    bool hasLeftOvers = (item.stackCount % chests.Length) != 0; // Check if there is any remainder after division.
+                                    int numberToPick = item.stackCount / chests.Length; // Strict integer division, any remainder is ignored.
+
+                                    if (!item.IsAStack() || numberToPick < 1 || numberToPick > item.stackCount || !storedLootItems.Contains(item))
+                                        //return null; // Continue from here tomorrow.
+                                    if (numberToPick == item.stackCount)
+                                        //return item;
+                                    //DaggerfallUnityItem pickedItems = ItemBuilder.CreateItem(item.ItemGroup, item.TemplateIndex);
+                                    //pickedItems.stackCount = numberToPick;
+                                    //AddItem(pickedItems, noStack: true);
+                                    item.stackCount -= numberToPick;
+                                    //return pickedItems;
+                                }
+                                else
+                                {
+                                    // Roll a die and determine if this singular item should be put into this loot collection.
+                                }
+
+                                ++loopNum;
+                            }
+
+                            //collection.RemoveItem(item.IsAStack() ? collection.SplitStack(item, 1) : item);
+
+                            ++attempts;
+                            if (attempts > 100) { break; } // Just to prevent from infinitely looping if something goes wrong.
+                        }
+
+                        for (int i = 0; i < chests.Length; i++)
+                        {
+                        }
+
+                        if (RemoveUnprotectedDungeonLootPiles && PreserveDeletedLootPileItems)
+                        {
+                            //
+
+                            for (int i = 0; i < chests.Length; i++)
+                            {
+                                //
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Decide what to do based on settings if a chest does not exist, but potentially have loot from deleted loot piles still in que.
+                        // Likely try to place a chest at a loot-pile location and put all the loot-pile loot into it, if settings permit that is.
+                    }
+
+                    // After the above stuff has been settled, likely delete loot-pile objects if that setting is enabled, etc.
 
                     for (int i = 0; i < validGos.Length; i++)
                     {
-                        MeshFilter meshFilter = null;
                         DaggerfallLoot lootPile = validGos[i].GetComponent<DaggerfallLoot>();
-
-                        if (lootPile == null)
-                            meshFilter = validGos[i].GetComponent<MeshFilter>();
-
-                        ReplaceWithCustomChest(meshFilter, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
+                        ReplaceWithCustomChest(null, lootPile, allowedMats, baseChestOdds, miscGroupOdds, itemGroupOdds, itemBlacklist);
                     }
                 }
             }
@@ -573,12 +727,12 @@ namespace LockedLootContainers
             }
         }
 
-        public static void PlaceCustomChest(QuestMarkerChestSpawnPoints marker, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds, int[] itemBlacklist, int buildQualMod = 0)
+        public static void PlaceCustomChest(QuestMarkerChestSpawnPoints marker, bool[] allowedMats, int baseChestOdds, int[] miscGroupOdds, int[] itemGroupOdds, int[] itemBlacklist, int buildQualMod = 0, bool megaChest = false)
         {
             if (marker == null)
                 return;
 
-            int totalRoomValueMod = UnityEngine.Random.Range(70, 121);
+            int totalRoomValueMod = (!megaChest) ? UnityEngine.Random.Range(70, 121) : UnityEngine.Random.Range(130, 201);
             int permitMatsCount = 0; // Total count of materials that are "true" from "allowedMats" bool array, if there is none then return and don't generate chest.
 
             for (int i = 0; i < allowedMats.Length; i++)
@@ -641,7 +795,7 @@ namespace LockedLootContainers
                 ToggleChestShadowsOrCollision(chestGo);
             }
 
-            int randMulti = UnityEngine.Random.Range(DungeonQuestMarkerLootMultiMinRange, DungeonQuestMarkerLootMultiMaxRange + 1);
+            int randMulti = (!megaChest) ? UnityEngine.Random.Range(DungeonQuestMarkerLootMultiMinRange, DungeonQuestMarkerLootMultiMaxRange + 1) : UnityEngine.Random.Range(MegaChestLootMultiMinRange, MegaChestLootMultiMaxRange + 1);
             float lootMulti = 1f + (float)(randMulti * 0.01f);
 
             int[] modMiscGroupOdds = (int[])miscGroupOdds.Clone(); // Note to self, make sure to clone an array like this if you plan on having different "instances" of changing the values inside.

@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/8/2022, 11:00 PM
-// Last Edit:		5/24/2025, 11:30 PM
+// Last Edit:		8/1/2025, 10:30 PM
 // Version:			1.10
 // Special Thanks:  
 // Modifier:			
@@ -42,6 +42,15 @@ namespace LockedLootContainers
         public static int DungeonQuestMarkerSpawnOdds { get; set; }
         public static int DungeonQuestMarkerLootMultiMinRange { get; set; }
         public static int DungeonQuestMarkerLootMultiMaxRange { get; set; }
+
+        public static int MegaChestLootMultiMinRange { get; set; }
+        public static int MegaChestLootMultiMaxRange { get; set; }
+
+        public static bool RemoveUnprotectedDungeonLootPiles { get; set; }
+        public static bool PreserveDeletedLootPileItems { get; set; }
+        public static bool DungeonChestsOnlySpawnAtQuestMarkers { get; set; }
+        public static bool SpawnSingularMegaChestInDungeons { get; set; }
+        public static int MegaChestSpawnOdds { get; set; }
 
         public static bool AllowCompatibilityWarnings { get; set; }
         public static bool AllowVerboseErrorLogging { get; set; }
@@ -261,6 +270,15 @@ namespace LockedLootContainers
             DungeonQuestMarkerSpawnOdds = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "DungeonQuestMarkerChestSpawnOdds");
             DungeonQuestMarkerLootMultiMinRange = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "DungeonQuestMarkerLootModMinRange");
             DungeonQuestMarkerLootMultiMaxRange = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "DungeonQuestMarkerLootModMaxRange");
+
+            MegaChestLootMultiMinRange = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "MegaChestLootModMinRange");
+            MegaChestLootMultiMaxRange = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "MegaChestLootModMaxRange");
+
+            RemoveUnprotectedDungeonLootPiles = mod.GetSettings().GetValue<bool>("ChestGenerationSettings", "UnprotectedDungeonLootPilesToggle");
+            PreserveDeletedLootPileItems = mod.GetSettings().GetValue<bool>("ChestGenerationSettings", "PreserveDeletedLootPileItemsToggle");
+            DungeonChestsOnlySpawnAtQuestMarkers = mod.GetSettings().GetValue<bool>("ChestGenerationSettings", "ChestsOnlySpawnAtQuestMarkersToggle");
+            SpawnSingularMegaChestInDungeons = mod.GetSettings().GetValue<bool>("ChestGenerationSettings", "SpawnSingularMegaChestInDungeonsToggle");
+            MegaChestSpawnOdds = mod.GetSettings().GetValue<int>("ChestGenerationSettings", "MegaChestChestSpawnOdds");
 
             AllowCompatibilityWarnings = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "AllowModCompatWarnings");
             AllowVerboseErrorLogging = mod.GetSettings().GetValue<bool>("ErrorLoggingAndCompatibilitySettings", "AllowVerboseErrorLogging");
@@ -691,8 +709,8 @@ namespace LockedLootContainers
         {
             ModManager modManager = ModManager.Instance;
             bool success = true;
-			
-			success &= modManager.TryGetAsset("chest_close", false, out LowPolyClosedChestPrefab);
+            
+            success &= modManager.TryGetAsset("chest_close", false, out LowPolyClosedChestPrefab);
             success &= modManager.TryGetAsset("chest_open_full", false, out LowPolyOpenFullChestPrefab);
             success &= modManager.TryGetAsset("chest_open_empty", false, out LowPolyOpenEmptyChestPrefab);
             success &= modManager.TryGetAsset("BrokenChestPilePrefab1", false, out LowPolySmashedChestPrefab);
